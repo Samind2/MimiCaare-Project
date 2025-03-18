@@ -43,3 +43,20 @@ func main() {
 
 	r.Run(":" + port) // รันเซิร์ฟเวอร์ที่พอร์ตที่กำหนด
 }
+
+//ใส่cors
+//ใส่cors
+//ใส่cors
+//ใส่cors
+//ใส่cors
+//ใส่cors
+//ใส่cors
+//ใส่cors
+//ใส่cors
+//ใส่cors
+//ใส่cors
+//ใส่cors
+//ใส่cors
+//ใส่cors
+//ใส่cors
+//ใส่cors
