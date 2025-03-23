@@ -5,11 +5,12 @@ import (
 	"net/http"
 	"os"
 
-	database "github.com/Plashon/service/config"
-	"github.com/Plashon/service/controllers"
-	routes "github.com/Plashon/service/routers"
+	database "github.com/Samind2/MimiCaare-Project/service/config/database"
+	controllers "github.com/Samind2/MimiCaare-Project/service/controllers"
+	routes "github.com/Samind2/MimiCaare-Project/service/routers"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
+	"github.com/rs/cors"
 )
 
 func main() {
@@ -20,11 +21,20 @@ func main() {
 	}
 
 	// เชื่อมต่อกับฐานข้อมูล
-	database.ConnectDB() // เรียกใช้ฟังก์ชัน ConnectDB
+	database.ConnectDB()
 
-	controllers.SetUserCollection(database.Client) // ใช้ Client ที่เชื่อมต่อกับ MongoDB
+	// ใช้ client ที่เชื่อมต่อกับ MongoDB เพื่อให้ client สามารถเข้าถึงฐานข้อมูลได้
+	controllers.CollectionControllers(database.Client)
 
 	r := gin.Default()
+
+	c := cors.New(cors.Options{
+		AllowedOrigins:   []string{os.Getenv("FRONT_URL")}, // เปลี่ยนเป็นโดเมนที่คุณอนุญาต ถ้าไม่ต้องการอนุญาตทุกโดเมน
+		AllowCredentials: true,
+	})
+
+	// ใช้ CORS Middleware
+	handler := c.Handler(r)
 
 	// Welcome Page
 	r.GET("/", func(c *gin.Context) {
@@ -40,23 +50,6 @@ func main() {
 	if port == "" {
 		port = "5000" // กำหนดพอร์ตเริ่มต้นถ้าไม่มีค่าใน .env
 	}
+	log.Fatal(http.ListenAndServe("localhost:"+port, handler))
 
-	r.Run(":" + port) // รันเซิร์ฟเวอร์ที่พอร์ตที่กำหนด
 }
-
-//ใส่cors
-//ใส่cors
-//ใส่cors
-//ใส่cors
-//ใส่cors
-//ใส่cors
-//ใส่cors
-//ใส่cors
-//ใส่cors
-//ใส่cors
-//ใส่cors
-//ใส่cors
-//ใส่cors
-//ใส่cors
-//ใส่cors
-//ใส่cors
