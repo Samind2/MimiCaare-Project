@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"os"
 
-	userModels "github.com/Samind2/MimiCaare-Project/service/models/userModel"
+	userModels "github.com/Samind2/MimiCaare-Project/service/models"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -22,7 +22,7 @@ func SetUserCollection(client *mongo.Client) {
 }
 
 func Signup(c *gin.Context) {
-	user := userModels.User
+	var user userModels.User
 	//เช็คข้อมูลก่อนว่ามาป่าว
 	if err := c.ShouldBindJSON(&user); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "ข้อมูลไม่มีค่าหรือข้อมูลไม่ถูกต้อง"})
@@ -30,12 +30,12 @@ func Signup(c *gin.Context) {
 	}
 
 	//เช็คค่าของข้อมูล
-	if !user.FirstName || !user.LastName || !user.Email || !user.Password {
+	if user.FirstName == "" || user.LastName == "" || user.Email == "" || user.Password == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "กรุณากรอกข้อมูลให้ครบทุกช่อง"})
 		return
 	}
 
-	existingEmail := userModels.user
+	var existingEmail userModels.User
 	err := userCollection.FindOne(context.TODO(), bson.M{"email": user.Email}).Decode(&existingEmail)
 	if err == nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "อีเมลนี้ถูกใช้ไปแล้ว"})
