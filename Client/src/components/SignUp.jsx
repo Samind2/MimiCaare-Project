@@ -1,28 +1,37 @@
-import React, { useState } from "react";
+import React, { useState, useContext  } from "react";
+import { AuthContext } from "../context/AuthContext";
+//import userService from "../service/user.service";
+import { useNavigate } from "react-router";
 
 const SignUp = () => {
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  const { signup } = useContext(AuthContext);
+  const navigate = useNavigate();
+  const [FirstName, setFirstName] = useState("");
+  const [LastName, setLastName] = useState("");
+  const [Email, setEmail] = useState("");
+  const [Password, setPassword] = useState("");
+  //const [confirmPassword, setConfirmPassword] = useState("");
   const [errors, setErrors] = useState({});
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     let newErrors = {};
-    if (!firstName.trim()) newErrors.firstName = "กรุณากรอกชื่อ";
-    if (!lastName.trim()) newErrors.lastName = "กรุณากรอกนามสกุล";
-    if (!email.trim()) newErrors.email = "กรุณากรอกอีเมล";
-    if (!password.trim()) newErrors.password = "กรุณากรอกรหัสผ่าน";
-    if (password !== confirmPassword) newErrors.confirmPassword = "รหัสผ่านไม่ตรงกัน";
+    if (!FirstName.trim()) newErrors.FirstName = "กรุณากรอกชื่อ";
+    if (!LastName.trim()) newErrors.LastName = "กรุณากรอกนามสกุล";
+    if (!Email.trim()) newErrors.Email = "กรุณากรอกอีเมล";
+    if (!Password.trim()) newErrors.Password = "กรุณากรอกรหัสผ่าน";
 
     if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
-      return;
+        setErrors(newErrors);
+        return;
     }
-  };
+    
+    const userData = { FirstName, LastName, Email, Password };
+    await signup(userData);
+    navigate("/"); // ไปที่หน้า home หลังสมัครสมาชิกสำเร็จ
+};
+  
 
   return (
     <div className="relative min-h-screen flex items-center justify-center bg-[#A7D7C5] overflow-hidden">
@@ -51,7 +60,7 @@ const SignUp = () => {
               <input
                 type="text"
                 className="input input-bordered w-full mt-1"
-                value={firstName}
+                value={FirstName}
                 onChange={(e) => setFirstName(e.target.value)}
               />
               {errors.firstName && <p className="text-red-500 text-xs">{errors.firstName}</p>}
@@ -63,7 +72,7 @@ const SignUp = () => {
               <input
                 type="text"
                 className="input input-bordered w-full mt-1"
-                value={lastName}
+                value={LastName}
                 onChange={(e) => setLastName(e.target.value)}
               />
               {errors.lastName && <p className="text-red-500 text-xs">{errors.lastName}</p>}
@@ -77,7 +86,7 @@ const SignUp = () => {
             <input
               type="email"
               className="input input-bordered w-full mt-1"
-              value={email}
+              value={Email}
               onChange={(e) => setEmail(e.target.value)}
             />
             {errors.email && <p className="text-red-500 text-xs">{errors.email}</p>}
@@ -90,13 +99,13 @@ const SignUp = () => {
             <input
               type="password"
               className="input input-bordered w-full mt-1"
-              value={password}
+              value={Password}
               onChange={(e) => setPassword(e.target.value)}
             />
             {errors.password && <p className="text-red-500 text-xs">{errors.password}</p>}
           </div>
           {/* เช็ครหัสผ่านอีกรอบ */}
-          <div className="mb-3 text-left">
+          {/* <div className="mb-3 text-left">
             <label className="block text-sm font-medium text-gray-700">
               ยืนยันรหัสผ่าน <span className="text-red-500">*</span>
             </label>
@@ -107,7 +116,7 @@ const SignUp = () => {
               onChange={(e) => setConfirmPassword(e.target.value)}
             />
             {errors.confirmPassword && <p className="text-red-500 text-xs">{errors.confirmPassword}</p>}
-          </div>
+          </div> */}
 
           <button
             type="submit"

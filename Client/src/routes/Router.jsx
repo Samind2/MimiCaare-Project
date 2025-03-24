@@ -4,7 +4,9 @@ import MainLayout from "../layouts/Main";
 import Home from "../pages/Home/Index";
 import SignUp from "../components/SignUp";
 import Signin from "../components/Signin";
-import GetComponent from '../pages/get';
+import Vaccine from "../pages/Vaccine/Index.jsx";
+import Development from "../pages/Development/Index.jsx";
+import ProfileChild from "../pages/ProfileChild/Index.jsx";
 
 const router = createBrowserRouter([
  {
@@ -24,8 +26,16 @@ const router = createBrowserRouter([
     element: <Signin />
    },
    {
-    path: "/GetComponent",
-    element: <GetComponent />
+    path: "/Vaccine",
+    element: <Vaccine />
+   },
+   {
+    path: "/Development",
+    element: <Development />
+   },
+   {
+    path: "/ProfileChild",
+    element: <ProfileChild />
    },
   ],
  },

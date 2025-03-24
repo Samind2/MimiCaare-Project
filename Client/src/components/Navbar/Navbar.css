@@ -1,0 +1,42 @@
+/* เมนู */
+.menu-item {
+    transition: all 0.3s ease;
+    color: #4A4A4A; /* สีของข้อความ */
+    text-decoration: none; /* เอาเส้นใต้ลิงก์ออก */
+}
+
+/* เปลี่ยนสีไอคอนและข้อความเมื่อ hover */
+.menu-item:hover {
+    color: #E51317; /* เปลี่ยนสีข้อความเมื่อ hover */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* ใส่เงาให้กับเมนู */
+    transform: translateY(-5px); /* ทำให้เมนูลอยขึ้นเล็กน้อย */
+}
+
+/* เปลี่ยนขนาดไอคอนเมื่อ hover */
+.menu-item:hover .icon {
+    transform: scale(1.2); /* ขยายขนาดไอคอน */
+    transition: transform 0.3s ease;
+    color: #E51317; /* เปลี่ยนสีไอคอนเมื่อ hover */
+}
+
+/* ปรับการจัดวางข้อความ */
+.menu-item span {
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    color: inherit; /* ใช้สีจาก parent element */
+}
+
+/* ปุ่ม */
+.btn {
+    background-color: #E51317;
+    color: white;
+    border: none;
+}
+
+/* เพิ่มแสงรอบๆ เมื่อ hover */
+.btn:hover {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* ใส่เงาให้กับเมนู */
+    transform: translateY(-5px); /* ทำให้เมนูลอยขึ้นเล็กน้อย */
+    transition: transform 0.3s ease;
+}

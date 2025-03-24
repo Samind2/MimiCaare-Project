@@ -1,10 +1,13 @@
 import api from "./api";
+console.log(api);
+
 const API_URL = "/user";
 
-const getAllUser = async () => {
-     return await api.get(`${API_URL}`); 
+const signup = async (userData ) => {
+     return await api.post(`${API_URL}/signup`, userData); 
 };
+console.log("Signup API URL:", API_URL);
 const userService = {
-    getAllUser,
+    signup,
 }
  export default userService;

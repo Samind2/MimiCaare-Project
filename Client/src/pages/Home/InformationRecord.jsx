@@ -1,16 +1,29 @@
 import React from 'react';
+import {motion} from 'framer-motion';
 
 const InformationRecord = () => {
   return (
     <div className="section-container bg-gradient-to-r from-[#f1f1f1] from-0% to-[#fff6f6]">
       <div className="py-12 flex flex-col justify-center items-center">
         <div className="text-center space-y-7 px-4">
-          <h3 className="md:text-3xl text-3xl font-bold md:leading-snug leading-snug">
-          โรคยอดฮิตในเด็กที่พ่อแม่ควรรู้
-          </h3>
-          <p className="text-xl text-[#4A4A4A]">
-          เด็กเล็กมักมีภูมิคุ้มกันที่ยังไม่แข็งแรง ทำให้มีโอกาสป่วยง่าย โดยเฉพาะโรคติดเชื้อต่าง ๆ ที่แพร่กระจายได้ง่ายในโรงเรียนหรือสถานที่ที่มีเด็กจำนวนมาก
-          </p>
+        <motion.h3 
+            className="md:text-3xl text-3xl font-bold md:leading-snug leading-snug"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: false }} // ให้แสดงแค่ครั้งเดียว
+          >
+            โรคยอดฮิตในเด็กที่พ่อแม่ควรรู้
+          </motion.h3>
+          <motion.p 
+            className="text-xl text-[#4A4A4A]"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: false }} // ให้แสดงแค่ครั้งเดียว
+          >
+            เด็กเล็กมักมีภูมิคุ้มกันที่ยังไม่แข็งแรง ทำให้มีโอกาสป่วยง่าย โดยเฉพาะโรคติดเชื้อต่าง ๆ ที่แพร่กระจายได้ง่ายในโรงเรียนหรือสถานที่ที่มีเด็กจำนวนมาก
+          </motion.p>
         </div>
       </div>
     </div>
