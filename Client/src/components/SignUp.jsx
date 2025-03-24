@@ -1,7 +1,8 @@
-import React, { useState, useContext  } from "react";
+import React, { useState, useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
-//import userService from "../service/user.service";
 import { useNavigate } from "react-router";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const SignUp = () => {
   const { signup } = useContext(AuthContext);
@@ -10,7 +11,7 @@ const SignUp = () => {
   const [LastName, setLastName] = useState("");
   const [Email, setEmail] = useState("");
   const [Password, setPassword] = useState("");
-  //const [confirmPassword, setConfirmPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [errors, setErrors] = useState({});
 
   const handleSubmit = async (e) => {
@@ -21,34 +22,64 @@ const SignUp = () => {
     if (!LastName.trim()) newErrors.LastName = "กรุณากรอกนามสกุล";
     if (!Email.trim()) newErrors.Email = "กรุณากรอกอีเมล";
     if (!Password.trim()) newErrors.Password = "กรุณากรอกรหัสผ่าน";
+    if (Password !== confirmPassword)
+      newErrors.confirmPassword = "รหัสผ่านและยืนยันรหัสผ่านไม่ตรงกัน"; // ตรวจสอบรหัสผ่าน
 
     if (Object.keys(newErrors).length > 0) {
-        setErrors(newErrors);
-        return;
+      setErrors(newErrors);
+      return;
     }
-    
+
     const userData = { FirstName, LastName, Email, Password };
-    await signup(userData);
-    navigate("/"); // ไปที่หน้า home หลังสมัครสมาชิกสำเร็จ
-};
-  
+    console.log("User Data:", userData);
+    try {
+      await signup(userData);
+      toast.success("สมัครสมาชิกสำเร็จ!", {
+        position: "top-center",
+        autoClose: 1000,
+        hideProgressBar: true, // ซ่อน progress bar(แถบสถานะ)
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+      setTimeout(() => {
+        navigate("/"); // ไปที่หน้า home
+      }, 1000); // 1000ms = 1 วินาที
+    } catch (error) {
+      toast.error("เกิดข้อผิดพลาดในการสมัครสมาชิก!", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+    }
+  };
 
   return (
     <div className="relative min-h-screen flex items-center justify-center bg-[#A7D7C5] overflow-hidden">
-        {/* ลวดลายพื้นหลังแบบสี่เหลี่ยม */}
-        <div className="absolute top-0 left-0 w-96 h-96 bg-[#C1E3D6] opacity-80 rounded-xl rotate-6"></div>
+      {/* ลวดลายพื้นหลังแบบสี่เหลี่ยม */}
+      <div className="absolute top-0 left-0 w-96 h-96 bg-[#C1E3D6] opacity-80 rounded-xl rotate-6"></div>
       <div className="absolute bottom-0 right-0 w-96 h-96 bg-[#C1E3D6] opacity-80 rounded-xl -rotate-6"></div>
 
       {/* ไอคอนตกแต่งพื้นหลัง */}
       <div className="absolute top-10 left-10 opacity-60">
-        <img src="/images/BG/BG-L.png" alt="children play" className="w-32 h-32" />
+        <img
+          src="/images/BG/BG-L.png"
+          alt="children play"
+          className="w-32 h-32"
+        />
       </div>
       <div className="absolute bottom-10 right-10 opacity-60">
         <img src="/images/BG/BG-R.png" alt="syringe" className="w-32 h-32" />
       </div>
       <div className="bg-white p-8 rounded-2xl shadow-lg w-96 text-center relative z-10">
         <h2 className="text-lg font-bold text-[#32403B] mb-4">
-          สร้างบัญชีเพื่อเข้าถึงบริการสำหรับบันทึกวัคซีน และติดตามพัฒนาการของเด็ก
+          สร้างบัญชีเพื่อเข้าถึงบริการสำหรับบันทึกวัคซีน
+          และติดตามพัฒนาการของเด็ก
         </h2>
         <form onSubmit={handleSubmit}>
           {/* กรอกชื่อ & นามสกุล */}
@@ -63,7 +94,9 @@ const SignUp = () => {
                 value={FirstName}
                 onChange={(e) => setFirstName(e.target.value)}
               />
-              {errors.firstName && <p className="text-red-500 text-xs">{errors.firstName}</p>}
+              {errors.firstName && (
+                <p className="text-red-500 text-xs">{errors.firstName}</p>
+              )}
             </div>
             <div className="w-1/2 text-left">
               <label className="block text-sm font-medium text-gray-700">
@@ -75,7 +108,9 @@ const SignUp = () => {
                 value={LastName}
                 onChange={(e) => setLastName(e.target.value)}
               />
-              {errors.lastName && <p className="text-red-500 text-xs">{errors.lastName}</p>}
+              {errors.lastName && (
+                <p className="text-red-500 text-xs">{errors.lastName}</p>
+              )}
             </div>
           </div>
           {/* กรอกอีเมล */}
@@ -89,7 +124,9 @@ const SignUp = () => {
               value={Email}
               onChange={(e) => setEmail(e.target.value)}
             />
-            {errors.email && <p className="text-red-500 text-xs">{errors.email}</p>}
+            {errors.email && (
+              <p className="text-red-500 text-xs">{errors.email}</p>
+            )}
           </div>
           {/* กรอกรหัสผ่าน */}
           <div className="mb-3 text-left">
@@ -102,10 +139,12 @@ const SignUp = () => {
               value={Password}
               onChange={(e) => setPassword(e.target.value)}
             />
-            {errors.password && <p className="text-red-500 text-xs">{errors.password}</p>}
+            {errors.password && (
+              <p className="text-red-500 text-xs">{errors.password}</p>
+            )}
           </div>
           {/* เช็ครหัสผ่านอีกรอบ */}
-          {/* <div className="mb-3 text-left">
+          <div className="mb-3 text-left">
             <label className="block text-sm font-medium text-gray-700">
               ยืนยันรหัสผ่าน <span className="text-red-500">*</span>
             </label>
@@ -115,8 +154,10 @@ const SignUp = () => {
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
             />
-            {errors.confirmPassword && <p className="text-red-500 text-xs">{errors.confirmPassword}</p>}
-          </div> */}
+            {errors.confirmPassword && (
+              <p className="text-red-500 text-xs">{errors.confirmPassword}</p>
+            )}
+          </div>
 
           <button
             type="submit"
@@ -127,9 +168,13 @@ const SignUp = () => {
         </form>
         {/* ไปหน้าเข้าสู่ระบบ */}
         <p className="mt-3 text-sm text-gray-500">
-          มีบัญชีอยู่แล้ว? <a href="/Signin" className="text-red-500">เข้าสู่ระบบ</a>
+          มีบัญชีอยู่แล้ว?{" "}
+          <a href="/Signin" className="text-red-500">
+            เข้าสู่ระบบ
+          </a>
         </p>
       </div>
+      <ToastContainer />
     </div>
   );
 };
