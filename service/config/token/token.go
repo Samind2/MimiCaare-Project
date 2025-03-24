@@ -11,17 +11,15 @@ import (
 )
 
 // ฟังก์ชันสำหรับสร้าง Token และตั้งค่า Cookie
-func GenerateToken(userId string, c *gin.Context) {
+func GenerateToken(userId string, c *gin.Context) (string, error) {
 	// ดึง Secret Key จาก ENV
-	secret := os.Getenv("KEY_PASS")
+	secret := os.Getenv("SECRET_KEY")
 	if secret == "" {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "Missing secret key"})
-		return
+		return "", fmt.Errorf("นำเข้าข้อมูลล้มเหลว - ระบบขัดข้องระหว่างการดึง SECRET_KEY")
 	}
 	node_mode := os.Getenv("NODE_ENV")
 	if node_mode == "" {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "Missing node mode"})
-		return
+		return "", fmt.Errorf("นำเข้าข้อมูลล้มเหลว - ระบบขัดข้องระหว่างการดึ NODE_ENV")
 	}
 
 	// สร้าง Claims สำหรับ JWT เอาไว้ใช้ตอนสร้างโทเค่นใช้บอกว่าโทเค่นมีอะไร
@@ -34,8 +32,7 @@ func GenerateToken(userId string, c *gin.Context) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	tokenString, err := token.SignedString([]byte(secret))
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error generating token"})
-		return
+		return "", fmt.Errorf("สร้างTokenเหลว - ระบบขัดข้องระหว่างการสร้าง Token")
 	}
 
 	// ตั้งค่า Cookie
@@ -52,4 +49,5 @@ func GenerateToken(userId string, c *gin.Context) {
 	http.SetCookie(c.Writer, cookie)
 
 	fmt.Println("Token generated and cookie set")
+	return tokenString, nil
 }
