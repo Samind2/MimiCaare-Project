@@ -1,16 +1,16 @@
-import React, {useContext} from "react";
+import React, { useContext } from "react";
 import { ImHome3 } from "react-icons/im";
 import { MdOutlineVaccines } from "react-icons/md";
 import { AuthContext } from "../../context/AuthContext";
 import { FaChild } from "react-icons/fa";
 import { RiInfoCardFill } from "react-icons/ri";
 import { useNavigate } from "react-router-dom";
+import Profile from "./Profile";
 import "./NavBar.css";
 
 const NavBar = () => {
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
-  const isAuthenticated = false; // เปลี่ยนเป็นตัวแปร state หรือ context จริงในโปรเจกต์ของคุณ
   return (
     <div className="relative flex items-center justify-between bg-white py-4 px-8 shadow-md">
       {/* เมนูด้านซ้าย */}
@@ -22,19 +22,28 @@ const NavBar = () => {
         </a>
 
         {/* เมนู ข้อมูลเด็ก */}
-        <a href="/ProfileChild" className="flex flex-col items-center gap-1 menu-item">
+        <a
+          href="/ProfileChild"
+          className="flex flex-col items-center gap-1 menu-item"
+        >
           <RiInfoCardFill className="w-6 h-6" />
           <span>ข้อมูลเด็ก</span>
         </a>
 
         {/* เมนู วัคซีน */}
-        <a href="/Vaccine" className="flex flex-col items-center gap-1 menu-item">
+        <a
+          href="/Vaccine"
+          className="flex flex-col items-center gap-1 menu-item"
+        >
           <MdOutlineVaccines className="w-6 h-6" />
           <span>วัคซีน</span>
         </a>
 
         {/* เมนู พัฒนาการ */}
-        <a href="/Development" className="flex flex-col items-center gap-1 menu-item">
+        <a
+          href="/Development"
+          className="flex flex-col items-center gap-1 menu-item"
+        >
           <FaChild className="w-6 h-6" />
           <span>พัฒนาการ</span>
         </a>
@@ -72,7 +81,6 @@ const NavBar = () => {
             <span className="badge badge-xs badge-primary indicator-item"></span>
           </div>
         </button>
-
         {/* แสดงปุ่ม "เข้าสู่ระบบ" ถ้ายังไม่ได้ล็อกอิน */}
         {!user ? (
           <button
@@ -82,40 +90,27 @@ const NavBar = () => {
             เข้าสู่ระบบ
           </button>
         ) : (
-          // Dropdown โปรไฟล์เมื่อผู้ใช้ล็อกอินแล้ว
-          <div className="dropdown dropdown-end">
-            <div
-              tabIndex={0}
-              role="button"
-              className="btn btn-ghost btn-circle avatar"
-            >
-              <div className="w-10 rounded-full">
-                {/* ใช้รูปโปรไฟล์ของผู้ใช้ */}
-                <img
-                  alt="Profile"
-                  src={user.profileImage || "https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp"}
-                />
-              </div>
-            </div>
-            <ul
-              tabIndex={0}
-              className="menu menu-sm dropdown-content bg-base-100 rounded-box z-50 mt-3 w-52 p-2 shadow"
-            >
-              <li>
-                <a className="justify-between">
-                  Profile
-                  <span className="badge">New</span>
-                </a>
-              </li>
-              <li>
-                <a>Settings</a>
-              </li>
-              <li>
-                <a>Logout</a>
-              </li>
-            </ul>
-          </div>
+          <Profile /> // แสดง Profile ถ้าผู้ใช้ล็อกอิน
         )}
+        <div className="dropdown dropdown-end">
+          <ul
+            tabIndex={0}
+            className="menu menu-sm dropdown-content bg-base-100 rounded-box z-50 mt-3 w-52 p-2 shadow"
+          >
+            <li>
+              <a className="justify-between">
+                Profile
+                <span className="badge">New</span>
+              </a>
+            </li>
+            <li>
+              <a>Settings</a>
+            </li>
+            <li>
+              <a>Logout</a>
+            </li>
+          </ul>
+        </div>
       </div>
     </div>
   );

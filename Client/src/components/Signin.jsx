@@ -1,22 +1,55 @@
-import React, { useState } from "react"
+import React, { useState, useContext } from "react"
+import { AuthContext } from "../context/AuthContext";
+import { useNavigate } from "react-router";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const Signin = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const { login } = useContext(AuthContext);
+   const navigate = useNavigate();
+  const [Email, setEmail] = useState("");
+  const [Password, setPassword] = useState("");
   const [errors, setErrors] = useState({});
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     let newErrors = {};
-    if (!email.trim()) newErrors.email = "กรุณากรอกอีเมล"; //ใช้ .trim() เพื่อลบช่องว่างหน้าและหลังข้อความ
-    if (!password.trim()) newErrors.password = "กรุณากรอกรหัสผ่าน";
+    if (!Email.trim()) newErrors.Email = "กรุณากรอกอีเมล"; //ใช้ .trim() เพื่อลบช่องว่างหน้าและหลังข้อความ
+    if (!Password.trim()) newErrors.Password = "กรุณากรอกรหัสผ่าน";
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       return;
     }
-  };
+  const userData = {  Email, Password };
+      console.log("User Data:", userData);
+      try {
+        await login(userData);
+        toast.success("เข้าสู่ระบบสำเร็จ!", {
+          position: "top-center",
+          autoClose: 1000,
+          hideProgressBar: true, // ซ่อน progress bar(แถบสถานะ)
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+        });
+        setTimeout(() => {
+          navigate("/"); // ไปที่หน้า home
+        }, 1000); // 1000ms = 1 วินาที
+      } catch (error) {
+        toast.error("เกิดข้อผิดพลาดในการเข้าสู่ระบบ!", {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+        });
+      }
+    };
 
   return (
     <div className="relative min-h-screen flex items-center justify-center bg-[#EE8A8A] overflow-hidden">
@@ -46,7 +79,7 @@ const Signin = () => {
             <input
               type="email"
               className="input input-bordered w-full mt-1"
-              value={email}
+              value={Email}
               onChange={(e) => setEmail(e.target.value)}
             />
             {errors.email && <p className="text-red-500 text-xs">{errors.email}</p>}
@@ -59,7 +92,7 @@ const Signin = () => {
             <input
               type="password"
               className="input input-bordered w-full mt-1"
-              value={password}
+              value={Password}
               onChange={(e) => setPassword(e.target.value)}
             />
             {errors.password && <p className="text-red-500 text-xs">{errors.password}</p>}
@@ -78,6 +111,7 @@ const Signin = () => {
           หากคุณยังไม่มีบัญชีผู้ใช้? <a href="/Signup" className="text-red-500">สมัครสมาชิก</a>
         </p>
       </div>
+      <ToastContainer />
     </div>
   );
 }
