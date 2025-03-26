@@ -9,4 +9,7 @@ import (
 func UserRoutes(router *gin.RouterGroup) {
 	router.POST("/signup", userController.Signup)
 	router.POST("/login", userController.Login)
+	router.POST("/logout", userController.Logout)
+	router.PUT("/update", userController.UpdateProfile)
+
 }
