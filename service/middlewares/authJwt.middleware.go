@@ -21,7 +21,7 @@ func VerifyToken() gin.HandlerFunc {
 		}
 
 		// Secret Key จาก .env
-		secretKey := os.Getenv("KEY_PASS")
+		secretKey := os.Getenv("SECRET_KEY")
 		if secretKey == "" {
 			c.JSON(http.StatusInternalServerError, gin.H{"message": "Missing secret key"})
 			c.Abort()

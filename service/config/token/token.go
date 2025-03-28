@@ -63,12 +63,10 @@ type UserClaims struct {
 func ValidateToken(tokenString string) (*UserClaims, error) {
 	secret := os.Getenv("SECRET_KEY")
 	claims := &UserClaims{}
-
 	// ยืนยัน Token
 	token, err := jwt.ParseWithClaims(tokenString, claims, func(t *jwt.Token) (interface{}, error) {
 		return []byte(secret), nil
 	})
-
 	if err != nil || !token.Valid {
 		return nil, errors.New("invalid token")
 	}

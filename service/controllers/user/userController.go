@@ -131,10 +131,11 @@ func Logout(c *gin.Context) {
 		Path:     "/",
 		MaxAge:   -1,
 		HttpOnly: true,
-		SameSite: http.SameSiteStrictMode, // ป้องกัน CSRF
+		Secure:   false,                 //ก่อนขึ้นโฮสต้องเปลี่ยนเป็น true
+		SameSite: http.SameSiteNoneMode, // ต้องใช้ None ถ้าเป็น cross-origin
 	}
-	//เช็ตค่าคุกกี้ใหม่
 	http.SetCookie(c.Writer, cookie)
+
 	c.JSON(http.StatusOK, gin.H{"message": "ออกจากระบบสำเร็จ"})
 }
 
@@ -160,7 +161,9 @@ func UpdateProfile(c *gin.Context) {
 		return
 	}
 	var req struct {
-		Picture string `json:"picture"`
+		FirstName string `json:"firstName,omitempty"`
+		LastName  string `json:"lastName,omitempty"`
+		Picture   string `json:"picture,omitempty"`
 	}
 	// ผูกข้อมูล JSON เข้ากับโครงสร้าง
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -168,56 +171,66 @@ func UpdateProfile(c *gin.Context) {
 		return
 	}
 	// ตรวจสอบว่ามี profilePic หรือไม่
-	if req.Picture == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "ไม่มีข้อมูลรูปภาพ"})
-		return
+	var pictureURL string
+	if req.Picture != "" {
+		//upload pic to cloudinary
+		cloudinaryURL := os.Getenv("CLOUDINARY_URL")
+		cld, err := cloudinary.NewFromURL(cloudinaryURL)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"message": "ไม่สามารถเชื่อมต่อ Cloudinary ได้"})
+			return
+		}
+		uploadResponse, err := cld.Upload.Upload(context.Background(), req.Picture, uploader.UploadParams{
+			Folder: "user_profiles", // เก็บไฟล์ในโฟลเดอร์ "user_profiles"
+		})
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"message": "เกิดข้อผิดพลาดขณะอัปโหลดภาพ"})
+			return
+		}
+		pictureURL = uploadResponse.SecureURL
 	}
-	// อัปโหลดภาพไปยัง Cloudinary
-	cloudinaryURL := os.Getenv("CLOUDINARY_URL")
-	cld, err := cloudinary.NewFromURL(cloudinaryURL)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "ไม่สามารถเชื่อมต่อ Cloudinary ได้"})
-		return
-	}
-	uploadResponse, err := cld.Upload.Upload(context.TODO(), req.Picture, uploader.UploadParams{
-		Folder: "user_profiles", // เก็บไฟล์ในโฟลเดอร์ "user_profiles"
-	})
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "เกิดข้อผิดพลาดขณะอัปโหลดภาพ"})
-		return
-	}
-	// ตรวจสอบว่ามีการเปลี่ยนแปลงข้อมูลหรือไม่
+	//เช็คข้อมูล ยูสเซอร์ก่อน
 	var existingUser userModels.User
 	err = userCollection.FindOne(context.TODO(), bson.M{"_id": objectID}).Decode(&existingUser)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
-			c.JSON(http.StatusNotFound, gin.H{"message": "User not found"})
+			c.JSON(http.StatusNotFound, gin.H{"message": "ไม่พบผู้ใช้งาน"})
 		} else {
-			c.JSON(http.StatusInternalServerError, gin.H{"message": "Error finding user"})
+			c.JSON(http.StatusInternalServerError, gin.H{"message": "เกิดข้อผิดพลาดในการค้นหาผู้ใช้งาน"})
 		}
 		return
 	}
-	if existingUser.Picture == uploadResponse.SecureURL {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "ไม่มีการเปลี่ยนแปลงข้อมูล"})
+
+	//สร้างตัวแปรสำหรับเก็บข้อมูลที่ต้องการอัปเดต
+	update := bson.M{}
+	if req.FirstName != "" {
+		update["firstName"] = req.FirstName
+	}
+	if req.LastName != "" {
+		update["lastName"] = req.LastName
+	}
+	if pictureURL != "" {
+		update["picture"] = req.Picture
+	}
+
+	// อัปเดตข้อมูลในฐานข้อมูล
+	if len(update) == 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "ไม่มีข้อมูลให้อัปเดต"})
 		return
 	}
-	// อัปเดตข้อมูลโปรไฟล์ในฐานข้อมูล
-	update := bson.M{"picture": uploadResponse.SecureURL}
-	result, err := userCollection.UpdateOne(context.TODO(), bson.M{"_id": objectID}, bson.M{"$set": update})
+	result, err := userCollection.UpdateOne(context.Background(), bson.M{"_id": objectID}, bson.M{"$set": update})
 	if err != nil {
-		//log.Println("Update Error:", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "เกิดข้อผิดพลาดขณะอัปเดตโปรไฟล์"})
 		return
 	}
-	//log.Println("Modified Count:", result.ModifiedCount) // log จำนวนที่ถูกเปลี่ยนแปลง
 	if result.ModifiedCount == 0 {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "ไม่มีการเปลี่ยนแปลงข้อมูล"})
 		return
 	}
-	// ส่งข้อมูลผู้ใช้กลับไป
+
 	c.JSON(http.StatusOK, gin.H{
 		"message": "โปรไฟล์อัปเดตสำเร็จ",
 		"userId":  userId,
-		"picture": uploadResponse.SecureURL,
+		"picture": pictureURL,
 	})
 }
