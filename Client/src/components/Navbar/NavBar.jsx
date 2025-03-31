@@ -9,8 +9,9 @@ import Profile from "./Profile";
 import "./NavBar.css";
 
 const NavBar = () => {
-  const { user } = useContext(AuthContext);
+  const { user } = useContext(AuthContext); // ดึงข้อมูล user จาก context
   const navigate = useNavigate();
+
   return (
     <div className="relative flex items-center justify-between bg-white py-4 px-8 shadow-md">
       {/* เมนูด้านซ้าย */}
@@ -23,7 +24,7 @@ const NavBar = () => {
 
         {/* เมนู ข้อมูลเด็ก */}
         <a
-          href="/ProfileChild"
+          href="/profile-child"
           className="flex flex-col items-center gap-1 menu-item"
         >
           <RiInfoCardFill className="w-6 h-6" />
@@ -63,7 +64,7 @@ const NavBar = () => {
       {/* เมนูด้านขวา */}
       <div className="flex gap-6 items-center">
         <button className="btn btn-ghost btn-circle">
-          <div className="indicator">
+          <a href='/Notification' className="indicator">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               className="h-5 w-5"
@@ -79,7 +80,7 @@ const NavBar = () => {
               />
             </svg>
             <span className="badge badge-xs badge-primary indicator-item"></span>
-          </div>
+          </a>
         </button>
         {/* แสดงปุ่ม "เข้าสู่ระบบ" ถ้ายังไม่ได้ล็อกอิน */}
         {!user ? (
@@ -90,7 +91,18 @@ const NavBar = () => {
             เข้าสู่ระบบ
           </button>
         ) : (
-          <Profile /> // แสดง Profile ถ้าผู้ใช้ล็อกอิน
+          // แสดงรูปโปรไฟล์ถ้ามีรูป
+          <div className="relative">
+            {user?.picture ? (
+              <img
+                src={user.picture} // ใช้ URL ของรูปโปรไฟล์
+                alt="User Profile"
+                className="w-10 h-10 rounded-full object-cover"
+              />
+            ) : (
+              <Profile /> // ถ้าไม่มีรูปโปรไฟล์ ให้แสดงคอมโพเนนต์ Profile
+            )}
+          </div>
         )}
         <div className="dropdown dropdown-end">
           <ul
@@ -98,13 +110,10 @@ const NavBar = () => {
             className="menu menu-sm dropdown-content bg-base-100 rounded-box z-50 mt-3 w-52 p-2 shadow"
           >
             <li>
-              <a className="justify-between">
+              <a href='/ProfileUpdate'>
                 Profile
                 <span className="badge">New</span>
               </a>
-            </li>
-            <li>
-              <a>Settings</a>
             </li>
             <li>
               <a>Logout</a>

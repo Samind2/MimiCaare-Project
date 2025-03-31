@@ -1,32 +1,32 @@
+import { Cookies } from "react-cookie";
+const cookies = new Cookies();
+
 const getLocalAccessToken = () => {
-    const user = getUser(); // Assuming getUser retrieves the user object with the token
-    return user?.accessToken; 
-  };
-  
-  const getUserRole = () => {
-    const user = getUser(); // Assuming getUser retrieves the user object with the token
-    return user?.roles || []; // Return user roles, or empty array if no roles found
-  };
-  
-  const setUser = (user) => {
-    localStorage.setItem("user", JSON.stringify(user));
-  };
-  
-  const getUser = () => {
-    return JSON.parse(localStorage.getItem("user"));
-  };
-  
-  const removeUser = () => {
-    localStorage.removeItem("user"); // ลบข้อมูลผู้ใช้ที่เก็บใน local storage
-    localStorage.removeItem("accessToken"); // ลบ accessToken ออกจาก local storage (ถ้าเก็บ accessToken แยกต่างหาก)
-  };
-  
-  const TokenService = {
-    getLocalAccessToken,
-    getUserRole, // เพิ่มฟังก์ชันนี้เพื่อใช้ตรวจสอบบทบาท
-    setUser,
-    getUser,
-    removeUser,
-  };
-  
-  export default TokenService;
+  const user = getUser();
+  return user?.token;
+};
+
+const getUser = () => {
+  const user = cookies.get("user");
+  return user;
+};
+
+const removeUser = () => {
+  cookies.remove("user", { path: "/" });
+};
+
+const setUser = (user) => {
+  cookies.set("user", JSON.stringify(user), {
+    path: "/",
+    expires: new Date(Date.now() + 86400 * 1000), // 1 วัน
+  });
+};
+
+const TokenService = {
+  getLocalAccessToken,
+  setUser,
+  getUser,
+  removeUser,
+};
+
+export default TokenService;

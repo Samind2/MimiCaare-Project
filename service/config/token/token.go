@@ -1,6 +1,7 @@
 package token
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"os"
@@ -50,4 +51,24 @@ func GenerateToken(userId string, c *gin.Context) (string, error) {
 
 	fmt.Println("Token generated and cookie set")
 	return tokenString, nil
+}
+
+// UserClaims คือโครงสร้างสำหรับเก็บข้อมูลผู้ใช้จาก JWT
+type UserClaims struct {
+	UserId string `json:"userId"`
+	jwt.RegisteredClaims
+}
+
+// ValidateToken ตรวจสอบว่า Token มีความถูกต้องและคืนค่าข้อมูล Claims
+func ValidateToken(tokenString string) (*UserClaims, error) {
+	secret := os.Getenv("SECRET_KEY")
+	claims := &UserClaims{}
+	// ยืนยัน Token
+	token, err := jwt.ParseWithClaims(tokenString, claims, func(t *jwt.Token) (interface{}, error) {
+		return []byte(secret), nil
+	})
+	if err != nil || !token.Valid {
+		return nil, errors.New("invalid token")
+	}
+	return claims, nil
 }

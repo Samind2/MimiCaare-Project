@@ -21,10 +21,10 @@ const Profile = () => {
           className="btn btn-ghost btn-circle avatar"
         >
           <div className="w-10 rounded-full">
-            {user?.photoURL ? (<div className='w-10 rounded-full'><img src={user.photoURL} alt='User Photo Profile' /></div>) : (
+            {user?.picture ? (<div className='w-10 rounded-full'><img src={user.picture} alt='User Photo Profile' /></div>) : (
               <img
                 alt="Tailwind CSS Navbar component"
-                src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp"
+                src={user.picture || "/images/UserPic/UserPic.png"}
               />
             )}
           </div>
@@ -35,20 +35,16 @@ const Profile = () => {
         >
           {/* แสดงชื่อผู้ใช้ด้านบนของ Dropdown */}
           <li className="text-center font-medium text-gray-700 py-2 flex items-center justify-center gap-2">
-            <span className="font-bold text-red">Welcome to our website</span> {user?.displayName || 'Guest'}
+            <span className="font-bold text-red">Welcome to our website</span> {user?.firstName && user?.lastName ? `${user.firstName} ${user.lastName}` : 'Guest'}
           </li>
           <div className="divider my-1"></div> {/* เส้นแบ่ง */}
           <li>
-            <a className="justify-between" href='/profileUser'>
+            <a className="justify-center text-[#E51317]" href='/profile-update'>
               Profile
-              <span className="badge">New</span>
             </a>
           </li>
           <li>
-            <a href='/UpdateProfile'>Settings</a>
-          </li>
-          <li>
-          <a onClick={handleLogout}>Logout</a> {/* ใช้ handleLogout */}
+          <a onClick={handleLogout} className='justify-center text-[#E51317]'>Logout</a> {/* ใช้ handleLogout ที่สร้างไว้ */}
           </li>
         </ul>
       </div>
