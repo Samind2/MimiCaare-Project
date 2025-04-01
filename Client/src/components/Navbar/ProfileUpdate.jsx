@@ -3,7 +3,6 @@ import { AuthContext } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import userService from '../../service/user.service'; // นำเข้า userService
 
 const ProfileUpdate = () => {
     const { user, updateProfile } = useContext(AuthContext);
@@ -23,13 +22,32 @@ const ProfileUpdate = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            await userService.updateProfile({ firstName, lastName, picture });
-            toast.success('โปรไฟล์อัปเดตสำเร็จ!', { autoClose: 1500 });
+            const userData = { firstName, lastName, picture };
+            await updateProfile(userData);
+            toast.success("อัพเดทโปรไฟล์สำเร็จ!", {
+                position: "top-center",
+                autoClose: 1000,
+                hideProgressBar: true,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+            });
+
             setTimeout(() => {
-                navigate('/'); // เปลี่ยนหน้า หลังจากแสดง toast
-            }, 1500);
+                navigate("/profile-parent");
+            }, 1000);
         } catch (error) {
-            toast.error('เกิดข้อผิดพลาดในการอัปเดตโปรไฟล์');
+            toast.error("เกิดข้อผิดพลาดในการอัพเดทโปรไฟล์!", {
+                position: "top-center",
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+            });
+            console.error("Error in profile update:", error); // เพิ่ม log เพื่อดู error
         }
     };
 

@@ -11,10 +11,10 @@ const AuthProvider = ({ children }) => {
   useEffect(() => {
     const currentUser = TokenService.getUser();
     if (currentUser) {
-      setUser(currentUser); // ตั้งค่า user ถ้ามีข้อมูล
+      setUser(currentUser); // อัพเดทข้อมูล user ใหม่จาก cookies
     }
     setLoading(false); // ตั้งค่า loading เป็น false หลังจากโหลดข้อมูลเสร็จ
-  }, []);
+  }, []); // ทำงานเมื่อแอพโหลดครั้งแรก
 
   // ฟังก์ชันสำหรับสมัครสมาชิก
   const signup = async (userData) => {
@@ -55,20 +55,31 @@ const AuthProvider = ({ children }) => {
   };
 
   // ฟังก์ชันอัปเดตโปรไฟล์
-  const updateProfile = async (firstName, lastName, picture) => {
+  const updateProfile = async (userData) => {
+    setLoading(true);
     try {
-      setLoading(true);
-      const updatedUser = { ...user, firstName, lastName, picture };
-      await userService.updateProfile(updatedUser); // อัปเดตโปรไฟล์ผ่าน API
-      TokenService.setUser(updatedUser); // เก็บข้อมูลใหม่ใน cookies
-      setUser(updatedUser); // อัปเดตข้อมูลใน state
-      setLoading(false);
+        const response = await userService.updateProfile(userData);
+        const updatedUser = response.data;
+
+        console.log("Updated User Data:", updatedUser);
+
+        // สร้าง object ใหม่ เพื่อให้ React ตรวจจับการเปลี่ยนแปลง
+        const newUserData = { ...user, ...updatedUser };
+
+        // บันทึกลง localStorage และอัปเดต Context
+        TokenService.setUser(newUserData);
+        setUser({ ...newUserData }); // บังคับให้ React รีเรนเดอร์
+
     } catch (error) {
-      console.error("Error updating profile:", error);
-      setLoading(false);
-      throw error;
+        console.error("Error updating profile:", error);
+        throw error;
+    } finally {
+        setLoading(false);
     }
-  };
+};
+
+  
+  
 
   const authInfo = {
     user,

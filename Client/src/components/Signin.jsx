@@ -23,7 +23,7 @@ const Signin = () => {
       return;
     }
   const userData = {  Email, Password };
-      console.log("User Data:", userData);
+     // console.log("User Data:", userData);
       try {
         await login(userData);
         toast.success("เข้าสู่ระบบสำเร็จ!", {
@@ -40,7 +40,7 @@ const Signin = () => {
         }, 1000); // 1000ms = 1 วินาที
       } catch (error) {
         toast.error("เกิดข้อผิดพลาดในการเข้าสู่ระบบ!", {
-          position: "top-right",
+          position: "top-center",
           autoClose: 5000,
           hideProgressBar: false,
           closeOnClick: true,

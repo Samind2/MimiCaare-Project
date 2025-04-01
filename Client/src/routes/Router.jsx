@@ -8,6 +8,7 @@ import Signin from "../components/Signin";
 import Vaccine from "../pages/Vaccine/Index.jsx";
 import Development from "../pages/Development/Index.jsx";
 import ProfileChild from "../pages/ProfileChild/Index.jsx";
+import ProfileParent from "../pages/ProfileParent/Index.jsx";
 import ProfileUpdate from "../components/Navbar/ProfileUpdate.jsx";
 import Notification from "../pages/Notifications/Index.jsx";
 
@@ -49,6 +50,14 @@ const router = createBrowserRouter([
                 element: (
                     <ProtectedRoute>
                         <ProfileChild />
+                    </ProtectedRoute>
+                )
+            },
+            {
+                path: "/profile-parent",
+                element: (
+                    <ProtectedRoute>
+                        <ProfileParent />
                     </ProtectedRoute>
                 )
             },

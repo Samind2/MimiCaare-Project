@@ -48,7 +48,7 @@ const SignUp = () => {
       }, 1000); // 1000ms = 1 วินาที
     } catch (error) {
       toast.error("เกิดข้อผิดพลาดในการสมัครสมาชิก!", {
-        position: "top-right",
+        position: "top-center",
         autoClose: 5000,
         hideProgressBar: false,
         closeOnClick: true,

@@ -91,17 +91,9 @@ const NavBar = () => {
             เข้าสู่ระบบ
           </button>
         ) : (
-          // แสดงรูปโปรไฟล์ถ้ามีรูป
+          // ใช้ Profile component โดยตรงเพื่อให้แน่ใจว่าสามารถคลิกได้
           <div className="relative">
-            {user?.picture ? (
-              <img
-                src={user.picture} // ใช้ URL ของรูปโปรไฟล์
-                alt="User Profile"
-                className="w-10 h-10 rounded-full object-cover"
-              />
-            ) : (
-              <Profile /> // ถ้าไม่มีรูปโปรไฟล์ ให้แสดงคอมโพเนนต์ Profile
-            )}
+            <Profile />
           </div>
         )}
         <div className="dropdown dropdown-end">
@@ -110,7 +102,7 @@ const NavBar = () => {
             className="menu menu-sm dropdown-content bg-base-100 rounded-box z-50 mt-3 w-52 p-2 shadow"
           >
             <li>
-              <a href='/ProfileUpdate'>
+              <a href='/profile-parent'>
                 Profile
                 <span className="badge">New</span>
               </a>
