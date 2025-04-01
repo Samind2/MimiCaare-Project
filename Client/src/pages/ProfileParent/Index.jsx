@@ -43,7 +43,7 @@ const Index = () => {
       <form onSubmit={handleSubmit} className="profile-form">
         <div className="profile-pic-section">
           <div className="profile-pic-wrapper">
-          <img src={picture || '/images/default-profile.png'} alt="Profile" className="profile-pic" />
+          <img src={picture || '/images/UserPic.png'} alt="Profile" className="profile-pic" />
           <label htmlFor="profilePicInput" className="profile-pic-upload-button">
               📷 {/* Camera Icon */}
             </label>
