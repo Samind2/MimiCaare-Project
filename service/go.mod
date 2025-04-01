@@ -1,12 +1,11 @@
 module github.com/Samind2/MimiCaare-Project/service
 
-go 1.24.1
+go 1.24.0
 
 require (
 	github.com/gin-gonic/gin v1.10.0
 	github.com/golang-jwt/jwt/v5 v5.2.2
 	github.com/joho/godotenv v1.5.1
-	github.com/rs/cors v1.11.1
 	go.mongodb.org/mongo-driver v1.17.3
 	golang.org/x/crypto v0.36.0
 )
@@ -14,8 +13,7 @@ require (
 require (
 	github.com/bytedance/sonic v1.11.6 // indirect
 	github.com/bytedance/sonic/loader v0.1.1 // indirect
-	github.com/cloudinary/cloudinary-go v1.7.0
-	github.com/cloudinary/cloudinary-go/v2 v2.9.1 // indirect
+	github.com/cloudinary/cloudinary-go/v2 v2.9.1
 	github.com/cloudwego/base64x v0.1.4 // indirect
 	github.com/cloudwego/iasm v0.2.0 // indirect
 	github.com/creasty/defaults v1.7.0 // indirect
