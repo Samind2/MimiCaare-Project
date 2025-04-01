@@ -23,7 +23,7 @@ const Profile = () => {
         >
           <div className="w-10 rounded-full">
             <img
-              src={user?.picture || "/images/UserPic/UserPic.png"}
+              src={user?.picture || "/images/UserPic.png"}
               alt="User Photo Profile"
               className="w-10 h-10 rounded-full object-cover"
             />
