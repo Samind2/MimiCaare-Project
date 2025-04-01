@@ -16,9 +16,15 @@ import (
 
 func main() {
 	// โหลดค่าจาก .env
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("❌ ไม่สามารถโหลดไฟล์ .env")
+	// err := godotenv.Load()
+	// if err != nil {
+	// 	log.Fatal("❌ ไม่สามารถโหลดไฟล์ .env")
+	// }
+	if os.Getenv("RENDER") == "" { // Render มีตัวแปร `RENDER` อัตโนมัติ
+		err := godotenv.Load()
+		if err != nil {
+			log.Println("⚠️ ไม่สามารถโหลดไฟล์ .env แต่ใช้ Environment Variables แทน")
+		}
 	}
 
 	// เชื่อมต่อกับฐานข้อมูล
