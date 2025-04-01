@@ -6,7 +6,7 @@ import { FaChild } from "react-icons/fa";
 import { RiInfoCardFill } from "react-icons/ri";
 import { useNavigate } from "react-router-dom";
 import Profile from "./Profile";
-import "./NavBar.css";
+import "./Navbar.css";
 
 const NavBar = () => {
   const { user } = useContext(AuthContext); // ดึงข้อมูล user จาก context
