@@ -11,8 +11,11 @@ node_modules
 dist
 dist-ssr
 *.local
-.env
-go.sum
+*.env
+*.env.example
+*.env.local
+*.env.staging
+.sum
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

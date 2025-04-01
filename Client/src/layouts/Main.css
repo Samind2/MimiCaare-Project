@@ -1,0 +1,57 @@
+@import url('https://fonts.googleapis.com/css2?family=Prompt:wght@100;200;300;400;500;600;700;800&display=swap');
+
+body {
+  font-family: "Prompt", sans-serif;
+}
+
+.section-container {
+  max-width: 1536px; /* เทียบเท่ากับ max-w-screen-2xl */
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 1rem; /* เทียบเท่ากับ p-4 */
+  padding-left: 6rem; /* เทียบเท่ากับ xl:px-24 */
+  padding-right: 6rem; /* เทียบเท่ากับ xl:px-24 */
+}
+
+@media (max-width: 1280px) { /* เทียบเท่ากับ xl breakpoint */
+  .section-container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}
+
+header,
+nav {
+  z-index: 1001 !important;
+}
+
+.title {
+  font-size: 1.25rem; /* เทียบเท่ากับ text-xl */
+  font-weight: 700; /* เทียบเท่ากับ font-bold */
+  line-height: normal;
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+@media (min-width: 768px) { /* เทียบเท่ากับ md breakpoint */
+  .title {
+    font-size: 3rem; /* เทียบเท่ากับ md:text-5xl */
+    line-height: 1.2; /* เทียบเท่ากับ md:leading-snug */
+  }
+}
+
+.subtitle {
+  color: red;
+  text-transform: uppercase;
+  letter-spacing: 0.05em; /* เทียบเท่ากับ tracking-wide */
+  font-weight: 600; /* เทียบเท่ากับ font-semibold */
+  font-size: 1.125rem; /* เทียบเท่ากับ text-lg */
+}
+
+.active {
+  text-decoration: underline;
+  text-underline-offset: 5px;
+  color: green;
+}
+
