@@ -1,5 +1,5 @@
 import axios from "axios";
-const baseURL = import.meta.env.VITE_BASE_URL || 'http://localhost:5000'; // กำหนด URL สำรองถ้าค่าจาก .env ไม่ถูกต้อง
+const baseURL = import.meta.env.VITE_BASE_URL || 'http://localhost:5000'; 
 console.log("VITE_BASE_URL:", baseURL);
 import TokenService from "./token.service";
 

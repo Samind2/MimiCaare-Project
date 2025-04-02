@@ -78,6 +78,7 @@ func Signup(c *gin.Context) {
 		"role":      user.Role,
 	})
 }
+
 func Login(c *gin.Context) {
 	var req struct {
 		Email    string `json:"email"`
@@ -119,6 +120,7 @@ func Login(c *gin.Context) {
 		"firstName": user.FirstName,
 		"lastName":  user.LastName,
 		"email":     user.Email,
+		"picture":   user.Picture,
 		"token":     jwtToken,
 	})
 }
@@ -229,8 +231,10 @@ func UpdateProfile(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"message": "โปรไฟล์อัปเดตสำเร็จ",
-		"userId":  userId,
-		"picture": pictureURL,
+		"message":   "โปรไฟล์อัปเดตสำเร็จ",
+		"userId":    userId,
+		"firstName": update["firstName"],
+		"lastName":  update["lastName"],
+		"picture":   pictureURL,
 	})
 }
