@@ -1,6 +1,8 @@
 import React, { useContext } from 'react'
 import { AuthContext } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 
 
@@ -9,7 +11,19 @@ const Profile = () => {
   const navigate = useNavigate();
   const handleLogout = () => {
     logout();
-    navigate('/signin');  // รีไดเร็กต์ไปที่หน้า signin หลังจาก logout
+    toast.success("ออกจากระบบสำเร็จ!", {
+      position: "top-center",
+      autoClose: 1000,
+      hideProgressBar: true,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+    });
+
+    setTimeout(() => {
+      navigate("/"); // รีไดเร็กต์ไปหน้า login
+    }, 1000);
   };
 
   return (
@@ -50,6 +64,7 @@ const Profile = () => {
           </li>
         </ul>
       </div>
+        <ToastContainer />
     </div>
   )
 }

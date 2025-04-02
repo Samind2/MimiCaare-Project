@@ -3,6 +3,7 @@ import { AuthContext } from "../context/AuthContext";
 import { useNavigate } from "react-router";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 const Signin = () => {
   const { login } = useContext(AuthContext);
@@ -10,24 +11,25 @@ const Signin = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState({});
+  const [showPassword, setShowPassword] = useState(false); // State for showing/hiding password
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     let newErrors = {};
-    // เช็คว่าอีเมลถูกกรอกหรือยัง
+    // Check if email is entered
     if (!email.trim()) newErrors.Email = "กรุณากรอกอีเมล";
-    // เช็คว่ารหัสผ่านถูกกรอกหรือยัง
+    // Check if password is entered
     if (!password.trim()) newErrors.Password = "กรุณากรอกรหัสผ่าน";
 
     if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors); // เก็บข้อผิดพลาด
-      return; // หยุดการส่งข้อมูลไปยังฟังก์ชัน login
+      setErrors(newErrors); // Store errors
+      return; // Stop form submission if there are errors
     }
 
     const userData = { email, password };
     try {
-      await login(userData); // เรียกใช้ฟังก์ชัน login
+      await login(userData); // Call the login function
       toast.success("เข้าสู่ระบบสำเร็จ!", {
         position: "top-center",
         autoClose: 1000,
@@ -38,8 +40,8 @@ const Signin = () => {
         progress: undefined,
       });
       setTimeout(() => {
-        navigate("/"); // ไปที่หน้า home
-      }, 1000); // 1000ms = 1 วินาที
+        navigate("/"); // Redirect to home page
+      }, 1000); // 1000ms = 1 second
     } catch (error) {
       toast.error("เกิดข้อผิดพลาดในการเข้าสู่ระบบ!", {
         position: "top-center",
@@ -86,12 +88,21 @@ const Signin = () => {
             <label className="block text-sm font-medium text-gray-700">
               รหัสผ่าน <span className="text-red-500">*</span>
             </label>
-            <input
-              type="password"
-              className="input input-bordered w-full mt-1"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"} // Toggle between password and text
+                className="input input-bordered w-full mt-1"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)} // Toggle password visibility
+                className="absolute top-1/2 right-3 transform -translate-y-1/2 text-gray-500"
+              >
+                {showPassword ? <FaEyeSlash /> : <FaEye />} {/* Button text based on visibility */}
+              </button>
+            </div>
             {errors.Password && <p className="text-red-500 text-xs">{errors.Password}</p>}
           </div>
           <p className="mt-3 text-sm text-gray-500 flex justify-end">
@@ -109,6 +120,6 @@ const Signin = () => {
       <ToastContainer />
     </div>
   );
-}
+};
 
 export default Signin;
