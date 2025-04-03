@@ -29,6 +29,7 @@ const ProfileUpdate = () => {
         try {
             const userData = { firstName, lastName, email, picture };  // ส่งข้อมูลอีเมลไปด้วย
             await updateProfile(userData);  // อัปเดตข้อมูลโปรไฟล์
+            console.log("Toast showing");
             toast.success("อัพเดทโปรไฟล์สำเร็จ!", {
                 position: "top-center",
                 autoClose: 1000,
@@ -41,7 +42,7 @@ const ProfileUpdate = () => {
 
             setTimeout(() => {
                 navigate("/profile-parent");
-            }, 1000);
+            }, 2000);
         } catch (error) {
             toast.error("เกิดข้อผิดพลาดในการอัพเดทโปรไฟล์!", {
                 position: "top-center",

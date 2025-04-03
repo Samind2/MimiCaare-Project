@@ -11,21 +11,8 @@ const Profile = () => {
   const navigate = useNavigate();
   const handleLogout = () => {
     logout();
-    toast.success("ออกจากระบบสำเร็จ!", {
-      position: "top-center",
-      autoClose: 1000,
-      hideProgressBar: true,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-    });
-
-    setTimeout(() => {
-      navigate("/"); // รีไดเร็กต์ไปหน้า login
-    }, 1000);
-  };
-
+    navigate('/login')
+  }
   return (
     <div>
 
