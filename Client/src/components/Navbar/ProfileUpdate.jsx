@@ -41,7 +41,7 @@ const ProfileUpdate = () => {
 
             setTimeout(() => {
                 navigate("/profile-parent");
-            }, 2000);
+            }, 1000);
         } catch (error) {
             toast.error("เกิดข้อผิดพลาดในการอัพเดทโปรไฟล์!", {
                 position: "top-center",
