@@ -98,7 +98,7 @@ const Index = () => {
               onChange={handleEmailChange} // Handle email change
               readOnly
               placeholder="กรอกอีเมล"
-              className="readonly-input"
+              className="readonly-input" // Change class for editable styling
             />
           </div>
 

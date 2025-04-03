@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect } from 'react';
+import React, { useContext, useState } from 'react';
 import { AuthContext } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { ToastContainer, toast } from "react-toastify";
@@ -8,22 +8,27 @@ const ProfileUpdate = () => {
     const { user, updateProfile } = useContext(AuthContext);
     const [firstName, setFirstName] = useState(user?.firstName || '');
     const [lastName, setLastName] = useState(user?.lastName || '');
+    const [email, setEmail] = useState(user?.email || ''); 
     const [picture, setPicture] = useState(user?.picture || '');
     const navigate = useNavigate();
 
-    useEffect(() => {
-        if (user) {
-            setFirstName(user.firstName || '');
-            setLastName(user.lastName || '');
-            setPicture(user.picture || '');
-        }
-    }, [user]);
+    const handleImageUpload = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+
+        reader.onload = () => {
+            setPicture(reader.result); // อัปเดตรูปภาพเป็น Base64
+        };
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const userData = { firstName, lastName, picture };
-            await updateProfile(userData);
+            const userData = { firstName, lastName, email, picture };  // ส่งข้อมูลอีเมลไปด้วย
+            await updateProfile(userData);  // อัปเดตข้อมูลโปรไฟล์
             toast.success("อัพเดทโปรไฟล์สำเร็จ!", {
                 position: "top-center",
                 autoClose: 1000,
@@ -36,7 +41,7 @@ const ProfileUpdate = () => {
 
             setTimeout(() => {
                 navigate("/profile-parent");
-            }, 1000);
+            }, 2000);
         } catch (error) {
             toast.error("เกิดข้อผิดพลาดในการอัพเดทโปรไฟล์!", {
                 position: "top-center",
@@ -78,18 +83,27 @@ const ProfileUpdate = () => {
                                 value={lastName}
                                 onChange={(e) => setLastName(e.target.value)}
                             />
-                        </div>
-
-                        <div className="form-control">
                             <label className="label">
-                                <span className="label-text">URL รูปภาพโปรไฟล์</span>
+                                <span className="label-text">อีเมล</span>
                             </label>
                             <input
-                                type="text"
-                                placeholder="ใส่ URL รูปภาพ"
+                                type="email"  // เปลี่ยนเป็น type="email"
+                                placeholder="Email"
                                 className="input input-bordered w-full"
-                                value={picture}
-                                onChange={(e) => setPicture(e.target.value)}
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}  // แก้ไขอีเมล
+                            />
+                        </div>
+                        
+                        <div className="form-control">
+                            <label className="label">
+                                <span className="label-text">อัพโหลดรูปภาพโปรไฟล์</span>
+                            </label>
+                            <input
+                                type="file"
+                                accept="image/*"
+                                className="file-input w-full"
+                                onChange={handleImageUpload}
                             />
                         </div>
 
@@ -118,3 +132,4 @@ const ProfileUpdate = () => {
 };
 
 export default ProfileUpdate;
+
