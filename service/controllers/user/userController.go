@@ -213,7 +213,7 @@ func UpdateProfile(c *gin.Context) {
 		update["lastName"] = req.LastName
 	}
 	if pictureURL != "" {
-		update["picture"] = req.Picture
+		update["picture"] = pictureURL
 	}
 	if req.Email != "" {
 		update["email"] = req.Email
