@@ -11,7 +11,7 @@ const Profile = () => {
   const navigate = useNavigate();
   const handleLogout = () => {
     logout();
-    navigate('/login')
+    navigate('/signin')
   }
   return (
     <div>
