@@ -69,13 +69,21 @@ func Signup(c *gin.Context) {
 		return
 	}
 
+	jwtToken, err := token.GenerateToken(user.ID.Hex(), c)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "สมัครสมาชิกล้มเหลว - ระบบขัดข้องระหว่างการสร้าง token"})
+		return
+	}
+
 	c.JSON(http.StatusCreated, gin.H{
+		"message":   "สมัครสมาชิกสำเร็จ",
 		"id":        user.ID,
 		"firstName": user.FirstName,
 		"lastName":  user.LastName,
 		"email":     user.Email,
 		"picture":   user.Picture,
 		"role":      user.Role,
+		"token":     jwtToken,
 	})
 }
 
