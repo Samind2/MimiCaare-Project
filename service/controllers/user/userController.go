@@ -165,6 +165,7 @@ func UpdateProfile(c *gin.Context) {
 	var req struct {
 		FirstName string `json:"firstName,omitempty"`
 		LastName  string `json:"lastName,omitempty"`
+		Email     string `json:"email,omitempty"`
 		Picture   string `json:"picture,omitempty"`
 	}
 	// ผูกข้อมูล JSON เข้ากับโครงสร้าง
@@ -214,6 +215,9 @@ func UpdateProfile(c *gin.Context) {
 	if pictureURL != "" {
 		update["picture"] = req.Picture
 	}
+	if req.Email != "" {
+		update["email"] = req.Email
+	}
 
 	// อัปเดตข้อมูลในฐานข้อมูล
 	if len(update) == 0 {
@@ -235,6 +239,7 @@ func UpdateProfile(c *gin.Context) {
 		"userId":    userId,
 		"firstName": update["firstName"],
 		"lastName":  update["lastName"],
+		"email":     update["email"],
 		"picture":   pictureURL,
 	})
 }

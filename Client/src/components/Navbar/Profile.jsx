@@ -1,6 +1,8 @@
 import React, { useContext } from 'react'
 import { AuthContext } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 
 
@@ -9,9 +11,8 @@ const Profile = () => {
   const navigate = useNavigate();
   const handleLogout = () => {
     logout();
-    navigate('/signin');  // รีไดเร็กต์ไปที่หน้า signin หลังจาก logout
-  };
-
+    navigate('/login')
+  }
   return (
     <div>
 
@@ -50,6 +51,7 @@ const Profile = () => {
           </li>
         </ul>
       </div>
+        <ToastContainer />
     </div>
   )
 }

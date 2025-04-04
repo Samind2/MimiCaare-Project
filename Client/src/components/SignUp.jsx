@@ -3,6 +3,7 @@ import { AuthContext } from "../context/AuthContext";
 import { useNavigate } from "react-router";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 const SignUp = () => {
   const { signup } = useContext(AuthContext);
@@ -13,6 +14,10 @@ const SignUp = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [errors, setErrors] = useState({});
+  
+  // State สำหรับจัดการการแสดงรหัสผ่าน
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const validateEmail = (email) => {
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
@@ -123,12 +128,21 @@ const SignUp = () => {
             <label className="block text-sm font-medium text-gray-700">
               รหัสผ่าน <span className="text-red-500">*</span>
             </label>
-            <input
-              type="password"
-              className="input input-bordered w-full mt-1"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                className="input input-bordered w-full mt-1"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+              <button
+                type="button"
+                className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500"
+                onClick={() => setShowPassword(!showPassword)}
+              >
+                {showPassword ? <FaEyeSlash /> : <FaEye />}
+              </button>
+            </div>
             {errors.password && (
               <p className="text-red-500 text-xs">{errors.password}</p>
             )}
@@ -137,12 +151,21 @@ const SignUp = () => {
             <label className="block text-sm font-medium text-gray-700">
               ยืนยันรหัสผ่าน <span className="text-red-500">*</span>
             </label>
-            <input
-              type="password"
-              className="input input-bordered w-full mt-1"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-            />
+            <div className="relative">
+              <input
+                type={showConfirmPassword ? "text" : "password"}
+                className="input input-bordered w-full mt-1"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+              />
+              <button
+                type="button"
+                className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              >
+                {showPassword ? <FaEyeSlash /> : <FaEye />}
+              </button>
+            </div>
             {errors.confirmPassword && (
               <p className="text-red-500 text-xs">{errors.confirmPassword}</p>
             )}

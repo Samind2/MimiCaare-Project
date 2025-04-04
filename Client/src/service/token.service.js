@@ -12,6 +12,9 @@ const getUser = () => {
 };
 
 const removeUser = () => {
+  // ลบ jwt cookie
+  cookies.remove("jwt", { path: "/" });
+  // ลบ user cookie ก
   cookies.remove("user", { path: "/" });
 };
 
