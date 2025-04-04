@@ -14,7 +14,7 @@ const SignUp = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [errors, setErrors] = useState({});
-  
+
   // State สำหรับจัดการการแสดงรหัสผ่าน
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -44,7 +44,7 @@ const SignUp = () => {
     const userData = { firstName, lastName, email, password };
     try {
       await signup(userData);
-      toast.success("สมัครสมาชิกสำเร็จ!", {
+      toast.success("ลงทะเบียนสำเร็จ!", {
         position: "top-center",
         autoClose: 1000,
         hideProgressBar: true,
@@ -53,11 +53,12 @@ const SignUp = () => {
         draggable: true,
         progress: undefined,
       });
+
       setTimeout(() => {
-        navigate("/"); // ไปที่หน้า home
-      }, 1000);
+        navigate("/");
+      }, 2000);
     } catch (error) {
-      toast.error("เกิดข้อผิดพลาดในการสมัครสมาชิก!", {
+      toast.error("เกิดข้อผิดพลาดในการลงทะเบียน!", {
         position: "top-center",
         autoClose: 5000,
         hideProgressBar: false,
@@ -66,6 +67,7 @@ const SignUp = () => {
         draggable: true,
         progress: undefined,
       });
+      console.error("Error in profile update:", error); // เพิ่ม log เพื่อดู error
     }
   };
 
