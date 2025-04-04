@@ -33,15 +33,16 @@ const Signin = () => {
       toast.success("เข้าสู่ระบบสำเร็จ!", {
         position: "top-center",
         autoClose: 1000,
-        hideProgressBar: true, 
+        hideProgressBar: true,
         closeOnClick: true,
         pauseOnHover: true,
         draggable: true,
         progress: undefined,
       });
+
       setTimeout(() => {
-        navigate("/"); // Redirect to home page
-      }, 1000); // 1000ms = 1 second
+        navigate("/");
+      }, 2000);
     } catch (error) {
       toast.error("เกิดข้อผิดพลาดในการเข้าสู่ระบบ!", {
         position: "top-center",
@@ -52,6 +53,7 @@ const Signin = () => {
         draggable: true,
         progress: undefined,
       });
+      console.error("Error in profile update:", error); // เพิ่ม log เพื่อดู error
     }
   };
 

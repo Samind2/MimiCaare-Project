@@ -26,9 +26,7 @@ const AuthProvider = ({ children }) => {
       setUser(user); // ตั้งค่า user ใน state
     } catch (error) {
       console.error("Signup Error:", error);
-    } finally {
-      setLoading(false);
-    }
+    } 
   };
 
   // ฟังก์ชันเข้าสู่ระบบ
@@ -41,8 +39,6 @@ const AuthProvider = ({ children }) => {
       setUser(user); // ตั้งค่า user ใน state
     } catch (error) {
       console.error("Login Error:", error);
-    } finally {
-      setLoading(false);
     }
   };
 
