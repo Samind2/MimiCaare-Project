@@ -13,8 +13,7 @@ import (
 func VerifyToken() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// ดึง Token จาก Header
-		tokenString, err := c.Cookie("jwt")
-		//tokenString := c.GetHeader("x-access-token")
+		tokenString := c.GetHeader("x-access-token")
 		if tokenString == "" {
 			c.JSON(http.StatusUnauthorized, gin.H{"message": "Token missing"})
 			c.Abort()

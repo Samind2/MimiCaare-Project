@@ -44,8 +44,7 @@ func GenerateToken(userId string, c *gin.Context) (string, error) {
 		MaxAge:   24 * 60 * 60,
 		HttpOnly: true,
 		Secure:   node_mode != "development",
-		//SameSite: http.SameSiteStrictMode, // ป้องกัน CSRF
-		SameSite: http.SameSiteNoneMode,
+		SameSite: http.SameSiteStrictMode, // ป้องกัน CSRF
 	}
 
 	http.SetCookie(c.Writer, cookie)
