@@ -28,7 +28,7 @@ func Signup(c *gin.Context) {
 	var user userModels.User
 	//เช็คข้อมูลก่อนว่ามาป่าว
 	if err := c.ShouldBindJSON(&user); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "ข้อมูลไม่มีค่าหรือข้อมูลไม่ถูกต้อง"})
+		c.JSON(http.StatusBadRequest, gin.H{"message": "ไม่มีข้อมูลหรือข้อมูลไม่ถูกต้อง"})
 		return
 	}
 
@@ -63,7 +63,7 @@ func Signup(c *gin.Context) {
 
 	//เพิ่มข้อมูลลงฐานข้อมูล
 	user.ID = primitive.NewObjectID()
-	_, err = userCollection.InsertOne(context.TODO(), user)
+	_, err = userCollection.InsertOne(context.Background(), user)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "สมัครสมาชิกล้มเหลว - ระบบขัดข้องระหว่างสมัครสมาชิก"})
 		return

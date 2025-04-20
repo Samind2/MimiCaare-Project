@@ -47,6 +47,7 @@ func main() {
 	// API Routes
 	api := r.Group("/api/v1")
 	routes.UserRoutes(api.Group("/user"))
+	routes.ChildrenRoutes(api.Group("/children"))
 
 	// ใช้ PORT จาก .env
 	port := os.Getenv("PORT")
