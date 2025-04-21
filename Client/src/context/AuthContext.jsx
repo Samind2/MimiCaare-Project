@@ -18,6 +18,7 @@ const AuthProvider = ({ children }) => {
 
   // ฟังก์ชันสำหรับสมัครสมาชิก
   const signup = async (userData) => {
+    setLoading(true); // ตั้งค่า loading เป็น true ก่อนทำการสมัครสมาชิก
     try {
       const response = await userService.signup(userData); // เรียกใช้งาน API
       const user = response.data;
@@ -33,6 +34,7 @@ const AuthProvider = ({ children }) => {
 
   // ฟังก์ชันเข้าสู่ระบบ
   const login = async (userData) => {
+    setLoading(true);
     try {
       const response = await userService.login(userData); // เรียกใช้งาน API
       const user = response.data;

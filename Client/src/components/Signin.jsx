@@ -6,7 +6,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 const Signin = () => {
-  const { login } = useContext(AuthContext);
+  const { login, loading  } = useContext(AuthContext);
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -15,18 +15,18 @@ const Signin = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+  
     let newErrors = {};
     // Check if email is entered
     if (!email.trim()) newErrors.Email = "กรุณากรอกอีเมล";
     // Check if password is entered
     if (!password.trim()) newErrors.Password = "กรุณากรอกรหัสผ่าน";
-
+  
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors); // Store errors
       return; // Stop form submission if there are errors
     }
-
+  
     const userData = { email, password };
     try {
       await login(userData); // Call the login function
@@ -39,12 +39,15 @@ const Signin = () => {
         draggable: true,
         progress: undefined,
       });
+  
+      // setTimeout(() => {
+      //   navigate("/");  // Navigate to home page
+      // }, 2000);
 
-      setTimeout(() => {
-        navigate("/");
-      }, 2000);
+      navigate("/"); // Navigate to home page
     } catch (error) {
-      toast.error("เกิดข้อผิดพลาดในการเข้าสู่ระบบ!", {
+      const errorMessage = error.response ? error.response.data.message : "เกิดข้อผิดพลาดในการเข้าสู่ระบบ!";
+      toast.error(errorMessage, {
         position: "top-center",
         autoClose: 5000,
         hideProgressBar: false,
@@ -53,9 +56,13 @@ const Signin = () => {
         draggable: true,
         progress: undefined,
       });
-      console.error("Error in profile update:", error); // เพิ่ม log เพื่อดู error
+      console.error("Error during login:", error); // เพิ่ม log เพื่อดู error ที่เกิดขึ้น
     }
   };
+
+  if (loading) {
+    return <div>กำลังโหลด...</div>; // หากกำลังโหลดหรือยังไม่พร้อม ให้แสดงข้อความโหลด
+  }
 
   return (
     <div className="relative min-h-screen flex items-center justify-center bg-[#EE8A8A] overflow-hidden">
