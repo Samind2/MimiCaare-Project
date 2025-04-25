@@ -11,6 +11,8 @@ import ProfileChild from "../pages/ProfileChild/Index.jsx";
 import ProfileParent from "../pages/ProfileParent/Index.jsx";
 import ProfileUpdate from "../components/Navbar/ProfileUpdate.jsx";
 import Notification from "../pages/Notifications/Index.jsx";
+import ProfileChildUpdate from '../pages/ProfileChild/ProfilechildUpdate.jsx';
+import AddChild from '../pages/ManageChild/AddChild.jsx';
 
 const router = createBrowserRouter([
     {
@@ -74,6 +76,22 @@ const router = createBrowserRouter([
                 element: (
                     <ProtectedRoute>
                         <Notification />
+                    </ProtectedRoute>
+                )
+            },
+            {
+                path: "/addChild",
+                element: (
+                    <ProtectedRoute>
+                        <AddChild />
+                    </ProtectedRoute>
+                )
+            },
+            {
+                path: "/profile-child-update/:id",
+                element: (
+                    <ProtectedRoute>
+                        <ProfileChildUpdate />
                     </ProtectedRoute>
                 )
             },
