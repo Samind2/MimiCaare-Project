@@ -71,7 +71,15 @@ const AddChild = () => {
       setTimeout(() => navigate("/profile-child"), 1500);
     } catch (err) {
       // แสดง error toast
-      toast.error("เกิดข้อผิดพลาดในการเพิ่มข้อมูล");
+      toast.error("เกิดข้อผิดพลาดในการเพิ่มข้อมูล", {
+        position: "top-center",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
       console.error(err);
       setMessage(err.response?.data?.message || 'เกิดข้อผิดพลาดในการเพิ่มข้อมูล');
     }
@@ -130,7 +138,7 @@ const AddChild = () => {
         {previewImage && (
           <img src={previewImage} alt="preview" className="w-32 h-32 object-cover rounded mx-auto" />
         )}
-        <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+        <button type="submit" className="btn btn-primary w-full">
           บันทึกข้อมูล
         </button>
       </form>
