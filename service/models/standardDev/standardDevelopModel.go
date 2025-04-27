@@ -1,8 +1,8 @@
-package criteriaDevelopModels
+package standardDevelopModels
 
 import "go.mongodb.org/mongo-driver/bson/primitive"
 
-type CriteriaDevelop struct {
+type StandardDevelop struct {
 	ID           primitive.ObjectID `bson:"_id,omitempty" json:"id"`
 	AgeRange     int                `bson:"ageRange,omitempty" json:"ageRange"`
 	Developments []DevelopmentItem  `bson:"developments" json:"developments"`

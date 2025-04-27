@@ -10,6 +10,7 @@ import (
 	"github.com/cloudinary/cloudinary-go/v2"
 	"github.com/cloudinary/cloudinary-go/v2/api/uploader"
 	"github.com/gin-gonic/gin"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -26,7 +27,7 @@ func AddNewChildren(c *gin.Context) {
 	// ดึง JWT จากคุกกี้
 	jwtCookie, err := c.Cookie("jwt")
 	if err != nil {
-		c.JSON(http.StatusForbidden, gin.H{"message": "ไม่ได้รับอนุญาต - ไม่มีโทเค็น"})
+		c.JSON(http.StatusForbidden, gin.H{"message": "ไม่ได้รับอนุญาต - ไม่มีคุกกี้"})
 		return
 	}
 	// ยืนยันและดึงข้อมูลจาก JWT
@@ -38,7 +39,7 @@ func AddNewChildren(c *gin.Context) {
 	userId := userClaims.UserId // ดึง userId จาก claims
 	parentId, err := primitive.ObjectIDFromHex(userId)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "ไอดีผู้ใช้ไม่ถูกต้อง"})
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Token ผิดพลาด กรุณาเข้าสู่ระบบใหม่"})
 		return
 	}
 
@@ -95,7 +96,7 @@ func GetChildrenByParentID(c *gin.Context) {
 	// ดึง JWT จากคุกกี้
 	jwtCookie, err := c.Cookie("jwt")
 	if err != nil {
-		c.JSON(http.StatusForbidden, gin.H{"message": "ไม่ได้รับอนุญาต - ไม่มีโทเค็น"})
+		c.JSON(http.StatusForbidden, gin.H{"message": "ไม่ได้รับอนุญาต - ไม่มีคุกกี้"})
 		return
 	}
 	// ยืนยันและดึงข้อมูลจาก JWT
@@ -107,7 +108,7 @@ func GetChildrenByParentID(c *gin.Context) {
 	userId := userClaims.UserId // ดึง userId จาก claims
 	parentId, err := primitive.ObjectIDFromHex(userId)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "ไอดีผู้ใช้ไม่ถูกต้อง"})
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Token ผิดพลาด กรุณาเข้าสู่ระบบใหม่"})
 		return
 	}
 
@@ -142,7 +143,7 @@ func GetChildrenByID(c *gin.Context) {
 	// ดึง JWT จากคุกกี้
 	jwtCookie, err := c.Cookie("jwt")
 	if err != nil {
-		c.JSON(http.StatusForbidden, gin.H{"message": "ไม่ได้รับอนุญาต - ไม่มีโทเค็น"})
+		c.JSON(http.StatusForbidden, gin.H{"message": "ไม่ได้รับอนุญาต - ไม่มีคุกกี้"})
 		return
 	}
 	// ยืนยันและดึงข้อมูลจาก JWT
@@ -154,7 +155,7 @@ func GetChildrenByID(c *gin.Context) {
 	userId := userClaims.UserId // ดึง userId จาก claims
 	parentId, err := primitive.ObjectIDFromHex(userId)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "ไอดีผู้ใช้ไม่ถูกต้อง"})
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Token ผิดพลาด กรุณาเข้าสู่ระบบใหม่"})
 		return
 	}
 
@@ -166,7 +167,7 @@ func GetChildrenByID(c *gin.Context) {
 	}
 
 	var child childrenModels.Children
-	err = childrenCollection.FindOne(context.Background(), childrenModels.Children{ID: childObjectID, ParentID: parentId}).Decode(&child)
+	err = childrenCollection.FindOne(context.Background(), bson.M{"_id": childObjectID, "parentId": parentId}).Decode(&child)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"message": "ไม่พบข้อมูลเด็ก"})
 		return
@@ -181,7 +182,7 @@ func UpdateChildrenByID(c *gin.Context) {
 	// ดึง JWT จากคุกกี้
 	jwtCookie, err := c.Cookie("jwt")
 	if err != nil {
-		c.JSON(http.StatusForbidden, gin.H{"message": "ไม่ได้รับอนุญาต - ไม่มีโทเค็น"})
+		c.JSON(http.StatusForbidden, gin.H{"message": "ไม่ได้รับอนุญาต - ไม่มีคุกกี้"})
 		return
 	}
 
@@ -194,7 +195,7 @@ func UpdateChildrenByID(c *gin.Context) {
 	userId := userClaims.UserId // ดึง userId จาก claims
 	parentId, err := primitive.ObjectIDFromHex(userId)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "ไอดีผู้ใช้ไม่ถูกต้อง"})
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Token ผิดพลาด กรุณาเข้าสู่ระบบใหม่"})
 		return
 	}
 
@@ -208,7 +209,7 @@ func UpdateChildrenByID(c *gin.Context) {
 
 	// ตรวจสอบว่าเด็กคนนี้เป็นลูกของผู้ใช้หรือไม่
 	var existingChild childrenModels.Children
-	err = childrenCollection.FindOne(context.Background(), childrenModels.Children{ID: childObjectID, ParentID: parentId}).Decode(&existingChild)
+	err = childrenCollection.FindOne(context.Background(), bson.M{"_id": childObjectID, "parentId": parentId}).Decode(&existingChild)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"message": "ไม่พบข้อมูลเด็ก"})
 		return
@@ -256,9 +257,10 @@ func UpdateChildrenByID(c *gin.Context) {
 	// อัปเดตข้อมูลในฐานข้อมูล
 	_, err = childrenCollection.UpdateOne(
 		context.Background(),
-		childrenModels.Children{ID: childObjectID, ParentID: parentId},
-		map[string]interface{}{"$set": updateFields},
+		bson.M{"_id": childObjectID, "parentId": parentId},
+		bson.M{"$set": updateFields},
 	)
+
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "ระบบขัดข้อง - อัปเดตข้อมูลเด็กไม่สำเร็จ"})
 		return

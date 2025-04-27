@@ -4,7 +4,7 @@ import (
 	childrenController "github.com/Samind2/MimiCaare-Project/service/controllers/children"
 	standardVaccineController "github.com/Samind2/MimiCaare-Project/service/controllers/standardVaccine"
 	userController "github.com/Samind2/MimiCaare-Project/service/controllers/user"
-
+	middleware "github.com/Samind2/MimiCaare-Project/service/middlewares"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -13,4 +13,5 @@ func CollectionControllers(client *mongo.Client) {
 	userController.SetUserCollection(client)
 	childrenController.SetChildrenCollection(client)
 	standardVaccineController.SetStandardVaccineCollection(client)
+	middleware.SetUserCollectionForMiddleware(client)
 }
