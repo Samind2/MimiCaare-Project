@@ -48,6 +48,7 @@ func main() {
 	routes.UserRoutes(api.Group("/user"))
 	routes.ChildrenRoutes(api.Group("/children"))
 	routes.StandardVaccineRoutes(api.Group("/standardVaccine"))
+	routes.StandardDevelopRoutes(api.Group("/standardDevelop"))
 
 	// ใช้ PORT จาก .env
 	port := os.Getenv("PORT")

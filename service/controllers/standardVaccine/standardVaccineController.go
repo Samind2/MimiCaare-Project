@@ -25,7 +25,7 @@ func AddStandardVaccine(c *gin.Context) {
 
 	// รับข้อมูลจาก Request Body เช็คข้อมูลก่อนว่ามาป่าว
 	if err := c.ShouldBindJSON(&standardVaccine); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "ไม่พบข้อมูลหรือข้อมูลไม่ถูกต้อง"})
+		c.JSON(http.StatusBadRequest, gin.H{"message": "ไม่พบข้อมูลหรือข้อมูลไม่ถูกต้อง", "error": err.Error()})
 		return
 	}
 
