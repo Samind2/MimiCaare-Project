@@ -5,7 +5,7 @@ import ProtectedRoute from "../components/ProtectedRoute";
 import Home from "../pages/Home/Index";
 import SignUp from "../components/SignUp";
 import Signin from "../components/Signin";
-import Vaccine from "../pages/Vaccine/Index.jsx";
+import Vaccine from "../pages/standardVaccine/Index.jsx";
 import Development from "../pages/Development/Index.jsx";
 import ProfileChild from "../pages/ProfileChild/Index.jsx";
 import ProfileParent from "../pages/ProfileParent/Index.jsx";
