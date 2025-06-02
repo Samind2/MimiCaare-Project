@@ -106,8 +106,9 @@ func UpdateStandardDevelopByID(c *gin.Context) {
 	}
 
 	// เตรียมฟิลด์ที่จะแก้ไข
+	// เตรียมฟิลด์ที่จะแก้ไข
 	updateFields := bson.M{}
-	if updatedData.AgeRange != 0 {
+	if updatedData.AgeRange != "" {
 		updateFields["ageRange"] = updatedData.AgeRange
 	}
 	if len(updatedData.Developments) > 0 {
