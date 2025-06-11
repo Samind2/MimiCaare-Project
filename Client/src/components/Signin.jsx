@@ -6,7 +6,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 const Signin = () => {
-  const { login, loading  } = useContext(AuthContext);
+  const { login, loading } = useContext(AuthContext);
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -15,18 +15,18 @@ const Signin = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
+
     let newErrors = {};
     // Check if email is entered
     if (!email.trim()) newErrors.Email = "กรุณากรอกอีเมล";
     // Check if password is entered
     if (!password.trim()) newErrors.Password = "กรุณากรอกรหัสผ่าน";
-  
+
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors); // Store errors
       return; // Stop form submission if there are errors
     }
-  
+
     const userData = { email, password };
     try {
       await login(userData); // Call the login function
@@ -39,24 +39,35 @@ const Signin = () => {
         draggable: true,
         progress: undefined,
       });
-  
+
       // setTimeout(() => {
       //   navigate("/");  // Navigate to home page
       // }, 2000);
 
       navigate("/"); // Navigate to home page
     } catch (error) {
-      const errorMessage = error.response ? error.response.data.message : "เกิดข้อผิดพลาดในการเข้าสู่ระบบ!";
-      toast.error(errorMessage, {
-        position: "top-center",
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
-      console.error("Error during login:", error); // เพิ่ม log เพื่อดู error ที่เกิดขึ้น
+      const errorMessage = error.response?.data?.message || "เกิดข้อผิดพลาด";
+
+      if (errorMessage === "ไม่พบผู้ใช้งาน") {
+        setErrors({ Email: errorMessage });
+      } else if (errorMessage === "รหัสผ่านไม่ถูกต้อง") {
+        setErrors({ Password: errorMessage });
+      } else if (errorMessage.includes("กรูณากรอกข้อมูล")) {
+        setErrors({ Email: errorMessage, Password: errorMessage });
+      } else {
+        // ข้อผิดพลาดอื่น ๆ แสดงผ่าน toast
+        toast.error(errorMessage, {
+          position: "top-center",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+        });
+      }
+
+      console.error("Login error:", error);
     }
   };
 
@@ -87,7 +98,7 @@ const Signin = () => {
             </label>
             <input
               type="email"
-              className="input input-bordered w-full mt-1"
+              className={`input input-bordered w-full mt-1 ${errors.Email ? "border-red-500" : ""}`}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
@@ -99,8 +110,8 @@ const Signin = () => {
             </label>
             <div className="relative">
               <input
-                type={showPassword ? "text" : "password"} // Toggle between password and text
-                className="input input-bordered w-full mt-1"
+                type={showPassword ? "text" : "password"}
+                className={`input input-bordered w-full mt-1 ${errors.Password ? "border-red-500" : ""}`}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />

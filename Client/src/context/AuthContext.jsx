@@ -34,19 +34,20 @@ const AuthProvider = ({ children }) => {
 
   // ฟังก์ชันเข้าสู่ระบบ
   const login = async (userData) => {
-    setLoading(true);
-    try {
-      const response = await userService.login(userData); // เรียกใช้งาน API
-      const user = response.data;
+  setLoading(true);
+  try {
+    const response = await userService.login(userData);
+    const user = response.data;
 
-      TokenService.setUser(user); // เก็บข้อมูลผู้ใช้ใน cookies
-      setUser(user); // ตั้งค่า user ใน state
-    } catch (error) {
-      console.error("Login Error:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+    TokenService.setUser(user);
+    setUser(user);
+  } catch (error) {
+    console.error("Login Error:", error);
+    throw error; // ✅ โยน error กลับไปให้ component ด้านนอกจัดการ
+  } finally {
+    setLoading(false);
+  }
+};
 
   // ฟังก์ชันออกจากระบบ
   const logout = () => {

@@ -90,17 +90,16 @@ const AddDevelopment = () => {
         setDevelopmentList(updatedList);
     };
 
-    const handleDelete = async (ageRangeToDelete) => {
-        if (window.confirm(`คุณต้องการลบข้อมูลช่วงอายุ ${ageRangeToDelete} ใช่หรือไม่?`)) {
+    const handleDelete = async (idToDelete) => {
+        if (window.confirm(`คุณต้องการลบข้อมูลช่วงอายุ ${idToDelete} ใช่หรือไม่?`)) {
             try {
-                await standardDevService.deleteStandardDev(ageRangeToDelete);
+                await standardDevService.deleteStandardDev(idToDelete);  // ส่ง id แท้จริงที่ได้จาก backend
                 fetchDevelopments();
             } catch (error) {
                 console.error('ลบข้อมูลไม่สำเร็จ', error);
             }
         }
     };
-
     return (
         <div className="p-6">
             <div className="flex justify-between items-center mb-4">
@@ -126,9 +125,9 @@ const AddDevelopment = () => {
                     </thead>
                     <tbody>
                         {allDevelopments.length > 0 ? (
-                            allDevelopments.map((dev, idx) =>
-                                dev.developments.length > 0 ? (
-                                    dev.developments.map((item, subIdx) => (
+                            allDevelopments.map((dev, idx) => {
+                                if (dev.developments.length > 0) {
+                                    return dev.developments.map((item, subIdx) => (
                                         <tr key={`${idx}-${subIdx}`} className="bg-white shadow rounded">
                                             {subIdx === 0 && (
                                                 <td rowSpan={dev.developments.length} className="px-4 py-2 font-medium align-middle">
@@ -139,27 +138,23 @@ const AddDevelopment = () => {
                                             <td className="px-4 py-2 align-middle">{item.detail}</td>
                                             {subIdx === 0 && (
                                                 <td rowSpan={dev.developments.length} className="px-4 py-2 align-middle">
-                                                    <button
-                                                        className="text-red-500 hover:underline text-sm"
-                                                        onClick={() => {
-                                                            // ฟังก์ชันลบข้อมูลในอนาคต
-                                                            handleDelete(dev.ageRange);
-                                                        }}
-                                                    >
+                                                    <button onClick={() => handleDelete(dev.id)} className="text-red-600 hover:underline">
                                                         ลบ
                                                     </button>
                                                 </td>
                                             )}
                                         </tr>
-                                    ))
-                                ) : (
-                                    <tr key={idx}>
-                                        <td colSpan="4" className="text-center text-gray-400 py-4">
-                                            ไม่มีข้อมูลพัฒนาการในช่วงอายุ {dev.ageRange}
-                                        </td>
-                                    </tr>
-                                )
-                            )
+                                    ));
+                                } else {
+                                    return (
+                                        <tr key={idx}>
+                                            <td colSpan="4" className="text-center text-gray-400 py-4">
+                                                ไม่มีข้อมูลพัฒนาการในช่วงอายุ {dev.ageRange}
+                                            </td>
+                                        </tr>
+                                    );
+                                }
+                            })
                         ) : (
                             <tr>
                                 <td colSpan="4" className="text-center text-gray-400 py-8">

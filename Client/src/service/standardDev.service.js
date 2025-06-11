@@ -10,9 +10,17 @@ const getDevelop = async () => {
     return await api.get(`${API_URL}/all`);
 }
 
+// const deleteStandardDev = async (id) => {
+//     return await api.delete(`${API_URL}/delete/${id}`);
+// }
+const deleteStandardDev = async (id) => {
+  return await api.delete(`${API_URL}/delete/${id}`);
+}
+
       const standardDevService = {
     addStandardDev,
     getDevelop,
+    deleteStandardDev
 
   };
   
