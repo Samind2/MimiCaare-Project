@@ -14,62 +14,61 @@ const Signin = () => {
   const [showPassword, setShowPassword] = useState(false); // State for showing/hiding password
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    let newErrors = {};
-    // Check if email is entered
-    if (!email.trim()) newErrors.Email = "กรุณากรอกอีเมล";
-    // Check if password is entered
-    if (!password.trim()) newErrors.Password = "กรุณากรอกรหัสผ่าน";
+  let newErrors = {};
+  if (!email.trim()) newErrors.Email = "กรุณากรอกอีเมล";
+  if (!password.trim()) newErrors.Password = "กรุณากรอกรหัสผ่าน";
 
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors); // Store errors
-      return; // Stop form submission if there are errors
+  if (Object.keys(newErrors).length > 0) {
+    setErrors(newErrors);
+    return;
+  }
+
+  const userData = { email, password };
+  try {
+    // สมมติ login คืนข้อมูล user เช่น { role: "Admin", ... }
+    const user = await login(userData);
+
+    toast.success("เข้าสู่ระบบสำเร็จ!", {
+      position: "top-center",
+      autoClose: 1000,
+      hideProgressBar: true,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+    });
+
+    if (user.role === "Admin") {
+      navigate("/dashboard");  // ไปหน้า dashboard ของ Admin
+    } else {
+      navigate("/"); // ไปหน้า homepage ปกติ
     }
+  } catch (error) {
+    const errorMessage = error.response?.data?.message || "เกิดข้อผิดพลาด";
 
-    const userData = { email, password };
-    try {
-      await login(userData); // Call the login function
-      toast.success("เข้าสู่ระบบสำเร็จ!", {
+    if (errorMessage === "ไม่พบผู้ใช้งาน") {
+      setErrors({ Email: errorMessage });
+    } else if (errorMessage === "รหัสผ่านไม่ถูกต้อง") {
+      setErrors({ Password: errorMessage });
+    } else if (errorMessage.includes("กรูณากรอกข้อมูล")) {
+      setErrors({ Email: errorMessage, Password: errorMessage });
+    } else {
+      toast.error(errorMessage, {
         position: "top-center",
-        autoClose: 1000,
-        hideProgressBar: true,
+        autoClose: 5000,
+        hideProgressBar: false,
         closeOnClick: true,
         pauseOnHover: true,
         draggable: true,
         progress: undefined,
       });
-
-      // setTimeout(() => {
-      //   navigate("/");  // Navigate to home page
-      // }, 2000);
-
-      navigate("/"); // Navigate to home page
-    } catch (error) {
-      const errorMessage = error.response?.data?.message || "เกิดข้อผิดพลาด";
-
-      if (errorMessage === "ไม่พบผู้ใช้งาน") {
-        setErrors({ Email: errorMessage });
-      } else if (errorMessage === "รหัสผ่านไม่ถูกต้อง") {
-        setErrors({ Password: errorMessage });
-      } else if (errorMessage.includes("กรูณากรอกข้อมูล")) {
-        setErrors({ Email: errorMessage, Password: errorMessage });
-      } else {
-        // ข้อผิดพลาดอื่น ๆ แสดงผ่าน toast
-        toast.error(errorMessage, {
-          position: "top-center",
-          autoClose: 5000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-        });
-      }
-
-      console.error("Login error:", error);
     }
-  };
+
+    console.error("Login error:", error);
+  }
+};
 
   if (loading) {
     return <div>กำลังโหลด...</div>; // หากกำลังโหลดหรือยังไม่พร้อม ให้แสดงข้อความโหลด

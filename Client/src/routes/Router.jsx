@@ -13,6 +13,13 @@ import ProfileUpdate from "../components/Navbar/ProfileUpdate.jsx";
 import Notification from "../pages/Notifications/Index.jsx";
 import ProfileChildUpdate from '../pages/ProfileChild/ProfilechildUpdate.jsx';
 import AddChild from '../pages/ManageChild/AddChild.jsx';
+import AdminLayout from '../layouts/AdminLayout.jsx';
+import AddDevelopment from '../pages/ManageDevelopment/AddDevelopment.jsx';
+import Dashboard from '../pages/Dashboard/Index.jsx';
+import AdminRoute from '../ProtectedRoutes/AdminRoute.jsx'; // นำเข้า AdminRoute
+import AddVaccine from '../pages/ManageVac/AddVac.jsx';
+import ViewVaccine from '../pages/User/Vaccine/Index.jsx';
+import ViewDevelopment from '../pages/User/Development/Index.jsx';
 
 const router = createBrowserRouter([
     {
@@ -28,22 +35,22 @@ const router = createBrowserRouter([
                 element: <SignUp />
             },
             {
-                path: "/signin", 
+                path: "/signin",
                 element: <Signin />
             },
             {
-                path: "/vaccine",
+                path: "/ViewVaccine",
                 element: (
                     <ProtectedRoute>
-                        <Vaccine />
+                        <ViewVaccine />
                     </ProtectedRoute>
                 )
             },
             {
-                path: "/development",
+                path: "/ViewDevelopment",
                 element: (
                     <ProtectedRoute>
-                        <Development />
+                        <ViewDevelopment />
                     </ProtectedRoute>
                 )
             },
@@ -95,6 +102,29 @@ const router = createBrowserRouter([
                     </ProtectedRoute>
                 )
             },
+        ],
+    }, 
+    {
+        path: "dashboard",
+        element: (
+            <AdminRoute>
+                <AdminLayout />
+            </AdminRoute>
+        ),
+        children: [
+            {
+                path: "",
+                element: <Dashboard />,
+            },
+            {
+                path: "add-Vaccine",
+                element: <AddVaccine />,
+            },
+            {
+                path: "add-Development",
+                element: <AddDevelopment />,
+            },
+        
         ],
     },
 ]);
