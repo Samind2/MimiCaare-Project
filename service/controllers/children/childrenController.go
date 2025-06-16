@@ -6,7 +6,7 @@ import (
 	"os"
 
 	"github.com/Samind2/MimiCaare-Project/service/config/token"
-	childrenModels "github.com/Samind2/MimiCaare-Project/service/models/children"
+	childrenModel "github.com/Samind2/MimiCaare-Project/service/models/children"
 	"github.com/cloudinary/cloudinary-go/v2"
 	"github.com/cloudinary/cloudinary-go/v2/api/uploader"
 	"github.com/gin-gonic/gin"
@@ -43,7 +43,7 @@ func AddNewChildren(c *gin.Context) {
 		return
 	}
 
-	var children childrenModels.Children
+	var children childrenModel.Children
 	if err := c.ShouldBindJSON(&children); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "ไม่มีข้อมูลหรือข้อมูลไม่ถูกต้อง"})
 		return
@@ -112,8 +112,8 @@ func GetChildrenByParentID(c *gin.Context) {
 		return
 	}
 
-	var children []childrenModels.Children
-	pointer, err := childrenCollection.Find(context.Background(), childrenModels.Children{ParentID: parentId})
+	var children []childrenModel.Children
+	pointer, err := childrenCollection.Find(context.Background(), childrenModel.Children{ParentID: parentId})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "ระบบขัดข้อง - ไม่สามารถดึงข้อมูลเด็กได้"})
 		return
@@ -121,7 +121,7 @@ func GetChildrenByParentID(c *gin.Context) {
 	defer pointer.Close(context.Background())
 
 	for pointer.Next(context.Background()) {
-		var child childrenModels.Children
+		var child childrenModel.Children
 		if err := pointer.Decode(&child); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"message": "ระบบขัดข้อง - ไม่สามารถดึงข้อมูลเด็กได้"})
 			return
@@ -166,7 +166,7 @@ func GetChildrenByID(c *gin.Context) {
 		return
 	}
 
-	var child childrenModels.Children
+	var child childrenModel.Children
 	err = childrenCollection.FindOne(context.Background(), bson.M{"_id": childObjectID, "parentId": parentId}).Decode(&child)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"message": "ไม่พบข้อมูลเด็ก"})
@@ -208,7 +208,7 @@ func UpdateChildrenByID(c *gin.Context) {
 	}
 
 	// ตรวจสอบว่าเด็กคนนี้เป็นลูกของผู้ใช้หรือไม่
-	var existingChild childrenModels.Children
+	var existingChild childrenModel.Children
 	err = childrenCollection.FindOne(context.Background(), bson.M{"_id": childObjectID, "parentId": parentId}).Decode(&existingChild)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"message": "ไม่พบข้อมูลเด็ก"})
@@ -216,7 +216,7 @@ func UpdateChildrenByID(c *gin.Context) {
 	}
 
 	// รับข้อมูลใหม่จากฝั่งหน้าบ้าน
-	var updatedData childrenModels.Children
+	var updatedData childrenModel.Children
 	if err := c.ShouldBindJSON(&updatedData); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "ข้อมูลที่ส่งมาไม่ถูกต้อง"})
 		return

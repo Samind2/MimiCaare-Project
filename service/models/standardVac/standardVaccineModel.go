@@ -1,4 +1,4 @@
-package standardVaccineModels
+package standardVaccineModel
 
 import "go.mongodb.org/mongo-driver/bson/primitive"
 

@@ -49,7 +49,8 @@ func main() {
 	routes.ChildrenRoutes(api.Group("/children"))
 	routes.StandardVaccineRoutes(api.Group("/standardVaccine"))
 	routes.StandardDevelopRoutes(api.Group("/standardDevelop"))
-
+	routes.ReceiveVaccineRoutes(api.Group("/receiveVaccine"))
+	routes.ReceiveDevelopRoutes(api.Group("/receiveDevelop"))
 	// ใช้ PORT จาก .env
 	port := os.Getenv("PORT")
 	if port == "" {

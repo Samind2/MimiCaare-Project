@@ -6,7 +6,7 @@ import (
 	"os"
 
 	"github.com/Samind2/MimiCaare-Project/service/config/token"
-	userModels "github.com/Samind2/MimiCaare-Project/service/models/user"
+	userModel "github.com/Samind2/MimiCaare-Project/service/models/user"
 	"github.com/cloudinary/cloudinary-go/v2"
 	"github.com/cloudinary/cloudinary-go/v2/api/uploader"
 	"github.com/gin-gonic/gin"
@@ -25,7 +25,7 @@ func SetUserCollection(client *mongo.Client) {
 }
 
 func Signup(c *gin.Context) {
-	var user userModels.User
+	var user userModel.User
 	//เช็คข้อมูลก่อนว่ามาป่าว
 	if err := c.ShouldBindJSON(&user); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "ไม่มีข้อมูลหรือข้อมูลไม่ถูกต้อง"})
@@ -38,7 +38,7 @@ func Signup(c *gin.Context) {
 		return
 	}
 
-	var existingEmail userModels.User
+	var existingEmail userModel.User
 	err := userCollection.FindOne(context.TODO(), bson.M{"email": user.Email}).Decode(&existingEmail)
 	if err == nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "อีเมลนี้ถูกใช้ไปแล้ว"})
@@ -63,7 +63,7 @@ func Signup(c *gin.Context) {
 
 	//เพิ่มข้อมูลลงฐานข้อมูล
 	user.ID = primitive.NewObjectID()
-	_, err = userCollection.InsertOne(context.Background(), user)
+	_, err = userCollection.InsertOne(context.TODO(), user)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "สมัครสมาชิกล้มเหลว - ระบบขัดข้องระหว่างสมัครสมาชิก"})
 		return
@@ -100,7 +100,7 @@ func Login(c *gin.Context) {
 		c.JSON((http.StatusBadRequest), gin.H{"message": "กรูณากรอกข้อมูลให้ครบถ้วน"})
 		return
 	}
-	var user userModels.User
+	var user userModel.User
 	err := userCollection.FindOne(context.TODO(), bson.M{"email": req.Email}).Decode(&user)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
@@ -191,7 +191,7 @@ func UpdateProfile(c *gin.Context) {
 			c.JSON(http.StatusInternalServerError, gin.H{"message": "ไม่สามารถเชื่อมต่อ Cloudinary ได้"})
 			return
 		}
-		uploadResponse, err := cld.Upload.Upload(context.Background(), req.Picture, uploader.UploadParams{
+		uploadResponse, err := cld.Upload.Upload(context.TODO(), req.Picture, uploader.UploadParams{
 			Folder: "user_profiles", // เก็บไฟล์ในโฟลเดอร์ "user_profiles"
 		})
 		if err != nil {
@@ -201,7 +201,7 @@ func UpdateProfile(c *gin.Context) {
 		pictureURL = uploadResponse.SecureURL
 	}
 	//เช็คข้อมูล ยูสเซอร์ก่อน
-	var existingUser userModels.User
+	var existingUser userModel.User
 	err = userCollection.FindOne(context.TODO(), bson.M{"_id": objectID}).Decode(&existingUser)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
@@ -232,7 +232,7 @@ func UpdateProfile(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "ไม่มีข้อมูลให้อัปเดต"})
 		return
 	}
-	result, err := userCollection.UpdateOne(context.Background(), bson.M{"_id": objectID}, bson.M{"$set": update})
+	result, err := userCollection.UpdateOne(context.TODO(), bson.M{"_id": objectID}, bson.M{"$set": update})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "เกิดข้อผิดพลาดขณะอัปเดตโปรไฟล์"})
 		return

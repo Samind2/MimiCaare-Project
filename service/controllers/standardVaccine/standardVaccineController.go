@@ -5,23 +5,23 @@ import (
 	"net/http"
 	"os"
 
-	standardVaccineModels "github.com/Samind2/MimiCaare-Project/service/models/standardVac"
+	standardVaccineModel "github.com/Samind2/MimiCaare-Project/service/models/standardVac"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-var standardVaccineCollection *mongo.Collection
+var StandardVaccineCollection *mongo.Collection
 
 // SetUserCollection ตั้งค่า userCollection
 func SetStandardVaccineCollection(client *mongo.Client) {
 	dbName := os.Getenv("DBNAME") // ดึงค่าชื่อฐานข้อมูลจาก .env
-	standardVaccineCollection = client.Database(dbName).Collection("standardVaccine")
+	StandardVaccineCollection = client.Database(dbName).Collection("standardVaccine")
 }
 
 func AddStandardVaccine(c *gin.Context) {
-	var standardVaccine standardVaccineModels.StandardVaccine
+	var standardVaccine standardVaccineModel.StandardVaccine
 
 	// รับข้อมูลจาก Request Body เช็คข้อมูลก่อนว่ามาป่าว
 	if err := c.ShouldBindJSON(&standardVaccine); err != nil {
@@ -30,7 +30,7 @@ func AddStandardVaccine(c *gin.Context) {
 	}
 
 	// ตรวจสอบข้อมูลที่จำเป็น
-	if standardVaccine.AgeRange < 0 && len(standardVaccine.Vaccines) == 0 {
+	if len(standardVaccine.Vaccines) == 0 {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "กรุณากรอกข้อมูลให้ครบทุกช่อง"})
 		return
 	}
@@ -39,7 +39,7 @@ func AddStandardVaccine(c *gin.Context) {
 	standardVaccine.ID = primitive.NewObjectID()
 
 	// บันทึกลง MongoDB
-	_, err := standardVaccineCollection.InsertOne(context.Background(), standardVaccine)
+	_, err := StandardVaccineCollection.InsertOne(context.TODO(), standardVaccine)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "เพิ่มข้อมูลวัคซีนไม่สำเร็จ"})
 		return
@@ -53,18 +53,17 @@ func AddStandardVaccine(c *gin.Context) {
 }
 
 func GetAllStandardVaccines(c *gin.Context) {
-	var vaccines []standardVaccineModels.StandardVaccine
-
-	cursor, err := standardVaccineCollection.Find(context.Background(), bson.M{})
+	focus, err := StandardVaccineCollection.Find(context.TODO(), bson.M{})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "ไม่สามารถดึงข้อมูลวัคซีนได้"})
 		return
 	}
-	defer cursor.Close(context.Background())
+	defer focus.Close(context.TODO())
 
-	for cursor.Next(context.Background()) {
-		var vaccine standardVaccineModels.StandardVaccine
-		if err := cursor.Decode(&vaccine); err != nil {
+	var vaccines []standardVaccineModel.StandardVaccine
+	for focus.Next(context.TODO()) {
+		var vaccine standardVaccineModel.StandardVaccine
+		if err := focus.Decode(&vaccine); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"message": "มีข้อผิดพลาดระหว่างแปลงข้อมูล"})
 			return
 		}
@@ -82,8 +81,8 @@ func GetStandardVaccineByID(c *gin.Context) {
 		return
 	}
 
-	var vaccine standardVaccineModels.StandardVaccine
-	err = standardVaccineCollection.FindOne(context.Background(), bson.M{"_id": objectID}).Decode(&vaccine)
+	var vaccine standardVaccineModel.StandardVaccine
+	err = StandardVaccineCollection.FindOne(context.TODO(), bson.M{"_id": objectID}).Decode(&vaccine)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"message": "ไม่พบข้อมูลวัคซีน"})
 		return
@@ -100,7 +99,7 @@ func UpdateStandardVaccine(c *gin.Context) {
 		return
 	}
 
-	var updatedData standardVaccineModels.StandardVaccine
+	var updatedData standardVaccineModel.StandardVaccine
 	if err := c.ShouldBindJSON(&updatedData); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "ข้อมูลที่ส่งมาไม่ถูกต้อง"})
 		return
@@ -119,8 +118,8 @@ func UpdateStandardVaccine(c *gin.Context) {
 		return
 	}
 
-	_, err = standardVaccineCollection.UpdateOne(
-		context.Background(),
+	_, err = StandardVaccineCollection.UpdateOne(
+		context.TODO(),
 		bson.M{"_id": objectID},
 		bson.M{"$set": updateFields},
 	)
@@ -140,8 +139,8 @@ func DeleteStandardVaccine(c *gin.Context) {
 		return
 	}
 
-	_, err = standardVaccineCollection.DeleteOne(
-		context.Background(),
+	_, err = StandardVaccineCollection.DeleteOne(
+		context.TODO(),
 		bson.M{"_id": objectID},
 	)
 	if err != nil {
