@@ -1,9 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import standardDevService from '../../../service/standardDev.service';
+import childService from "../../../service/child.service";
 
 const ViewDev = () => {
   const [devs, setDevs] = useState([]);
   const [selectedAgeRange, setSelectedAgeRange] = useState('แรกเกิด - 1 เดือน');
+  const [children, setChildren] = useState([]);
+  const [selectedChild, setSelectedChild] = useState(null);
 
   // เก็บสถานะเลือก "ทำได้" หรือ "ทำไม่ได้" ของแต่ละ item
   const [checkStates, setCheckStates] = useState({});
@@ -34,6 +37,23 @@ const ViewDev = () => {
     fetchData();
   }, [selectedAgeRange]);
 
+  useEffect(() => {
+    const fetchChildren = async () => {
+      try {
+        const res = await childService.getChildren(); // ใช้ getChildren จาก service
+        const data = res.data.children || res.data || []; // ปรับตามโครงสร้าง response จริง
+        setChildren(data);
+        if (data.length > 0) {
+          setSelectedChild(data[0]); // ตั้งค่าคนแรกเป็น default
+        }
+      } catch (err) {
+        console.error("Error fetching children", err);
+      }
+    };
+
+    fetchChildren();
+  }, []);
+
   // ฟังก์ชันจัดการเลือก radio
   const handleCheckChange = (index, value) => {
     setCheckStates(prev => ({
@@ -50,15 +70,47 @@ const ViewDev = () => {
         <h2 className="text-xl font-semibold">พัฒนาการของเด็กช่วงอายุ {selectedAgeRange}</h2>
         <div className="flex gap-4">
           <div className="dropdown dropdown-hover">
-            <label tabIndex={0} className="btn btn-outline">มนทกานต์ คงดี</label>
-            <ul tabIndex={0} className="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52">
-              <li><a>อาทิตยา คงดี</a></li>
+            <div
+              tabIndex={0}
+              role="button"
+              className="btn w-40 h-12 px-3 text-left overflow-hidden whitespace-nowrap text-ellipsis"
+              title={
+                selectedChild
+                  ? `${selectedChild.firstName} ${selectedChild.lastName}`
+                  : "เลือกเด็ก"
+              }
+            >
+              <span className="truncate block w-full">
+                {selectedChild
+                  ? `${selectedChild.firstName} ${selectedChild.lastName}`
+                  : "เลือกเด็ก"}
+              </span>
+            </div>
+            <ul
+              tabIndex={0}
+              className="dropdown-content z-50 menu p-2 shadow bg-base-100 rounded-box w-52"
+            >
+              {children.map((child) => (
+                <li key={child._id}>
+                  <a onClick={() => setSelectedChild(child)}>
+                    {child.firstName} {child.lastName}
+                  </a>
+                </li>
+              ))}
             </ul>
           </div>
 
           <div className="dropdown dropdown-hover">
-            <label tabIndex={0} className="btn btn-outline">{selectedAgeRange}</label>
-            <ul tabIndex={0} className="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52">
+            <label
+              tabIndex={0}
+              className="btn w-40 h-12 px-3 text-left overflow-hidden whitespace-nowrap text-ellipsis"
+            >
+              {selectedAgeRange}
+            </label>
+            <ul
+              tabIndex={0}
+              className="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52"
+            >
               {ageRanges.map((range) => (
                 <li key={range}>
                   <a onClick={() => setSelectedAgeRange(range)}>{range}</a>

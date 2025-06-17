@@ -20,6 +20,7 @@ import AdminRoute from '../ProtectedRoutes/AdminRoute.jsx'; // นำเข้�
 import AddVaccine from '../pages/ManageVac/AddVac.jsx';
 import ViewVaccine from '../pages/User/Vaccine/Index.jsx';
 import ViewDevelopment from '../pages/User/Development/Index.jsx';
+import ManageRights from '../pages/ManageUser/ManageRights.jsx';
 
 const router = createBrowserRouter([
     {
@@ -102,8 +103,9 @@ const router = createBrowserRouter([
                     </ProtectedRoute>
                 )
             },
+
         ],
-    }, 
+    },
     {
         path: "dashboard",
         element: (
@@ -123,8 +125,11 @@ const router = createBrowserRouter([
             {
                 path: "add-Development",
                 element: <AddDevelopment />,
+            }, {
+                path: "ManageRights",
+                element: <ManageRights />,
             },
-        
+
         ],
     },
 ]);

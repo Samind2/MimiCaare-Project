@@ -142,7 +142,7 @@ const AddDevelopment = () => {
                                                         ลบ
                                                     </button>
                                                 </td>
-                                            )}
+                                            )} 
                                         </tr>
                                     ));
                                 } else {

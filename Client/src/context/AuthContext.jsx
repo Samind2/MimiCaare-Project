@@ -26,10 +26,12 @@ const AuthProvider = ({ children }) => {
       setUser(user);
     } catch (error) {
       console.error("Signup Error:", error);
+          throw error;
     } finally {
       setLoading(false);
     }
   };
+
 
  const login = async (userData) => {
   setLoading(true);

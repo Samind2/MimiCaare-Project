@@ -1,9 +1,7 @@
 import React from 'react';
 import { Outlet, Link, useLocation } from "react-router-dom";
 import { MdSpaceDashboard } from "react-icons/md";
-import { FaCartArrowDown } from "react-icons/fa6";
-import { FaCartPlus } from "react-icons/fa";
-import { MdOutlineDashboardCustomize } from "react-icons/md";
+import { FaUserFriends, FaSyringe, FaChild } from 'react-icons/fa';
 import { FaUser } from "react-icons/fa";
 import { FiLogOut } from "react-icons/fi";
 import { useContext } from 'react'; // ต้องใช้ useContext
@@ -73,82 +71,58 @@ const AdminLayout = () => { // สร้าง AdminLayout
                             aria-label="close sidebar"
                             className="drawer-overlay"
                         ></label>
-                        <ul className="menu bg-base-200 text-base-content min-h-full w-80 p-4">
-                            {/* Sidebar content */}
-                            <li>
-                                <Link
-                                    to="/"
-                                    className="flex items-center space-x-2 mb-3"
-                                >
-                                    <img
-                                        src="/Mimicare(1).png"
-                                        alt="Logo"
-                                        className="h-25 lg:h-28 mx-auto"
-                                    />
-                                    <div className="badge badge-primary">Admin</div>
+                        <ul className="menu bg-[#FCEFEF] text-[#5F6F65] min-h-full w-80 p-4 rounded-r-3xl shadow-lg">
+                            <li className="mb-6 text-center">
+                                <Link to="/" className="flex flex-col items-center space-y-2">
+                                    <img src="/Mimicare(1).png" alt="Logo" className="h-24" />
+                                    <span className="badge badge-secondary px-4 py-2 rounded-full bg-pink-200 text-pink-800">
+                                        Admin
+                                    </span>
                                 </Link>
                             </li>
-                            <div className="relative flex py-8 items-center">
-                                <div className="flex-grow border-t border-gray-400"></div>
-                                <div className="flex-shrink mx-4 text-gray-400">Menu</div>
-                                <div className="flex-grow border-t border-gray-400"></div>
-                            </div>
+
+                            <div className="divider before:bg-pink-300 after:bg-pink-300 text-pink-500">เมนู</div>
+
                             <li>
-                                <Link to="/dashboard">
+                                <Link to="/dashboard" className="hover:bg-pink-100 rounded-xl">
                                     <MdSpaceDashboard />
-                                    Dashboard
+                                    หน้าหลัก
                                 </Link>
                             </li>
                             <li>
-                                <Link to="/dashboard/add-Vaccine">
-                                    <FaCartArrowDown />
-                                    Manage Orders
+                                <Link to="/dashboard/ManageRights" className="hover:bg-pink-100 rounded-xl">
+                                    <FaUserFriends />
+                                    จัดการสิทธิ์ผู้ใช้
                                 </Link>
                             </li>
                             <li>
-                                <Link to="/dashboard/add-Development">
-                                    <FaCartPlus />
-                                    Add Product
+                                <Link to="/dashboard/add-Vaccine" className="hover:bg-pink-100 rounded-xl">
+                                    <FaSyringe />
+                                    จัดการข้อมูลวัคซีน
                                 </Link>
                             </li>
                             <li>
-                                <Link to="/dashboard/manageItems">
-                                    <MdOutlineDashboardCustomize />
-                                    Manage Item
+                                <Link to="/dashboard/add-Development" className="hover:bg-pink-100 rounded-xl">
+                                    <FaChild />
+                                    ข้อมูลพัฒนาการ
                                 </Link>
                             </li>
                             <li>
-                                <Link to="/dashboard/manageUser">
-                                    <FaUser />
-                                    All User
+                                <Link to="/dashboard/manageUser" className="hover:bg-pink-100 rounded-xl">
+                                    <FaUserFriends />
+                                    ผู้ใช้ทั้งหมด
                                 </Link>
                             </li>
-                            <div className="relative flex py-8 items-center">
-                                <div className="flex-grow border-t border-gray-400"></div>
-                                <div className="flex-shrink mx-4 text-gray-400">Menu</div>
-                                <div className="flex-grow border-t border-gray-400"></div>
-                            </div>
-                            <li>
-                                <Link to="/">Home</Link>
-                            </li>
-                            <li>
-                                <Link to="/products">Products</Link>
-                            </li>
-                            <li>
-                                <Link to="/order-tracking">Order Tracking</Link>
-                            </li>
-                            <li>
-                                <Link to="/customer-support">Customer Support</Link>
-                            </li>
-                            {/* ปุ่ม Logout */}
-                            <div className="mt-6">
+
+                            {/* ปุ่ม Logout ที่ปรับให้ดูอบอุ่น */}
+                            <div className="mt-8 px-2">
                                 <button
                                     type="button"
-                                    onClick={handleLogout} // เรียกฟังก์ชัน handleLogout
-                                    className="w-full bg-red text-white p-3 rounded-lg font-bold hover:bg-secondary transition-all ease-in-out transform hover:scale-105 shadow-md hover:shadow-xl flex items-center justify-center gap-2"
+                                    onClick={handleLogout}
+                                    className="w-full bg-gradient-to-r from-pink-400 via-pink-300 to-pink-400 text-white py-3 px-4 rounded-full font-bold shadow-md hover:scale-105 transition-transform duration-300 ease-in-out flex items-center justify-center gap-2"
                                 >
-                                    <FiLogOut size={24} />
-                                    <span>LOGOUT</span>
+                                    <FiLogOut size={20} />
+                                    <span>ออกจากระบบ</span>
                                 </button>
                             </div>
                         </ul>

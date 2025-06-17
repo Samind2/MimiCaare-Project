@@ -1,8 +1,12 @@
 import React, { useEffect, useState } from "react";
 import vaccineService from "../../../service/standardVaccine.service";
+import childService from "../../../service/child.service";
 
 const ViewVac = () => {
   const [vaccines, setVaccines] = useState([]);
+  const [children, setChildren] = useState([]);
+  const [selectedChild, setSelectedChild] = useState(null);
+
 
   useEffect(() => {
     const fetchVaccines = async () => {
@@ -16,6 +20,23 @@ const ViewVac = () => {
     };
 
     fetchVaccines();
+  }, []);
+
+  useEffect(() => {
+    const fetchChildren = async () => {
+      try {
+        const res = await childService.getChildren(); // ใช้ getChildren จาก service
+        const data = res.data.children || res.data || []; // ปรับตามโครงสร้าง response จริง
+        setChildren(data);
+        if (data.length > 0) {
+          setSelectedChild(data[0]); // ตั้งค่าคนแรกเป็น default
+        }
+      } catch (err) {
+        console.error("Error fetching children", err);
+      }
+    };
+
+    fetchChildren();
   }, []);
 
   return (
@@ -33,11 +54,33 @@ const ViewVac = () => {
             </ul>
           </div>
           <div className="dropdown dropdown-hover">
-            <label tabIndex={0} className="btn m-1">
-              มนทกานต์ คงดี
-            </label>
-            <ul tabIndex={0} className="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52">
-              <li><a>อาทิตยา คงดี</a></li>
+            <div
+              tabIndex={0}
+              role="button"
+              className="btn m-1 w-40 overflow-hidden whitespace-nowrap text-ellipsis px-3 text-left"
+              title={
+                selectedChild
+                  ? `${selectedChild.firstName} ${selectedChild.lastName}`
+                  : "เลือกเด็ก"
+              }
+            >
+              <span className="truncate block w-full">
+                {selectedChild
+                  ? `${selectedChild.firstName} ${selectedChild.lastName}`
+                  : "เลือกเด็ก"}
+              </span>
+            </div>
+            <ul
+              tabIndex={0}
+              className="dropdown-content z-50 menu p-2 shadow bg-base-100 rounded-box w-52"
+            >
+              {children.map((child) => (
+                <li key={child._id}>
+                  <a onClick={() => setSelectedChild(child)}>
+                    {child.firstName} {child.lastName}
+                  </a>
+                </li>
+              ))}
             </ul>
           </div>
         </div>

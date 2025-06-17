@@ -5,9 +5,11 @@ import Footer from "../components/Footer";
 import "./Main.css";
 import { ChevronRight } from "lucide-react";
 
-const Breadcrumbs = () => {
+const Breadcrumbs = ({ shouldHide }) => {
   const location = useLocation();
-  const paths = location.pathname.split("/").filter((path) => path); //ดึง pathname ปัจจุบัน 
+  if (shouldHide) return null; // ถ้าต้องซ่อน breadcrumb ก็ไม่แสดง
+
+  const paths = location.pathname.split("/").filter((path) => path);
 
   return (
     <nav className="bg-white shadow-md rounded-lg p-3 mb-4">
@@ -33,17 +35,18 @@ const Breadcrumbs = () => {
           </Link>
         </li>
 
-        {paths.map((path, index) => { // แสดง breadcrumb สำหรับแต่ละหน้า
-          const to = `/${paths.slice(0, index + 1).join("/")}`; // URL สำหรับ breadcrumb
-          const isLast = index === paths.length - 1; // ตรวจสอบว่า breadcrumb สุดท้ายหรือไม่
+        {paths.map((path, index) => {
+          const to = `/${paths.slice(0, index + 1).join("/")}`;
+          const isLast = index === paths.length - 1;
           return (
             <li key={to} className="flex items-center">
-              <ChevronRight className="text-gray-400 h-4 w-4 mx-2" />  
-              <Link //สร้างลิงก์ ไปยังแต่ละหน้า
+              <ChevronRight className="text-gray-400 h-4 w-4 mx-2" />
+              <Link
                 to={to}
                 className="text-[#114965] hover:text-[#0d3a4d] transition-colors capitalize"
+                aria-current={isLast ? "page" : undefined}
               >
-                {decodeURIComponent(path)} 
+                {decodeURIComponent(path)}
               </Link>
             </li>
           );
@@ -54,11 +57,15 @@ const Breadcrumbs = () => {
 };
 
 const Main = () => {
+  const location = useLocation();
+  const hiddenRoutes = ["/Signin", "/Signup"];
+  const shouldHideNavbar = hiddenRoutes.includes(location.pathname);
+
   return (
     <div>
-      <NavBar />
+      {!shouldHideNavbar && <NavBar />}
       <div className="container mx-auto p-4">
-        <Breadcrumbs />
+        <Breadcrumbs shouldHide={shouldHideNavbar} />
         <Outlet />
       </div>
       <Footer />
