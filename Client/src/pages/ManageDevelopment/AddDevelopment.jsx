@@ -5,16 +5,16 @@ import { toast } from "react-toastify";
 const AddDevelopment = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [ageRange, setAgeRange] = useState('');
-    const [developmentList, setDevelopmentList] = useState([
+    const [developmentList, setDevelopmentList] = useState([ // เก็บข้อมูลพัฒนาการที 
         { category: '', detail: '', image: '' },
         { category: '', detail: '', image: '' },
         { category: '', detail: '', image: '' },
         { category: '', detail: '', image: '' },
         { category: '', detail: '', image: '' },
     ]);
-    const [allDevelopments, setAllDevelopments] = useState([]);
+    const [allDevelopments, setAllDevelopments] = useState([]); // เก็บข้อมูลพัฒนาการทั้งหมดจากฐานข้อมูล
 
-    // 
+    // ช่วงอายุที่ใช้
     const ageOptions = [
         { value: 1 },
         { value: 2 },
@@ -41,18 +41,13 @@ const AddDevelopment = () => {
         { value: 78 },
     ];
 
-
-    // const getAgeLabel = (val) => {
-    //     const found = ageOptions.find(opt => opt.value === val);
-    //     return found ? found.label : val;
-    // };
-
-    const getAgeLabel = (val) => {
-        const found = ageOptions.find(opt => opt.value === val);
+    // แปลงค่าเดือนเป็นข้อความช่วงอายุ
+    const getAgeLabel = (ageValue) => {
+        const found = ageOptions.find(opt => opt.value === ageValue); // ค้นหาช่วงอายุที่ตรงกับค่า val
         if (found) {
             return convertMonthsToYearText(found.value);
         }
-        return val;
+        return ageValue;
     };
 
     const convertMonthsToYearText = (months) => {
@@ -322,59 +317,60 @@ const AddDevelopment = () => {
                                     ))}
                                 </select>
                             </div>
+                            <div className="max-h-[400px] overflow-y-auto space-y-4 pr-1">
+                                {/* พัฒนาการแต่ละด้าน */}
+                                {developmentList.map((dev, index) => {
+                                    const selectedCategories = developmentList
+                                        .filter((_, i) => i !== index)
+                                        .map(d => d.category)
+                                        .filter(c => c);
 
-                            {/* พัฒนาการแต่ละด้าน */}
-                            {developmentList.map((dev, index) => {
-                                const selectedCategories = developmentList
-                                    .filter((_, i) => i !== index)
-                                    .map(d => d.category)
-                                    .filter(c => c);
+                                    return (
+                                        <div key={index} className="border rounded p-2 space-y-2 bg-gray-50">
+                                            <div className="flex gap-2">
+                                                <select
+                                                    className="w-1/2 border rounded px-3 py-2"
+                                                    value={dev.category}
+                                                    onChange={(e) =>
+                                                        handleDevelopmentChange(index, 'category', e.target.value)
+                                                    }
+                                                >
+                                                    <option value="">เลือกพัฒนาการ</option>
+                                                    {categoryOptions
+                                                        .filter(cat => !selectedCategories.includes(cat))
+                                                        .map((cat, i) => (
+                                                            <option key={i} value={cat}>
+                                                                {cat}
+                                                            </option>
+                                                        ))}
+                                                </select>
 
-                                return (
-                                    <div key={index} className="border rounded p-2 space-y-2 bg-gray-50">
-                                        <div className="flex gap-2">
-                                            <select
-                                                className="w-1/2 border rounded px-3 py-2"
-                                                value={dev.category}
-                                                onChange={(e) =>
-                                                    handleDevelopmentChange(index, 'category', e.target.value)
-                                                }
-                                            >
-                                                <option value="">เลือกพัฒนาการ</option>
-                                                {categoryOptions
-                                                    .filter(cat => !selectedCategories.includes(cat))
-                                                    .map((cat, i) => (
-                                                        <option key={i} value={cat}>
-                                                            {cat}
+                                                <select
+                                                    className="w-1/2 border rounded px-3 py-2"
+                                                    value={dev.detail}
+                                                    onChange={(e) =>
+                                                        handleDevelopmentChange(index, 'detail', e.target.value)
+                                                    }
+                                                >
+                                                    <option value="">เลือกรายละเอียด</option>
+                                                    {detailOptions.map((detail, i) => (
+                                                        <option key={i} value={detail}>
+                                                            {detail}
                                                         </option>
                                                     ))}
-                                            </select>
+                                                </select>
+                                            </div>
 
-                                            <select
-                                                className="w-1/2 border rounded px-3 py-2"
-                                                value={dev.detail}
-                                                onChange={(e) =>
-                                                    handleDevelopmentChange(index, 'detail', e.target.value)
-                                                }
-                                            >
-                                                <option value="">เลือกรายละเอียด</option>
-                                                {detailOptions.map((detail, i) => (
-                                                    <option key={i} value={detail}>
-                                                        {detail}
-                                                    </option>
-                                                ))}
-                                            </select>
+                                            <input
+                                                type="file"
+                                                accept="image/*"
+                                                onChange={(e) => handleImageChange(index, e)}
+                                                className="w-full"
+                                            />
                                         </div>
-
-                                        <input
-                                            type="file"
-                                            accept="image/*"
-                                            onChange={(e) => handleImageChange(index, e)}
-                                            className="w-full"
-                                        />
-                                    </div>
-                                );
-                            })}
+                                    );
+                                })}
+                            </div>
                         </div>
 
                         {/* ปุ่ม */}

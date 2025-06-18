@@ -4,7 +4,7 @@ import childService from "../../../service/child.service";
 
 const ViewDev = () => {
   // ใช้ number แทน string
-  const [selectedAgeRange, setSelectedAgeRange] = useState(2); // เริ่มต้นเป็นเลข 2 ตามฐานข้อมูล
+  const [selectedAgeRange, setSelectedAgeRange] = useState(1); //  แรกเกิด - 1 เดือน เป็น
   const [devs, setDevs] = useState([]);
   const [children, setChildren] = useState([]);
   const [selectedChild, setSelectedChild] = useState(null);
@@ -84,7 +84,7 @@ const ViewDev = () => {
     const fetchData = async () => {
       try {
         const res = await standardDevService.getDevelop();
-        const allDevs = res.data.data || [];
+        const allDevs = res.data.data || []; // เก็บข้อมูลพัฒนาการทั้งหมด
 
         // เทียบ selectedAgeRange เป็น number
         const selectedData = allDevs.find(dev => Number(dev.ageRange) === Number(selectedAgeRange));
