@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import standardDevService from "../../service/standardDev.service";
+import { toast } from "react-toastify";
 
 const AddDevelopment = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -84,12 +85,11 @@ const AddDevelopment = () => {
     ];
 
     const detailOptions = [
-        "พัฒนากล้ามเนื้อใหญ่",
-        "พัฒนากล้ามเนื้อเล็ก",
-        "พูดคำง่ายๆ",
-        "เข้าใจคำสั่งง่ายๆ",
-        "เล่นกับเพื่อน",
-        "แสดงอารมณ์",
+        "ท่านอนคว่ำยกศรีษะและหันไปข้างใดข้างหนึ่ง",
+        "มองตามถึงกึ่งกลางลำตัว",
+        "สะดุ้งหรือเคลื่อนไหวร่างกายเมื่อได้ยินเสียงพูดระดับปกติ",
+        "ส่งเสียง อ้อ แอ้ง แอ้ง",
+        "มองจ้องหน้าได้นาน 1 - 2 วินาที",
     ];
 
     useEffect(() => {
@@ -99,7 +99,8 @@ const AddDevelopment = () => {
     const fetchDevelopments = async () => {
         try {
             const res = await standardDevService.getDevelop();
-            let data = res.data.data;
+            const data = res.data.data;
+
 
             data.sort((a, b) => a.ageRange - b.ageRange); // เรียงตามช่วงอายุ
             setAllDevelopments(data);
@@ -118,8 +119,15 @@ const AddDevelopment = () => {
             return;
         }
 
+        // เช็คว่ามีช่วงอายุ;ซ้ำในฐานข้อมูลหรือไม่
+        const isDuplicate = allDevelopments.some(dev => dev.ageRange === ageRange);
+        if (isDuplicate) {
+            toast.warning('ช่วงอายุนี้มีอยู่แล้ว กรุณาเลือกช่วงอายุอื่น');
+            return;
+        }
+
         if (validDevelopments.length === 0) {
-            alert('กรุณากรอกพัฒนาการอย่างน้อยหนึ่งรายการ');
+            toast.warning('กรุณากรอกพัฒนาการอย่างน้อยหนึ่งรายการ');
             return;
         }
 
@@ -130,6 +138,7 @@ const AddDevelopment = () => {
 
         try {
             await standardDevService.addStandardDev(newData);
+            toast.success("เพิ่มพัฒนาการสำเร็จ!", { autoClose: 1500 });
             setIsModalOpen(false);
             setAgeRange('');
             setDevelopmentList([
@@ -141,7 +150,7 @@ const AddDevelopment = () => {
             ]);
             fetchDevelopments();
         } catch (err) {
-            console.error('เกิดข้อผิดพลาดในการบันทึก:', err);
+            toast.error('เกิดข้อผิดพลาดในการบันทึก:', err);
         }
     };
 
@@ -152,13 +161,53 @@ const AddDevelopment = () => {
     };
 
     const handleDelete = async (idToDelete) => {
-        if (window.confirm(`คุณต้องการลบข้อมูลช่วงอายุ ${idToDelete} ใช่หรือไม่?`)) {
-            try {
-                await standardDevService.deleteStandardDev(idToDelete);
-                fetchDevelopments();
-            } catch (error) {
-                console.error('ลบข้อมูลไม่สำเร็จ', error);
-            }
+        // สร้าง Toast 
+        const confirmDelete = () =>
+            new Promise((resolve) => {
+                const ToastContent = ({ closeToast }) => ( // ฟังก์ชันที่ใช้แสดงเนื้อหาใน Toast
+                    <div>
+                        <p>คุณต้องการลบข้อมูลช่วงอายุ {idToDelete} ใช่หรือไม่?</p>
+                        <div className="mt-2 flex justify-end gap-2">
+                            <button
+                                className="btn btn-sm btn-error"
+                                onClick={() => {
+                                    closeToast();
+                                    resolve(false); // ยกเลิก
+                                }}
+                            >
+                                ยกเลิก
+                            </button>
+                            <button
+                                className="btn btn-sm btn-success"
+                                onClick={() => {
+                                    closeToast();
+                                    resolve(true); // ยืนยัน
+                                }}
+                            >
+                                ตกลง
+                            </button>
+                        </div>
+                    </div>
+                );
+
+                toast.info(<ToastContent />, {
+                    autoClose: false,
+                    closeOnClick: false,
+                    closeButton: false,
+                    draggable: false,
+                });
+            });
+
+        const confirmed = await confirmDelete();
+        if (!confirmed) return;
+
+        try {
+            await standardDevService.deleteStandardDev(idToDelete);
+            toast.success("ลบข้อมูลสำเร็จ");
+            fetchDevelopments();
+        } catch (error) {
+            toast.error("ลบข้อมูลไม่สำเร็จ");
+            console.error(error);
         }
     };
 

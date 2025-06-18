@@ -97,22 +97,48 @@ const ViewVac = () => {
             </tr>
           </thead>
           <tbody>
-            {vaccines.map((item, index) =>
-              item.vaccines.map((vaccine, i) => (
-                <tr key={`${index}-${i}`}>
-                  <td>{item.ageRange >= 12 ? `${item.ageRange / 12} ปี` : `${item.ageRange} เดือน`}</td>
-                  <td>{vaccine.vaccineName}</td>
-                  <td>
-                    <span className="bg-red-600 text-white px-2 py-1 text-xs rounded-full">
-                      ยังไม่ได้รับ
-                    </span>
+            {vaccines.map((item, index) => {
+              const ageText =
+                item.ageRange >= 12
+                  ? `${item.ageRange / 12} ปี`
+                  : `${item.ageRange} เดือน`;
+
+              return (
+                <tr key={index}>
+                  {/* ช่อง อายุ */}
+                  <td className="align-top">{ageText}</td>
+
+                  {/* ช่อง วัคซีน */}
+                  <td className="align-top py-4">
+                    <ul className="space-y-2">
+                      {item.vaccines.map((vaccine, i) => (
+                        <li key={i}>{vaccine.vaccineName}</li>
+                      ))}
+                    </ul>
                   </td>
-                  <td>
-                    <button className="btn btn-outline btn-sm">บันทึกรับวัคซีน</button>
+
+                  {/* ช่อง สถานะ */}
+                  <td className="align-top py-4">
+                    <ul className="space-y-2">
+                      {item.vaccines.map((_, i) => (
+                        <li key={i}>
+                          <span className="bg-red-600 text-white px-2 py-1 text-xs rounded-full">
+                            ยังไม่ได้รับ
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  </td>
+
+                  {/* ช่อง การจัดการ */}
+                  <td className="align-top">
+                    <button className="btn btn-error btn-sm mt-2">
+                      บันทึกรับวัคซีน
+                    </button>
                   </td>
                 </tr>
-              ))
-            )}
+              );
+            })}
           </tbody>
         </table>
       </div>
