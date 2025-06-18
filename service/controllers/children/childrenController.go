@@ -63,7 +63,7 @@ func AddNewChildren(c *gin.Context) {
 			return
 		}
 		// อัปโหลดภาพไปยัง Cloudinary
-		uploadResponse, err := cld.Upload.Upload(context.Background(), children.Image, uploader.UploadParams{
+		uploadResponse, err := cld.Upload.Upload(context.TODO(), children.Image, uploader.UploadParams{
 			Folder: "children image",
 		})
 		if err != nil {
@@ -74,7 +74,7 @@ func AddNewChildren(c *gin.Context) {
 	}
 	children.ID = primitive.NewObjectID() // สร้าง ID ใหม่ให้กับเด็ก
 	//add data to database
-	_, err = childrenCollection.InsertOne(context.Background(), children)
+	_, err = childrenCollection.InsertOne(context.TODO(), children)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "ระบบขัดข้อง - เพิ่มข้อมูลเด็กไม่สำเร็จ"})
 		return
@@ -113,14 +113,14 @@ func GetChildrenByParentID(c *gin.Context) {
 	}
 
 	var children []childrenModel.Children
-	pointer, err := childrenCollection.Find(context.Background(), childrenModel.Children{ParentID: parentId})
+	pointer, err := childrenCollection.Find(context.TODO(), childrenModel.Children{ParentID: parentId})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "ระบบขัดข้อง - ไม่สามารถดึงข้อมูลเด็กได้"})
 		return
 	}
-	defer pointer.Close(context.Background())
+	defer pointer.Close(context.TODO())
 
-	for pointer.Next(context.Background()) {
+	for pointer.Next(context.TODO()) {
 		var child childrenModel.Children
 		if err := pointer.Decode(&child); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"message": "ระบบขัดข้อง - ไม่สามารถดึงข้อมูลเด็กได้"})
@@ -167,7 +167,7 @@ func GetChildrenByID(c *gin.Context) {
 	}
 
 	var child childrenModel.Children
-	err = childrenCollection.FindOne(context.Background(), bson.M{"_id": childObjectID, "parentId": parentId}).Decode(&child)
+	err = childrenCollection.FindOne(context.TODO(), bson.M{"_id": childObjectID, "parentId": parentId}).Decode(&child)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"message": "ไม่พบข้อมูลเด็ก"})
 		return
@@ -209,7 +209,7 @@ func UpdateChildrenByID(c *gin.Context) {
 
 	// ตรวจสอบว่าเด็กคนนี้เป็นลูกของผู้ใช้หรือไม่
 	var existingChild childrenModel.Children
-	err = childrenCollection.FindOne(context.Background(), bson.M{"_id": childObjectID, "parentId": parentId}).Decode(&existingChild)
+	err = childrenCollection.FindOne(context.TODO(), bson.M{"_id": childObjectID, "parentId": parentId}).Decode(&existingChild)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"message": "ไม่พบข้อมูลเด็ก"})
 		return
@@ -244,7 +244,7 @@ func UpdateChildrenByID(c *gin.Context) {
 			c.JSON(http.StatusInternalServerError, gin.H{"message": "ไม่สามารถเชื่อมต่อ Cloudinary ได้"})
 			return
 		}
-		uploadResponse, err := cld.Upload.Upload(context.Background(), updatedData.Image, uploader.UploadParams{
+		uploadResponse, err := cld.Upload.Upload(context.TODO(), updatedData.Image, uploader.UploadParams{
 			Folder: "children image",
 		})
 		if err != nil {
@@ -256,7 +256,7 @@ func UpdateChildrenByID(c *gin.Context) {
 
 	// อัปเดตข้อมูลในฐานข้อมูล
 	_, err = childrenCollection.UpdateOne(
-		context.Background(),
+		context.TODO(),
 		bson.M{"_id": childObjectID, "parentId": parentId},
 		bson.M{"$set": updateFields},
 	)
