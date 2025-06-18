@@ -6,11 +6,11 @@ const AddDevelopment = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [ageRange, setAgeRange] = useState('');
     const [developmentList, setDevelopmentList] = useState([
-        { category: '', detail: '' },
-        { category: '', detail: '' },
-        { category: '', detail: '' },
-        { category: '', detail: '' },
-        { category: '', detail: '' },
+        { category: '', detail: '', image: '' },
+        { category: '', detail: '', image: '' },
+        { category: '', detail: '', image: '' },
+        { category: '', detail: '', image: '' },
+        { category: '', detail: '', image: '' },
     ]);
     const [allDevelopments, setAllDevelopments] = useState([]);
 
@@ -122,7 +122,7 @@ const AddDevelopment = () => {
         // เช็คว่ามีช่วงอายุ;ซ้ำในฐานข้อมูลหรือไม่
         const isDuplicate = allDevelopments.some(dev => dev.ageRange === ageRange);
         if (isDuplicate) {
-            toast.warning('ช่วงอายุนี้มีอยู่แล้ว กรุณาเลือกช่วงอายุอื่น');
+            toast.warning('ช่วงอายุนี้มีข้อมูลพัฒนาการอยู่แล้ว');
             return;
         }
 
@@ -160,6 +160,18 @@ const AddDevelopment = () => {
         setDevelopmentList(updatedList);
     };
 
+    const handleImageChange = (index, event) => {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                const updatedList = [...developmentList];
+                updatedList[index].image = reader.result;
+                setDevelopmentList(updatedList);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
     const handleDelete = async (idToDelete) => {
         // สร้าง Toast 
         const confirmDelete = () =>
@@ -231,6 +243,7 @@ const AddDevelopment = () => {
                             <th className="px-4 py-2">ช่วงอายุ</th>
                             <th className="px-4 py-2">พัฒนาการ</th>
                             <th className="px-4 py-2">รายละเอียด</th>
+                            <th className="px-4 py-2">รูปภาพ</th>
                             <th className="px-4 py-2">การจัดการ</th>
                         </tr>
                     </thead>
@@ -247,6 +260,13 @@ const AddDevelopment = () => {
                                             )}
                                             <td className="px-4 py-2 align-middle">{item.category}</td>
                                             <td className="px-4 py-2 align-middle">{item.detail}</td>
+                                            <td className="px-4 py-2 align-middle">
+                                                {item.image ? (
+                                                    <img src={item.image} alt="รูปภาพพัฒนาการ" className="w-20 h-auto rounded" />
+                                                ) : (
+                                                    <span className="text-gray-400">ไม่มีรูป</span>
+                                                )}
+                                            </td>
                                             {subIdx === 0 && (
                                                 <td rowSpan={dev.developments.length} className="px-4 py-2 align-middle">
                                                     <button onClick={() => handleDelete(dev.id)} className="text-red-600 hover:underline">
@@ -289,18 +309,6 @@ const AddDevelopment = () => {
                             {/* ช่วงอายุ */}
                             <div>
                                 <label className="block mb-1">ช่วงอายุ</label>
-                                {/* <select
-                                    className="w-full border rounded px-3 py-2"
-                                    value={ageRange}
-                                    onChange={(e) => setAgeRange(Number(e.target.value))}
-                                >
-                                    <option value="">เลือกช่วงอายุ</option>
-                                    {ageOptions.map((opt) => (
-                                        <option key={opt.value} value={opt.value}>
-                                            {opt.label}
-                                        </option>
-                                    ))}
-                                </select> */}
                                 <select
                                     className="w-full border rounded px-3 py-2"
                                     value={ageRange}
@@ -323,38 +331,47 @@ const AddDevelopment = () => {
                                     .filter(c => c);
 
                                 return (
-                                    <div key={index} className="flex gap-2">
-                                        <select
-                                            className="w-1/2 border rounded px-3 py-2"
-                                            value={dev.category}
-                                            onChange={(e) =>
-                                                handleDevelopmentChange(index, 'category', e.target.value)
-                                            }
-                                        >
-                                            <option value="">เลือกพัฒนาการ</option>
-                                            {categoryOptions
-                                                .filter(cat => !selectedCategories.includes(cat))
-                                                .map((cat, i) => (
-                                                    <option key={i} value={cat}>
-                                                        {cat}
+                                    <div key={index} className="border rounded p-2 space-y-2 bg-gray-50">
+                                        <div className="flex gap-2">
+                                            <select
+                                                className="w-1/2 border rounded px-3 py-2"
+                                                value={dev.category}
+                                                onChange={(e) =>
+                                                    handleDevelopmentChange(index, 'category', e.target.value)
+                                                }
+                                            >
+                                                <option value="">เลือกพัฒนาการ</option>
+                                                {categoryOptions
+                                                    .filter(cat => !selectedCategories.includes(cat))
+                                                    .map((cat, i) => (
+                                                        <option key={i} value={cat}>
+                                                            {cat}
+                                                        </option>
+                                                    ))}
+                                            </select>
+
+                                            <select
+                                                className="w-1/2 border rounded px-3 py-2"
+                                                value={dev.detail}
+                                                onChange={(e) =>
+                                                    handleDevelopmentChange(index, 'detail', e.target.value)
+                                                }
+                                            >
+                                                <option value="">เลือกรายละเอียด</option>
+                                                {detailOptions.map((detail, i) => (
+                                                    <option key={i} value={detail}>
+                                                        {detail}
                                                     </option>
                                                 ))}
-                                        </select>
+                                            </select>
+                                        </div>
 
-                                        <select
-                                            className="w-1/2 border rounded px-3 py-2"
-                                            value={dev.detail}
-                                            onChange={(e) =>
-                                                handleDevelopmentChange(index, 'detail', e.target.value)
-                                            }
-                                        >
-                                            <option value="">เลือกรายละเอียด</option>
-                                            {detailOptions.map((detail, i) => (
-                                                <option key={i} value={detail}>
-                                                    {detail}
-                                                </option>
-                                            ))}
-                                        </select>
+                                        <input
+                                            type="file"
+                                            accept="image/*"
+                                            onChange={(e) => handleImageChange(index, e)}
+                                            className="w-full"
+                                        />
                                     </div>
                                 );
                             })}
