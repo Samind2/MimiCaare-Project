@@ -16,11 +16,10 @@ const Signin = () => {
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
 
-  // รวม handleChange
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-    setErrors((prev) => ({ ...prev, [name]: "" })); // เคลียร์ error ของฟิลด์นั้นเมื่อแก้ไข
+    setErrors((prev) => ({ ...prev, [name]: "" }));
   };
 
 
@@ -60,11 +59,15 @@ const Signin = () => {
     }
   };
 
+    const inputBaseClass =
+    "input input-bordered w-full mt-1 focus:outline-none focus:ring-2 focus:ring-[#84C7AE]";
+  const errorClass = "border-red-500";
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#EE8A8A] overflow-hidden p-6">
       <div className="bg-white p-6 rounded-xl shadow-md w-full max-w-md relative z-10">
 
-        {/* ปุ่ม X ปิด */}
+        {/* ปุ่มปิด */}
         <button
           type="button"
           onClick={() => navigate("/")}
@@ -88,7 +91,7 @@ const Signin = () => {
               type="email"
               value={formData.email}
               onChange={handleChange}
-              className={`input input-bordered w-full ${errors.email ? "border-red-500" : ""}`}
+              className={`${inputBaseClass} ${errors.email ? errorClass : ""}`}
               autoComplete="email"
               placeholder="กรอกอีเมลของคุณ"
             />
@@ -104,7 +107,7 @@ const Signin = () => {
               type={showPassword ? "text" : "password"}
               value={formData.password}
               onChange={handleChange}
-              className={`input input-bordered w-full ${errors.password ? "border-red-500" : ""}`}
+              className={`${inputBaseClass} ${errors.password ? errorClass : ""}`}
               autoComplete="current-password"
               placeholder="กรอกรหัสผ่าน"
             />

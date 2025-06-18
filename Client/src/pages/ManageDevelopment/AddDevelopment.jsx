@@ -13,6 +13,68 @@ const AddDevelopment = () => {
     ]);
     const [allDevelopments, setAllDevelopments] = useState([]);
 
+    // 
+    const ageOptions = [
+        { value: 1 },
+        { value: 2 },
+        { value: 4 },
+        { value: 6 },
+        { value: 8 },
+        { value: 9 },
+        { value: 12 },
+        { value: 15 },
+        { value: 17 },
+        { value: 18 },
+        { value: 24 },
+        { value: 29 },
+        { value: 30 },
+        { value: 39 },
+        { value: 41 },
+        { value: 42 },
+        { value: 48 },
+        { value: 54 },
+        { value: 59 },
+        { value: 60 },
+        { value: 66 },
+        { value: 72 },
+        { value: 78 },
+    ];
+
+
+    // const getAgeLabel = (val) => {
+    //     const found = ageOptions.find(opt => opt.value === val);
+    //     return found ? found.label : val;
+    // };
+
+    const getAgeLabel = (val) => {
+        const found = ageOptions.find(opt => opt.value === val);
+        if (found) {
+            return convertMonthsToYearText(found.value);
+        }
+        return val;
+    };
+
+    const convertMonthsToYearText = (months) => {
+        // กรณีพิเศษแสดงข้อความช่วงสั้นๆ
+        if (months === 1) return "แรกเกิด - 1 เดือน";
+        if (months === 2) return "1 - 2 เดือน";
+        if (months === 4) return "3 - 4 เดือน";
+        if (months === 6) return "5 - 6 เดือน";
+        if (months === 8) return "7 - 8 เดือน";
+        if (months === 9) return "9 เดือน";
+        if (months === 12) return "10 - 12 เดือน";
+
+        // สำหรับเลขเดือนอื่น แปลงเป็นปีและเดือน
+        const years = Math.floor(months / 12);
+        const remMonths = months % 12;
+
+        let result = "";
+        if (years > 0) result += `${years} ปี`;
+        if (remMonths > 0) result += (years > 0 ? ` ${remMonths} เดือน` : `${remMonths} เดือน`);
+        return result;
+    };
+
+
     const categoryOptions = [
         "การเคลื่อนไหวพื้นฐาน ",
         "การใช้กล้ามเนื้อมัดเล็กและสติปัญญา",
@@ -37,16 +99,15 @@ const AddDevelopment = () => {
     const fetchDevelopments = async () => {
         try {
             const res = await standardDevService.getDevelop();
-            let data = res.data.data; // หรือ res.data ตามโครงสร้าง API
+            let data = res.data.data;
 
-            // เรียงข้อมูลจากมากไปน้อย ตามจำนวน developments ในแต่ละ ageRange
-            data.sort((a, b) => b.developments.length - a.developments.length);
-
+            data.sort((a, b) => a.ageRange - b.ageRange); // เรียงตามช่วงอายุ
             setAllDevelopments(data);
         } catch (err) {
             console.error('เกิดข้อผิดพลาดในการโหลดข้อมูล:', err);
         }
     };
+
     const handleSubmit = async () => {
         const validDevelopments = developmentList.filter(
             (d) => d.category && d.detail
@@ -63,7 +124,7 @@ const AddDevelopment = () => {
         }
 
         const newData = {
-            ageRange,
+            ageRange: parseInt(ageRange, 10),
             developments: validDevelopments,
         };
 
@@ -78,7 +139,7 @@ const AddDevelopment = () => {
                 { category: '', detail: '' },
                 { category: '', detail: '' },
             ]);
-            fetchDevelopments(); // refresh ตาราง
+            fetchDevelopments();
         } catch (err) {
             console.error('เกิดข้อผิดพลาดในการบันทึก:', err);
         }
@@ -93,13 +154,14 @@ const AddDevelopment = () => {
     const handleDelete = async (idToDelete) => {
         if (window.confirm(`คุณต้องการลบข้อมูลช่วงอายุ ${idToDelete} ใช่หรือไม่?`)) {
             try {
-                await standardDevService.deleteStandardDev(idToDelete);  // ส่ง id แท้จริงที่ได้จาก backend
+                await standardDevService.deleteStandardDev(idToDelete);
                 fetchDevelopments();
             } catch (error) {
                 console.error('ลบข้อมูลไม่สำเร็จ', error);
             }
         }
     };
+
     return (
         <div className="p-6">
             <div className="flex justify-between items-center mb-4">
@@ -131,7 +193,7 @@ const AddDevelopment = () => {
                                         <tr key={`${idx}-${subIdx}`} className="bg-white shadow rounded">
                                             {subIdx === 0 && (
                                                 <td rowSpan={dev.developments.length} className="px-4 py-2 font-medium align-middle">
-                                                    {dev.ageRange}
+                                                    {getAgeLabel(dev.ageRange)}
                                                 </td>
                                             )}
                                             <td className="px-4 py-2 align-middle">{item.category}</td>
@@ -142,14 +204,14 @@ const AddDevelopment = () => {
                                                         ลบ
                                                     </button>
                                                 </td>
-                                            )} 
+                                            )}
                                         </tr>
                                     ));
                                 } else {
                                     return (
                                         <tr key={idx}>
                                             <td colSpan="4" className="text-center text-gray-400 py-4">
-                                                ไม่มีข้อมูลพัฒนาการในช่วงอายุ {dev.ageRange}
+                                                ไม่มีข้อมูลพัฒนาการในช่วงอายุ {getAgeLabel(dev.ageRange)}
                                             </td>
                                         </tr>
                                     );
@@ -178,25 +240,38 @@ const AddDevelopment = () => {
                             {/* ช่วงอายุ */}
                             <div>
                                 <label className="block mb-1">ช่วงอายุ</label>
+                                {/* <select
+                                    className="w-full border rounded px-3 py-2"
+                                    value={ageRange}
+                                    onChange={(e) => setAgeRange(Number(e.target.value))}
+                                >
+                                    <option value="">เลือกช่วงอายุ</option>
+                                    {ageOptions.map((opt) => (
+                                        <option key={opt.value} value={opt.value}>
+                                            {opt.label}
+                                        </option>
+                                    ))}
+                                </select> */}
                                 <select
                                     className="w-full border rounded px-3 py-2"
                                     value={ageRange}
-                                    onChange={(e) => setAgeRange(e.target.value)}
+                                    onChange={(e) => setAgeRange(Number(e.target.value))}
                                 >
                                     <option value="">เลือกช่วงอายุ</option>
-                                    <option>0-1 ปี</option>
-                                    <option>1-2 ปี</option>
-                                    <option>2-3 ปี</option>
+                                    {ageOptions.map((opt) => (
+                                        <option key={opt.value} value={opt.value}>
+                                            {convertMonthsToYearText(opt.value)}
+                                        </option>
+                                    ))}
                                 </select>
                             </div>
 
                             {/* พัฒนาการแต่ละด้าน */}
                             {developmentList.map((dev, index) => {
-                                // หา category ที่ถูกเลือกในบรรทัดอื่น (ยกเว้นตัวเอง)
                                 const selectedCategories = developmentList
-                                    .filter((_, i) => i !== index) // ยกเว้นตัวเอง
+                                    .filter((_, i) => i !== index)
                                     .map(d => d.category)
-                                    .filter(c => c); // กรองเอาเฉพาะที่ไม่ใช่ค่าว่าง
+                                    .filter(c => c);
 
                                 return (
                                     <div key={index} className="flex gap-2">
@@ -209,7 +284,7 @@ const AddDevelopment = () => {
                                         >
                                             <option value="">เลือกพัฒนาการ</option>
                                             {categoryOptions
-                                                .filter(cat => !selectedCategories.includes(cat)) // กรองตัวเลือกที่ถูกเลือกแล้ว
+                                                .filter(cat => !selectedCategories.includes(cat))
                                                 .map((cat, i) => (
                                                     <option key={i} value={cat}>
                                                         {cat}
@@ -217,7 +292,6 @@ const AddDevelopment = () => {
                                                 ))}
                                         </select>
 
-                                        {/* ส่วน detail ไม่ต้องกรอง เพราะรายละเอียดไม่ซ้ำกันก็ได้ */}
                                         <select
                                             className="w-1/2 border rounded px-3 py-2"
                                             value={dev.detail}
@@ -255,7 +329,6 @@ const AddDevelopment = () => {
                     </div>
                 </div>
             )}
-
         </div>
     );
 };

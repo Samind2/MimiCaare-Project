@@ -21,6 +21,7 @@ import AddVaccine from '../pages/ManageVac/AddVac.jsx';
 import ViewVaccine from '../pages/User/Vaccine/Index.jsx';
 import ViewDevelopment from '../pages/User/Development/Index.jsx';
 import ManageRights from '../pages/ManageUser/ManageRights.jsx';
+import AllUser from '../pages/ManageUser/AllUser.jsx';
 
 const router = createBrowserRouter([
     {
@@ -128,6 +129,11 @@ const router = createBrowserRouter([
             }, {
                 path: "ManageRights",
                 element: <ManageRights />,
+            },
+            {
+                path: "AllUser",
+                element: 
+                    <AllUser />
             },
 
         ],

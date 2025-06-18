@@ -3,20 +3,84 @@ import standardDevService from '../../../service/standardDev.service';
 import childService from "../../../service/child.service";
 
 const ViewDev = () => {
+  // ใช้ number แทน string
+  const [selectedAgeRange, setSelectedAgeRange] = useState(2); // เริ่มต้นเป็นเลข 2 ตามฐานข้อมูล
   const [devs, setDevs] = useState([]);
-  const [selectedAgeRange, setSelectedAgeRange] = useState('แรกเกิด - 1 เดือน');
   const [children, setChildren] = useState([]);
   const [selectedChild, setSelectedChild] = useState(null);
 
-  // เก็บสถานะเลือก "ทำได้" หรือ "ทำไม่ได้" ของแต่ละ item
   const [checkStates, setCheckStates] = useState({});
 
+  // กำหนดช่วงอายุเป็น array ของ int (เดือน)
   const ageRanges = [
-    'แรกเกิด - 1 เดือน',
-    '2 - 3 เดือน',
-    '4 - 6 เดือน',
-    '1-2 ปี'
+    1,  // แรกเกิด - 1 เดือน
+    2,  // 1 - 2 เดือน
+    4,  // 3 - 4 เดือน
+    6,  // 5 - 6 เดือน
+    8,  // 7 - 8 เดือน
+    9,  // 9 เดือน
+    12, // 10 - 12 เดือน
+    15, // 13 - 15 เดือน
+    17, // 16 - 17 เดือน
+    18, // 18 เดือน
+    24, // 19 - 24 เดือน
+    29, // 25 - 29 เดือน
+    30, // 30 เดือน
+    39, // 31 - 39 เดือน
+    41, // 37 - 41 เดือน (ซ้ำช่วง)
+    42, // 42 เดือน
+    48, // 43 - 48 เดือน
+    54, // 49 - 54 เดือน
+    59, // 55 - 59 เดือน
+    60, // 60 เดือน
+    66, // 61 - 66 เดือน
+    72, // 67 - 72 เดือน
+    78  // 73 - 78 เดือน
   ];
+
+  // ฟังก์ชันแปลง int เป็นข้อความช่วงอายุ
+  const ageRangeToText = (ageInt) => {
+    switch (ageInt) {
+      case 1: return 'แรกเกิด - 1 เดือน';
+      case 2: return '1 - 2 เดือน';
+      case 4: return '3 - 4 เดือน';
+      case 6: return '5 - 6 เดือน';
+      case 8: return '7 - 8 เดือน';
+      case 9: return '9 เดือน';
+      case 12: return '10 - 12 เดือน';
+      // เอาช่วงที่ต้องการแสดงข้อความเฉพาะไว้
+      // ส่วนอื่นแปลงเป็นปีแทน
+      case 15: 
+      case 17: 
+      case 18:
+      case 24:
+      case 29:
+      case 30:
+      case 39:
+      case 41:
+      case 42:
+      case 48:
+      case 54:
+      case 59:
+      case 60:
+      case 66:
+      case 72:
+      case 78:
+        {
+          const years = Math.floor(ageInt / 12);
+          const months = ageInt % 12;
+          if (months === 0) return `${years} ปี`;
+          return `${years} ปี ${months} เดือน`;
+        }
+      default: {
+        const years = Math.floor(ageInt / 12);
+        const months = ageInt % 12;
+        if (months === 0) return `${years} ปี`;
+        return `${years} ปี ${months} เดือน`;
+      }
+    }
+  };
+
 
   useEffect(() => {
     const fetchData = async () => {
@@ -24,11 +88,12 @@ const ViewDev = () => {
         const res = await standardDevService.getDevelop();
         const allDevs = res.data.data || [];
 
-        const selectedData = allDevs.find(dev => dev.ageRange === selectedAgeRange);
+        // เทียบ selectedAgeRange เป็น number
+        const selectedData = allDevs.find(dev => Number(dev.ageRange) === Number(selectedAgeRange));
         const filteredDevs = selectedData ? selectedData.developments : [];
 
         setDevs(filteredDevs);
-        setCheckStates({}); // เคลียร์สถานะ checkbox ทุกครั้งที่เปลี่ยนช่วงอายุ
+        setCheckStates({});
       } catch (err) {
         console.error(err);
       }
@@ -40,21 +105,20 @@ const ViewDev = () => {
   useEffect(() => {
     const fetchChildren = async () => {
       try {
-        const res = await childService.getChildren(); // ใช้ getChildren จาก service
-        const data = res.data.children || res.data || []; // ปรับตามโครงสร้าง response จริง
+        const res = await childService.getChildren();
+        const data = res.data.children || res.data || [];
         setChildren(data);
         if (data.length > 0) {
-          setSelectedChild(data[0]); // ตั้งค่าคนแรกเป็น default
+          setSelectedChild(data[0]);
         }
       } catch (err) {
-        console.error("Error fetching children", err);
+        console.error(err);
       }
     };
 
     fetchChildren();
   }, []);
 
-  // ฟังก์ชันจัดการเลือก radio
   const handleCheckChange = (index, value) => {
     setCheckStates(prev => ({
       ...prev,
@@ -67,30 +131,27 @@ const ViewDev = () => {
       <h1 className="text-3xl font-bold mb-6 text-center">ประเมินพัฒนาการ</h1>
 
       <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
-        <h2 className="text-xl font-semibold">พัฒนาการของเด็กช่วงอายุ {selectedAgeRange}</h2>
+        <h2 className="text-xl font-semibold">
+          พัฒนาการของเด็กช่วงอายุ {ageRangeToText(selectedAgeRange)}
+        </h2>
         <div className="flex gap-4">
+          {/* Dropdown เลือกเด็ก */}
           <div className="dropdown dropdown-hover">
             <div
               tabIndex={0}
               role="button"
               className="btn w-40 h-12 px-3 text-left overflow-hidden whitespace-nowrap text-ellipsis"
-              title={
-                selectedChild
-                  ? `${selectedChild.firstName} ${selectedChild.lastName}`
-                  : "เลือกเด็ก"
-              }
+              title={selectedChild ? `${selectedChild.firstName} ${selectedChild.lastName}` : "เลือกเด็ก"}
             >
               <span className="truncate block w-full">
-                {selectedChild
-                  ? `${selectedChild.firstName} ${selectedChild.lastName}`
-                  : "เลือกเด็ก"}
+                {selectedChild ? `${selectedChild.firstName} ${selectedChild.lastName}` : "เลือกเด็ก"}
               </span>
             </div>
             <ul
               tabIndex={0}
               className="dropdown-content z-50 menu p-2 shadow bg-base-100 rounded-box w-52"
             >
-              {children.map((child) => (
+              {children.map(child => (
                 <li key={child._id}>
                   <a onClick={() => setSelectedChild(child)}>
                     {child.firstName} {child.lastName}
@@ -100,20 +161,24 @@ const ViewDev = () => {
             </ul>
           </div>
 
+          {/* Dropdown เลือกช่วงอายุ */}
           <div className="dropdown dropdown-hover">
             <label
               tabIndex={0}
               className="btn w-40 h-12 px-3 text-left overflow-hidden whitespace-nowrap text-ellipsis"
+              title={ageRangeToText(selectedAgeRange)}
             >
-              {selectedAgeRange}
+              {ageRangeToText(selectedAgeRange)}
             </label>
             <ul
               tabIndex={0}
               className="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52"
             >
-              {ageRanges.map((range) => (
+              {ageRanges.map(range => (
                 <li key={range}>
-                  <a onClick={() => setSelectedAgeRange(range)}>{range}</a>
+                  <a onClick={() => setSelectedAgeRange(range)}>
+                    {ageRangeToText(range)}
+                  </a>
                 </li>
               ))}
             </ul>
@@ -139,7 +204,10 @@ const ViewDev = () => {
               </tr>
             ) : (
               devs.map((item, idx) => (
-                <tr key={idx} className="align-top hover:bg-gray-50 transition-colors">
+                <tr
+                  key={`${item.category}-${item.detail}-${idx}`}
+                  className="align-top hover:bg-gray-50 transition-colors"
+                >
                   <td className="py-4 border-b border-gray-200 text-center">
                     <div className="flex flex-col space-y-1">
                       <label className="inline-flex items-center cursor-pointer space-x-2 px-2 py-1 rounded hover:bg-gray-100">

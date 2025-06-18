@@ -5,11 +5,13 @@ import { toast } from "react-toastify";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { IoIosCloseCircle } from "react-icons/io";
 
+
 const SignUp = () => {
   const { signup } = useContext(AuthContext);
   const navigate = useNavigate();
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
 
-  const [form, setForm] = useState({
+  const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
     email: "",
@@ -25,46 +27,47 @@ const SignUp = () => {
     /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email);
 
   const handleChange = (e) => {
-    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    setErrors((prev) => ({ ...prev, [name]: "" }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     const newErrors = {};
-    if (!form.firstName.trim()) newErrors.firstName = "กรุณากรอกชื่อ";
-    if (!form.lastName.trim()) newErrors.lastName = "กรุณากรอกนามสกุล";
-    if (!form.email.trim()) newErrors.email = "กรุณากรอกอีเมล";
-    else if (!validateEmail(form.email)) newErrors.email = "อีเมลไม่ถูกต้อง";
-    if (!form.password) newErrors.password = "กรุณากรอกรหัสผ่าน";
-    if (form.password !== form.confirmPassword)
-      newErrors.confirmPassword = "รหัสผ่านไม่ตรงกัน";
+    if (!formData.firstName.trim()) newErrors.firstName = "กรุณากรอกชื่อ";
+    if (!formData.lastName.trim()) newErrors.lastName = "กรุณากรอกนามสกุล";
+    if (!formData.email.trim()) newErrors.email = "กรุณากรอกอีเมล";
+    else if (!validateEmail(formData.email)) newErrors.email = "อีเมลไม่ถูกต้อง";
+    if (!formData.password) newErrors.password = "กรุณากรอกรหัสผ่าน";
+    if (!formData.confirmPassword)
+      newErrors.confirmPassword = "กรุณายืนยันรหัสผ่าน"; // เพิ่มการตรวจสอบกรณีไม่กรอกยืนยันรหัสผ่าน
+    else if (formData.password !== formData.confirmPassword)
+      newErrors.confirmPassword = "รหัสผ่านไม่ตรงกัน"; // ตรวจสอบว่ารหัสผ่านและยืนยันรหัสผ่านตรงกัน
 
-    if (Object.keys(newErrors).length) {
+    if (Object.keys(newErrors).length) { 
       setErrors(newErrors);
       return;
     }
 
     try {
-      await signup({
-        firstName: form.firstName,
-        lastName: form.lastName,
-        email: form.email,
-        password: form.password,
-      });
-      console.log("Sign up success reached!");
+      setIsLoggingIn(true);
+      await signup(formData);
       toast.success("ลงทะเบียนสำเร็จ!", { autoClose: 1500 });
       setTimeout(() => {
         navigate("/");
       }, 1600);
     } catch (error) {
+      setIsLoggingIn(false);
       const msg = error.response?.data?.message || "เกิดข้อผิดพลาด";
-      if (msg === "อีเมลนี้ถูกใช้งานแล้ว") setErrors({ email: msg });
-      else toast.error(msg);
+      if (msg === "อีเมลนี้ถูกใช้งานแล้ว") {
+        setErrors((prev) => ({ ...prev, email: msg }));
+      } else {
+        toast.error(msg);
+      }
     }
   };
 
-  // สร้างตัวแปรเดียวแล้วเอาไปใช้ซ้ำ
   const inputBaseClass =
     "input input-bordered w-full mt-1 focus:outline-none focus:ring-2 focus:ring-[#84C7AE]";
   const errorClass = "border-red-500";
@@ -72,7 +75,7 @@ const SignUp = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#A7D7C5] p-4">
       <div className="bg-white p-8 rounded-xl shadow-md w-full max-w-md relative z-10">
-        {/* ปุ่ม X ปิด */}
+        {/* ปุ่มปิด */}
         <button
           type="button"
           onClick={() => navigate("/")}
@@ -95,7 +98,7 @@ const SignUp = () => {
               </label>
               <input
                 name="firstName"
-                value={form.firstName}
+                value={formData.firstName}
                 onChange={handleChange}
                 placeholder="ชื่อ"
                 className={`${inputBaseClass} ${errors.firstName ? errorClass : ""
@@ -115,7 +118,7 @@ const SignUp = () => {
               </label>
               <input
                 name="lastName"
-                value={form.lastName}
+                value={formData.lastName}
                 onChange={handleChange}
                 placeholder="นามสกุล"
                 className={`${inputBaseClass} ${errors.lastName ? errorClass : ""
@@ -138,7 +141,7 @@ const SignUp = () => {
             <input
               name="email"
               type="email"
-              value={form.email}
+              value={formData.email}
               onChange={handleChange}
               placeholder="example@mail.com"
               className={`${inputBaseClass} ${errors.email ? errorClass : ""}`}
@@ -160,7 +163,7 @@ const SignUp = () => {
               <input
                 name="password"
                 type={showPass ? "text" : "password"}
-                value={form.password}
+                value={formData.password}
                 onChange={handleChange}
                 placeholder="••••••••"
                 className={`${inputBaseClass} ${errors.password ? errorClass : ""
@@ -192,7 +195,7 @@ const SignUp = () => {
               <input
                 name="confirmPassword"
                 type={showConfirmPass ? "text" : "password"}
-                value={form.confirmPassword}
+                value={formData.confirmPassword}
                 onChange={handleChange}
                 placeholder="••••••••"
                 className={`${inputBaseClass} ${errors.confirmPassword ? errorClass : ""
@@ -221,9 +224,13 @@ const SignUp = () => {
 
           <button
             type="submit"
-            className="bg-[#84C7AE] text-white py-2 rounded-lg w-full hover:bg-[#9fe0c8] transition"
+            disabled={isLoggingIn}
+            className={`${isLoggingIn
+              ? "bg-[#47b18a] opacity-50 cursor-not-allowed"
+              : "bg-[#47b18a] hover:bg-[#9fe0c8]"
+              } text-white py-2 rounded-lg w-full transition`}
           >
-            สร้างบัญชี
+            {isLoggingIn ? " กำลังสร้างบัญชี..." : "สร้างบัญชี"}
           </button>
         </form>
 
