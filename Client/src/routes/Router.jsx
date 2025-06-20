@@ -120,11 +120,11 @@ const router = createBrowserRouter([
                 element: <Dashboard />,
             },
             {
-                path: "add-Vaccine",
+                path: "add-vaccine",
                 element: <AddVaccine />,
             },
             {
-                path: "add-Development",
+                path: "add-development",
                 element: <AddDevelopment />,
             }, {
                 path: "ManageRights",
