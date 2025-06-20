@@ -3,10 +3,10 @@ import vaccineService from '../../service/standardVaccine.service';
 import { FaPlus } from 'react-icons/fa';
 
 const VaccinePage = () => {
-  const [vaccineOptions, setVaccineOptions] = useState([]);
-  const [formRows, setFormRows] = useState([]);
-  const [showForm, setShowForm] = useState(false);
-  const [displayRows, setDisplayRows] = useState([]);
+  const [vaccineOptions, setVaccineOptions] = useState([]); //เก็บชื่อวัคซีนทั้งหมดที่ใช้ใน datalist
+  const [formRows, setFormRows] = useState([]); // เก็บข้อมูลที่กรอกในฟอร์ม
+  const [showForm, setShowForm] = useState(false); // แสดงหรือซ่อนฟอร์มเพิ่มวัคซีน
+  const [displayRows, setDisplayRows] = useState([]); // เก็บข้อมูลวัคซีนที่จะแสดงในตาราง
 
   const ageOptions = ['1 เดือน', '2 เดือน', '4 เดือน', '6 เดือน', '9 เดือน', '1 ปี', '1 ปี 6 เดือน', '2 ปี', '2 ปี 6 เดือน', '11 ปี', '12 ปี'];
 
@@ -16,7 +16,7 @@ const VaccinePage = () => {
         const res = await vaccineService.getvaccine();
         const allVaccines = res.data.vaccines;
 
-        const flatRows = allVaccines.flatMap(item =>
+        const flatRows = allVaccines.flatMap(item => // แปลงข้อมูลแบบซ้อนกันให้เป็นแถวเดียว
           item.vaccines.map(v => ({
             age: `${item.ageRange} เดือน`, // แปลงเป็นข้อความเพื่อแสดง
             ageNum: item.ageRange, // เพิ่มอันนี้เพื่อใช้เรียงลำดับ
@@ -52,7 +52,7 @@ const VaccinePage = () => {
     setFormRows(updatedRows);
   };
 
-  const mapAgeTextToNumber = (ageText) => {
+  const mapAgeTextToNumber = (ageText) => { // แปลงข้อความเป็นตัวเลข (เดือน)
     const map = {
       '1 เดือน': 1,
       '2 เดือน': 2,

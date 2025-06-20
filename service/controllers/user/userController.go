@@ -129,6 +129,7 @@ func Login(c *gin.Context) {
 		"lastName":  user.LastName,
 		"email":     user.Email,
 		"picture":   user.Picture,
+		"role":      user.Role,
 		"token":     jwtToken,
 	})
 }

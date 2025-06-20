@@ -1,132 +1,157 @@
 import React, { useState, useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { useNavigate } from "react-router";
-import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import { toast } from "react-toastify";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { IoIosCloseCircle } from "react-icons/io";
+
 
 const Signin = () => {
-  const { login, loading  } = useContext(AuthContext);
+  const { login } = useContext(AuthContext);
   const navigate = useNavigate();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
+
+  // ใช้ state เดียวเก็บข้อมูลฟอร์ม
+  const [formData, setFormData] = useState({ email: "", password: "" });
   const [errors, setErrors] = useState({});
-  const [showPassword, setShowPassword] = useState(false); // State for showing/hiding password
+  const [showPassword, setShowPassword] = useState(false);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    setErrors((prev) => ({ ...prev, [name]: "" }));
+  };
+
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
-    let newErrors = {};
-    // Check if email is entered
-    if (!email.trim()) newErrors.Email = "กรุณากรอกอีเมล";
-    // Check if password is entered
-    if (!password.trim()) newErrors.Password = "กรุณากรอกรหัสผ่าน";
-  
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors); // Store errors
-      return; // Stop form submission if there are errors
-    }
-  
-    const userData = { email, password };
-    try {
-      await login(userData); // Call the login function
-      toast.success("เข้าสู่ระบบสำเร็จ!", {
-        position: "top-center",
-        autoClose: 1000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
-  
-      // setTimeout(() => {
-      //   navigate("/");  // Navigate to home page
-      // }, 2000);
 
-      navigate("/"); // Navigate to home page
+    // Validate
+    const newErrors = {};
+    if (!formData.email.trim()) newErrors.email = "กรุณากรอกอีเมล";
+    if (!formData.password.trim()) newErrors.password = "กรุณากรอกรหัสผ่าน";
+
+    if (Object.keys(newErrors).length) {
+      setErrors(newErrors);
+      return;
+    }
+
+    try {
+      setIsLoggingIn(true); // ตั้งค่าสถานะการล็อกอินเป็นกำลังดำเนินการ
+      const user = await login(formData);
+      console.log("Sign up success reached!");
+
+      toast.success("เข้าสู่ระบบสำเร็จ!", { autoClose: 1500 });
+
+      setTimeout(() => {
+        if (user.role === "admin") navigate("/dashboard");
+        else navigate("/");
+      }, 1600);
+
     } catch (error) {
-      const errorMessage = error.response ? error.response.data.message : "เกิดข้อผิดพลาดในการเข้าสู่ระบบ!";
-      toast.error(errorMessage, {
-        position: "top-center",
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
-      console.error("Error during login:", error); // เพิ่ม log เพื่อดู error ที่เกิดขึ้น
+      setIsLoggingIn(false); // รีเซ็ตสถานะการล็อกอินเมื่อเกิดข้อผิดพลาด
+      console.error("Login Error:", error);
+      const msg = error.response?.data?.message || "เกิดข้อผิดพลาด";
+      if (msg === "ไม่พบผู้ใช้งาน") setErrors({ email: msg });
+      else if (msg === "รหัสผ่านไม่ถูกต้อง") setErrors({ password: msg });
+      else toast.error(msg);
     }
   };
 
-  if (loading) {
-    return <div>กำลังโหลด...</div>; // หากกำลังโหลดหรือยังไม่พร้อม ให้แสดงข้อความโหลด
-  }
+    const inputBaseClass =
+    "input input-bordered w-full mt-1 focus:outline-none focus:ring-2 focus:ring-[#84C7AE]";
+  const errorClass = "border-red-500";
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center bg-[#EE8A8A] overflow-hidden">
-      <div className="absolute top-0 left-0 w-96 h-96 bg-[#FFD2D1] opacity-80 rounded-xl rotate-6"></div>
-      <div className="absolute bottom-0 right-0 w-96 h-96 bg-[#FFD2D1] opacity-80 rounded-xl -rotate-6"></div>
+    <div className="min-h-screen flex items-center justify-center bg-[#EE8A8A] overflow-hidden p-6">
+      <div className="bg-white p-6 rounded-xl shadow-md w-full max-w-md relative z-10">
 
-      <div className="absolute top-10 left-10 opacity-60">
-        <img src="/images/BG/BG-L.png" alt="children play" className="w-32 h-32" />
-      </div>
-      <div className="absolute bottom-10 right-10 opacity-60">
-        <img src="/images/BG/BG-R.png" alt="syringe" className="w-32 h-32" />
-      </div>
+        {/* ปุ่มปิด */}
+        <button
+          type="button"
+          onClick={() => navigate("/")}
+          className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 text-4xl"
+          aria-label="ยกเลิก"
+        >
+          <IoIosCloseCircle />
+        </button>
 
-      <div className="bg-white p-8 rounded-2xl shadow-lg w-96 text-center relative z-10">
-        <h2 className="text-lg font-bold text-[#32403B] mb-4">
-          เข้าสู่ระบบเพื่อเข้าถึงบริการสำหรับบันทึกวัคซีน และ ติดตามพัฒนาการของเด็ก
+        <h2 className="text-center text-lg font-semibold mb-8 mt-10 text-[#32403B]">
+          เข้าสู่ระบบเพื่อเข้าถึงบริการบันทึกวัคซีนและติดตามพัฒนาการของเด็ก
         </h2>
-        <form onSubmit={handleSubmit}>
-          <div className="mb-3 text-left">
-            <label className="block text-sm font-medium text-gray-700">
+
+        <form onSubmit={handleSubmit} noValidate>
+          <div className="mb-4">
+            <label className="block mb-1 text-sm font-medium text-gray-700">
               อีเมล <span className="text-red-500">*</span>
             </label>
             <input
+              name="email"
               type="email"
-              className="input input-bordered w-full mt-1"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              value={formData.email}
+              onChange={handleChange}
+              className={`${inputBaseClass} ${errors.email ? errorClass : ""}`}
+              autoComplete="email"
+              placeholder="กรอกอีเมลของคุณ"
             />
-            {errors.Email && <p className="text-red-500 text-xs">{errors.Email}</p>}
+            {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
           </div>
-          <div className="mb-3 text-left">
-            <label className="block text-sm font-medium text-gray-700">
+
+          <div className="mb-4 relative">
+            <label className="block mb-1 text-sm font-medium text-gray-700">
               รหัสผ่าน <span className="text-red-500">*</span>
             </label>
-            <div className="relative">
-              <input
-                type={showPassword ? "text" : "password"} // Toggle between password and text
-                className="input input-bordered w-full mt-1"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)} // Toggle password visibility
-                className="absolute top-1/2 right-3 transform -translate-y-1/2 text-gray-500"
-              >
-                {showPassword ? <FaEyeSlash /> : <FaEye />} {/* Button text based on visibility */}
-              </button>
-            </div>
-            {errors.Password && <p className="text-red-500 text-xs">{errors.Password}</p>}
+            <input
+              name="password"
+              type={showPassword ? "text" : "password"}
+              value={formData.password}
+              onChange={handleChange}
+              className={`${inputBaseClass} ${errors.password ? errorClass : ""}`}
+              autoComplete="current-password"
+              placeholder="กรอกรหัสผ่าน"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword((v) => !v)}
+              className="absolute top-9 right-3 text-gray-500"
+              tabIndex={-1}
+              aria-label={showPassword ? "ซ่อนรหัสผ่าน" : "แสดงรหัสผ่าน"}
+            >
+              {showPassword ? <FaEyeSlash /> : <FaEye />}
+            </button>
+            {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password}</p>}
           </div>
-          <p className="mt-3 text-sm text-gray-500 flex justify-end">
-            หากคุณลืมรหัสผ่าน? <a href="/Signup" className="text-red-500">คลิ๊กที่นี่</a>
+
+          <p className="text-sm text-gray-500 mb-4 text-right">
+            หากลืมรหัสผ่าน?{" "}
+            <a href="/Signup" className="text-red-500 underline">
+              คลิกที่นี่
+            </a>
           </p>
-          <button className="bg-[#FA5453] text-white px-4 py-2 rounded-lg w-full hover:bg-[#ff8686] transition duration-300 mt-4">
-            เข้าสู่ระบบ
+
+          <button
+            type="submit"
+            disabled={isLoggingIn}
+            className={`${isLoggingIn
+              ? "bg-[#FA5453] opacity-50 cursor-not-allowed"
+              : "bg-[#FA5453] hover:bg-[#ff8686]"
+              } text-white py-2 rounded-lg w-full transition`}
+          >
+            {isLoggingIn ? "กำลังเข้าสู่ระบบ..." : "เข้าสู่ระบบ"}
           </button>
         </form>
 
-        <p className="mt-3 text-sm text-gray-500">
-          หากคุณยังไม่มีบัญชีผู้ใช้? <a href="/Signup" className="text-red-500">สมัครสมาชิก</a>
+
+
+        <p className="mt-4 text-center text-sm text-gray-500">
+          หากยังไม่มีบัญชีผู้ใช้?{" "}
+          <a href="/Signup" className="text-red-500 underline">
+            สมัครสมาชิก
+          </a>
         </p>
+
       </div>
-      <ToastContainer />
     </div>
   );
 };

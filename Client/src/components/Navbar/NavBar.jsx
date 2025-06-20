@@ -33,7 +33,7 @@ const NavBar = () => {
 
         {/* เมนู วัคซีน */}
         <a
-          href="/Vaccine"
+          href="/ViewVaccine"
           className="flex flex-col items-center gap-1 menu-item"
         >
           <MdOutlineVaccines className="w-6 h-6" />
@@ -42,7 +42,7 @@ const NavBar = () => {
 
         {/* เมนู พัฒนาการ */}
         <a
-          href="/Development"
+          href="/ViewDevelopment"
           className="flex flex-col items-center gap-1 menu-item"
         >
           <FaChild className="w-6 h-6" />

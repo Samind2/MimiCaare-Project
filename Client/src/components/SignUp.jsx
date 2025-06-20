@@ -1,192 +1,246 @@
 import React, { useState, useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { useNavigate } from "react-router";
-import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import { toast } from "react-toastify";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { IoIosCloseCircle } from "react-icons/io";
+
 
 const SignUp = () => {
   const { signup } = useContext(AuthContext);
   const navigate = useNavigate();
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
+
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+  });
+
   const [errors, setErrors] = useState({});
+  const [showPass, setShowPass] = useState(false);
+  const [showConfirmPass, setShowConfirmPass] = useState(false);
 
-  // State สำหรับจัดการการแสดงรหัสผ่าน
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const validateEmail = (email) =>
+    /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email);
 
-  const validateEmail = (email) => {
-    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-    return emailRegex.test(email);
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    setErrors((prev) => ({ ...prev, [name]: "" }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const newErrors = {};
+    if (!formData.firstName.trim()) newErrors.firstName = "กรุณากรอกชื่อ";
+    if (!formData.lastName.trim()) newErrors.lastName = "กรุณากรอกนามสกุล";
+    if (!formData.email.trim()) newErrors.email = "กรุณากรอกอีเมล";
+    else if (!validateEmail(formData.email)) newErrors.email = "อีเมลไม่ถูกต้อง";
+    if (!formData.password) newErrors.password = "กรุณากรอกรหัสผ่าน";
+    if (!formData.confirmPassword)
+      newErrors.confirmPassword = "กรุณายืนยันรหัสผ่าน"; // เพิ่มการตรวจสอบกรณีไม่กรอกยืนยันรหัสผ่าน
+    else if (formData.password !== formData.confirmPassword)
+      newErrors.confirmPassword = "รหัสผ่านไม่ตรงกัน"; // ตรวจสอบว่ารหัสผ่านและยืนยันรหัสผ่านตรงกัน
 
-    let newErrors = {};
-    if (!firstName.trim()) newErrors.firstName = "กรุณากรอกชื่อ";
-    if (!lastName.trim()) newErrors.lastName = "กรุณากรอกนามสกุล";
-    if (!email.trim()) newErrors.email = "กรุณากรอกอีเมล";
-    if (email && !validateEmail(email)) newErrors.email = "อีเมลไม่ถูกต้อง";
-    if (!password.trim()) newErrors.password = "กรุณากรอกรหัสผ่าน";
-    if (password !== confirmPassword)
-      newErrors.confirmPassword = "รหัสผ่านและยืนยันรหัสผ่านไม่ตรงกัน"; // ตรวจสอบรหัสผ่าน
-
-    if (Object.keys(newErrors).length > 0) {
+    if (Object.keys(newErrors).length) { 
       setErrors(newErrors);
       return;
     }
 
-    const userData = { firstName, lastName, email, password };
     try {
-      await signup(userData);
-      toast.success("ลงทะเบียนสำเร็จ!", {
-        position: "top-center",
-        autoClose: 1000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
-
+      setIsLoggingIn(true);
+      await signup(formData);
+      toast.success("ลงทะเบียนสำเร็จ!", { autoClose: 1500 });
       setTimeout(() => {
         navigate("/");
-      }, 2000);
+      }, 1600);
     } catch (error) {
-      toast.error("เกิดข้อผิดพลาดในการลงทะเบียน!", {
-        position: "top-center",
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
-      console.error("Error in profile update:", error); // เพิ่ม log เพื่อดู error
+      setIsLoggingIn(false);
+      const msg = error.response?.data?.message || "เกิดข้อผิดพลาด";
+      if (msg === "อีเมลนี้ถูกใช้งานแล้ว") {
+        setErrors((prev) => ({ ...prev, email: msg }));
+      } else {
+        toast.error(msg);
+      }
     }
   };
 
-  return (
-    <div className="relative min-h-screen flex items-center justify-center bg-[#A7D7C5] overflow-hidden">
-      <div className="absolute top-0 left-0 w-96 h-96 bg-[#C1E3D6] opacity-80 rounded-xl rotate-6"></div>
-      <div className="absolute bottom-0 right-0 w-96 h-96 bg-[#C1E3D6] opacity-80 rounded-xl -rotate-6"></div>
+  const inputBaseClass =
+    "input input-bordered w-full mt-1 focus:outline-none focus:ring-2 focus:ring-[#84C7AE]";
+  const errorClass = "border-red-500";
 
-      <div className="bg-white p-8 rounded-2xl shadow-lg w-96 text-center relative z-10">
-        <h2 className="text-lg font-bold text-[#32403B] mb-4">
-          สร้างบัญชีเพื่อเข้าถึงบริการสำหรับบันทึกวัคซีน
-          และติดตามพัฒนาการของเด็ก
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-[#A7D7C5] p-4">
+      <div className="bg-white p-8 rounded-xl shadow-md w-full max-w-md relative z-10">
+        {/* ปุ่มปิด */}
+        <button
+          type="button"
+          onClick={() => navigate("/")}
+          className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 text-4xl"
+          aria-label="ยกเลิก"
+        >
+          <IoIosCloseCircle />
+        </button>
+
+        <h2 className="text-center text-lg font-semibold mb-8 mt-10 text-[#32403B]">
+          สร้างบัญชีเพื่อบันทึกวัคซีนและติดตามพัฒนาการของเด็ก
         </h2>
-        <form onSubmit={handleSubmit}>
-          <div className="flex gap-3 mb-3">
-            <div className="w-1/2 text-left">
-              <label className="block text-sm font-medium text-gray-700">
+
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="flex gap-4">
+            <div className="flex-1">
+              <label>
                 ชื่อ <span className="text-red-500">*</span>
               </label>
               <input
-                type="text"
-                className="input input-bordered w-full mt-1"
-                value={firstName}
-                onChange={(e) => setFirstName(e.target.value)}
+                name="firstName"
+                value={formData.firstName}
+                onChange={handleChange}
+                placeholder="ชื่อ"
+                className={`${inputBaseClass} ${errors.firstName ? errorClass : ""
+                  }`}
+                aria-invalid={!!errors.firstName}
+                aria-describedby="firstName-error"
               />
               {errors.firstName && (
-                <p className="text-red-500 text-xs">{errors.firstName}</p>
+                <p id="firstName-error" className="text-red-500 text-xs mt-1">
+                  {errors.firstName}
+                </p>
               )}
             </div>
-            <div className="w-1/2 text-left">
-              <label className="block text-sm font-medium text-gray-700">
+            <div className="flex-1">
+              <label>
                 นามสกุล <span className="text-red-500">*</span>
               </label>
               <input
-                type="text"
-                className="input input-bordered w-full mt-1"
-                value={lastName}
-                onChange={(e) => setLastName(e.target.value)}
+                name="lastName"
+                value={formData.lastName}
+                onChange={handleChange}
+                placeholder="นามสกุล"
+                className={`${inputBaseClass} ${errors.lastName ? errorClass : ""
+                  }`}
+                aria-invalid={!!errors.lastName}
+                aria-describedby="lastName-error"
               />
               {errors.lastName && (
-                <p className="text-red-500 text-xs">{errors.lastName}</p>
+                <p id="lastName-error" className="text-red-500 text-xs mt-1">
+                  {errors.lastName}
+                </p>
               )}
             </div>
           </div>
-          <div className="mb-3 text-left">
-            <label className="block text-sm font-medium text-gray-700">
-              อีเมลที่ใช้อยู่ปัจจุบัน <span className="text-red-500">*</span>
+
+          <div>
+            <label>
+              อีเมล <span className="text-red-500">*</span>
             </label>
             <input
+              name="email"
               type="email"
-              className="input input-bordered w-full mt-1"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              value={formData.email}
+              onChange={handleChange}
+              placeholder="example@mail.com"
+              className={`${inputBaseClass} ${errors.email ? errorClass : ""}`}
+              aria-invalid={!!errors.email}
+              aria-describedby="email-error"
             />
             {errors.email && (
-              <p className="text-red-500 text-xs">{errors.email}</p>
+              <p id="email-error" className="text-red-500 text-xs mt-1">
+                {errors.email}
+              </p>
             )}
           </div>
-          <div className="mb-3 text-left">
-            <label className="block text-sm font-medium text-gray-700">
+
+          <div>
+            <label>
               รหัสผ่าน <span className="text-red-500">*</span>
             </label>
             <div className="relative">
               <input
-                type={showPassword ? "text" : "password"}
-                className="input input-bordered w-full mt-1"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                name="password"
+                type={showPass ? "text" : "password"}
+                value={formData.password}
+                onChange={handleChange}
+                placeholder="••••••••"
+                className={`${inputBaseClass} ${errors.password ? errorClass : ""
+                  }`}
+                aria-invalid={!!errors.password}
+                aria-describedby="password-error"
               />
               <button
                 type="button"
-                className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500"
-                onClick={() => setShowPassword(!showPassword)}
+                onClick={() => setShowPass(!showPass)}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500"
+                aria-label={showPass ? "ซ่อนรหัสผ่าน" : "แสดงรหัสผ่าน"}
               >
-                {showPassword ? <FaEyeSlash /> : <FaEye />}
+                {showPass ? <FaEyeSlash /> : <FaEye />}
               </button>
             </div>
             {errors.password && (
-              <p className="text-red-500 text-xs">{errors.password}</p>
+              <p id="password-error" className="text-red-500 text-xs mt-1">
+                {errors.password}
+              </p>
             )}
           </div>
-          <div className="mb-3 text-left">
-            <label className="block text-sm font-medium text-gray-700">
+
+          <div>
+            <label>
               ยืนยันรหัสผ่าน <span className="text-red-500">*</span>
             </label>
             <div className="relative">
               <input
-                type={showConfirmPassword ? "text" : "password"}
-                className="input input-bordered w-full mt-1"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
+                name="confirmPassword"
+                type={showConfirmPass ? "text" : "password"}
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                placeholder="••••••••"
+                className={`${inputBaseClass} ${errors.confirmPassword ? errorClass : ""
+                  }`}
+                aria-invalid={!!errors.confirmPassword}
+                aria-describedby="confirmPassword-error"
               />
               <button
                 type="button"
-                className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500"
-                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                onClick={() => setShowConfirmPass(!showConfirmPass)}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500"
+                aria-label={showConfirmPass ? "ซ่อนรหัสผ่าน" : "แสดงรหัสผ่าน"}
               >
-                {showPassword ? <FaEyeSlash /> : <FaEye />}
+                {showConfirmPass ? <FaEyeSlash /> : <FaEye />}
               </button>
             </div>
             {errors.confirmPassword && (
-              <p className="text-red-500 text-xs">{errors.confirmPassword}</p>
+              <p
+                id="confirmPassword-error"
+                className="text-red-500 text-xs mt-1"
+              >
+                {errors.confirmPassword}
+              </p>
             )}
           </div>
+
           <button
             type="submit"
-            className="bg-[#84C7AE] text-white px-4 py-2 rounded-lg w-full hover:bg-[#9fe0c8] transition duration-300"
+            disabled={isLoggingIn}
+            className={`${isLoggingIn
+              ? "bg-[#47b18a] opacity-50 cursor-not-allowed"
+              : "bg-[#47b18a] hover:bg-[#9fe0c8]"
+              } text-white py-2 rounded-lg w-full transition`}
           >
-            สร้างบัญชี
+            {isLoggingIn ? " กำลังสร้างบัญชี..." : "สร้างบัญชี"}
           </button>
         </form>
-        <p className="mt-3 text-sm text-gray-500">
-          มีบัญชีอยู่แล้ว?{" "}
+
+        <p className="mt-4 text-center text-gray-500">
+          มีบัญชีแล้ว?{" "}
           <a href="/Signin" className="text-red-500">
             เข้าสู่ระบบ
           </a>
         </p>
       </div>
-      <ToastContainer />
     </div>
   );
 };
