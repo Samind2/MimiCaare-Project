@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import vaccineService from "../../../service/standardVaccine.service";
 import receiveVaccineService from "../../../service/receiveVac.service";
 import childService from "../../../service/child.service";
+import { toast } from "react-toastify";
 
 const ViewVac = () => {
   const [vaccines, setVaccines] = useState([]);
@@ -31,7 +32,7 @@ const ViewVac = () => {
         (rv) => rv.standardVaccineId === item.id
       );
       if (!record) {
-        alert("ไม่พบข้อมูลวัคซีนที่ต้องการแก้ไข");
+        toast.warning("ไม่พบข้อมูลวัคซีนที่ต้องการแก้ไข");
         return;
       }
 
@@ -100,7 +101,7 @@ const ViewVac = () => {
       if (!selectedChild) return;
       try {
         const res = await receiveVaccineService.getByChildId(selectedChild.id);
-        console.log("API getByChildId response:", res.data);
+        // console.log("API getByChildId response:", res.data);
 
         // ดึงข้อมูลวัคซีนที่ได้รับ (ถ้า vaccines เป็น null ให้แทนด้วย array ว่าง)
         const receivedData = Array.isArray(res.data.vaccines)
@@ -109,7 +110,7 @@ const ViewVac = () => {
 
         setReceivedVaccines(receivedData);
       } catch (error) {
-        console.error("Error fetching received vaccines", error);
+        // console.error("Error fetching received vaccines", error);
         setReceivedVaccines([]);
       }
     };
@@ -127,11 +128,11 @@ const ViewVac = () => {
   // บันทึกข้อมูลรับวัคซีน (เพิ่มหรือแก้ไข)
   const handleSaveVaccine = async () => {
     if (!selectedChild?.id) {
-      alert("กรุณาเลือกเด็กก่อนบันทึก");
+      toast.warning("กรุณาเลือกเด็กก่อนบันทึก");
       return;
     }
     if (!formData.standardVaccineId) {
-      alert("ข้อมูลวัคซีนไม่ถูกต้อง");
+      toast.warning("ข้อมูลวัคซีนไม่ถูกต้อง");
       return;
     }
 
@@ -148,15 +149,15 @@ const ViewVac = () => {
       if (isEditMode) {
         // เรียก API แก้ไขข้อมูล โดยใช้ editingRecordId
         if (!editingRecordId) {
-          alert("ไม่พบข้อมูลสำหรับแก้ไข");
+          toast.warning("ไม่พบข้อมูลสำหรับแก้ไขการรับวัคซีน");
           return;
         }
         await receiveVaccineService.updateById(editingRecordId, payload);
-        alert("แก้ไขข้อมูลสำเร็จ");
+        toast.success("แก้ไขการรับวัคซีนสำเร็จ");
       } else {
         // เพิ่มใหม่
         await receiveVaccineService.addFromStandard(payload);
-        alert("บันทึกข้อมูลสำเร็จ");
+        toast.success("บันทึกการรับวัคซีนสำเร็จ");
       }
 
       setShowModal(false);
@@ -166,8 +167,8 @@ const ViewVac = () => {
       const receivedData = Array.isArray(res.data.vaccines) ? res.data.vaccines : [];
       setReceivedVaccines(receivedData);
     } catch (err) {
-      console.error("เกิดข้อผิดพลาดขณะบันทึก", err);
-      alert("เกิดข้อผิดพลาดขณะบันทึก กรุณาลองใหม่");
+      // console.error("เกิดข้อผิดพลาดขณะบันทึก", err);
+      toast.error("เกิดข้อผิดพลาดขณะบันทึก กรุณาลองใหม่");
     }
   };
 
@@ -178,23 +179,28 @@ const ViewVac = () => {
 
         <div className="flex space-x-4">
           <div className="dropdown dropdown-hover">
-            <label tabIndex={0} className="btn m-1">
+            <label
+              tabIndex={0}
+              className="btn bg-blue-200 text-blue-800 hover:bg-blue-300 rounded-xl px-4 py-2 text-lg font-semibold shadow-md transition"
+            >
               ตามมาตรฐาน
             </label>
             <ul
               tabIndex={0}
-              className="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52"
+              className="dropdown-content menu p-3 shadow-lg bg-blue-100 rounded-xl w-56 text-blue-900 font-medium text-base"
+              style={{ minWidth: "14rem" }}
             >
               <li>
-                <a>เพิ่มเติม</a>
+                <a className="hover:bg-blue-300 rounded-md p-2 cursor-pointer">เพิ่มเติม</a>
               </li>
             </ul>
           </div>
+
           <div className="dropdown dropdown-hover">
             <div
               tabIndex={0}
               role="button"
-              className="btn m-1 w-40 overflow-hidden whitespace-nowrap text-ellipsis px-3 text-left"
+              className="btn m-1 w-48 overflow-hidden whitespace-nowrap text-ellipsis px-4 py-2 text-left bg-pink-100 text-pink-800 hover:bg-pink-200 rounded-xl text-lg font-semibold shadow-md cursor-pointer transition"
               title={
                 selectedChild
                   ? `${selectedChild.firstName} ${selectedChild.lastName}`
@@ -209,11 +215,13 @@ const ViewVac = () => {
             </div>
             <ul
               tabIndex={0}
-              className="dropdown-content z-50 menu p-2 shadow bg-base-100 rounded-box w-52"
+              className="dropdown-content z-50 menu p-3 shadow-lg bg-pink-50 rounded-xl w-56 max-h-60 overflow-auto text-pink-900 font-medium text-base"
+              style={{ minWidth: "14rem" }}
             >
               {children.map((child) => (
                 <li key={child._id}>
                   <a
+                    className="hover:bg-pink-200 rounded-md p-2 cursor-pointer"
                     onClick={() => {
                       setSelectedChild(child);
                       setReceivedVaccines([]); // เคลียร์ข้อมูลเก่า
@@ -301,8 +309,8 @@ const ViewVac = () => {
         </table>
 
         {showModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-            <div className="bg-white p-6 rounded shadow-lg w-full max-w-md">
+          <div className="fixed inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm z-50">
+            <div className="bg-white rounded-xl p-6 w-[90%] max-w-md shadow-lg">
               <h2 className="text-xl font-bold mb-4">
                 {isEditMode ? "แก้ไขข้อมูลวัคซีน" : "บันทึกข้อมูลวัคซีน"}
               </h2>

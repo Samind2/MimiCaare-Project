@@ -113,7 +113,7 @@ const AddDevelopment = () => {
         );
 
         if (!ageRange) {
-            alert('กรุณาเลือกช่วงอายุ');
+            toast.warning('กรุณาเลือกช่วงอายุ');
             return;
         }
 
