@@ -4,20 +4,24 @@ import { FaPlus } from 'react-icons/fa';
 import { toast } from "react-toastify";
 
 const VaccinePage = () => {
+  // กำหนด state สำหรับข้อมูลวัคซีน
   const [vaccineOptions, setVaccineOptions] = useState([]);
   const [formRows, setFormRows] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [groupedByAge, setGroupedByAge] = useState({});
-  const [editAge, setEditAge] = useState(null);          // อายุที่กำลังแก้ไข (เช่น 6, 12, 18 ...)
-  const [editVaccines, setEditVaccines] = useState([]);  // รายการวัคซีนที่แก้ไขสำหรับช่วงอายุนี้
+  const [editAge, setEditAge] = useState(null);          // เก็บอายุที่กำลังแก้ไข
+  const [editVaccines, setEditVaccines] = useState([]);  // เก็บชื่อวัคซีนที่จะแก้ไข
 
 
+  // กำหนดตัวเลือกอายุสำหรับ select
   const ageOptions = ['1 เดือน', '2 เดือน', '4 เดือน', '6 เดือน', '9 เดือน', '1 ปี', '1 ปี 6 เดือน', '2 ปี', '2 ปี 6 เดือน', '11 ปี', '12 ปี'];
 
+  // ดึงข้อมูลวัคซีนเ
   useEffect(() => {
     fetchVaccines();
   }, []);
 
+  // ดึงข้อมูลวัคซีนจาก API 
   const fetchVaccines = async () => {
     try {
       const res = await vaccineService.getvaccine();
@@ -32,10 +36,10 @@ const VaccinePage = () => {
         };
       });
 
-      console.log('Grouped by Age:', grouped);
-      setGroupedByAge(grouped);
+      // console.log('Grouped by Age:', grouped);
+      setGroupedByAge(grouped); // เก็บข้อมูลที่จัดกลุ่มตามอายุ
 
-      // รวมชื่อวัคซีนเพื่อ autocomplete / datalist
+      // สร้างตัวเลือกวัคซีนที่ไม่ซ้ำกัน
       const vaccineNames = [...new Set(allVaccines.flatMap(item => item.vaccines.map(v => v.vaccineName)))];
       setVaccineOptions(vaccineNames);
     } catch (err) {
@@ -43,6 +47,7 @@ const VaccinePage = () => {
     }
   };
 
+  // แปลงอายุเป็นข้อความ
   const mapAgeToText = (age) => {
     if (age >= 12) {
       const years = age / 12;
@@ -51,21 +56,7 @@ const VaccinePage = () => {
     return `${age} เดือน`;
   };
 
-  const handleAddForm = () => {
-    setIsModalOpen(true);
-    setFormRows([{ age: '', vaccine: '' }]);
-  };
-
-  const handleAddRow = () => {
-    setFormRows([...formRows, { age: '', vaccine: '' }]);
-  };
-
-  const handleChange = (index, field, value) => {
-    const updatedRows = [...formRows];
-    updatedRows[index][field] = value;
-    setFormRows(updatedRows);
-  };
-
+    // แปลงข้อความอายุเป็นตัวเลข
   const mapAgeTextToNumber = (ageText) => {
     const map = {
       '1 เดือน': 1, '2 เดือน': 2, '4 เดือน': 4, '6 เดือน': 6, '9 เดือน': 9,
@@ -74,17 +65,36 @@ const VaccinePage = () => {
     return map[ageText] || 0;
   };
 
+  // เปิด modal เพื่อเพิ่มข้อมูลวัคซีน
+  const handleAddForm = () => {
+    setIsModalOpen(true);
+    setFormRows([{ age: '', vaccine: '' }]);
+  };
+
+  // เพิ่มแถวใหม่ในฟอร์ม
+  const handleAddRow = () => {
+    setFormRows([...formRows, { age: '', vaccine: '' }]);
+  };
+
+  // จัดการการเปลี่ยนแปลงข้อมูลในฟอร์ม
+  const handleChange = (index, field, value) => {
+    const updatedRows = [...formRows];
+    updatedRows[index][field] = value;
+    setFormRows(updatedRows);
+  };
+
+  // บันทึกข้อมูลวัคซีน
   const handleSave = async () => {
     try {
       const grouped = {};
-      formRows.forEach((row) => {
-        const age = mapAgeTextToNumber(row.age);
+      formRows.forEach((row) => { // ตรวจสอบว่ามีข้อมูลอายุและวัคซีนหรือไม่
+        const age = mapAgeTextToNumber(row.age); 
         if (!grouped[age]) grouped[age] = [];
-        grouped[age].push({ vaccineName: row.vaccine, note: "" });
+        grouped[age].push({ vaccineName: row.vaccine, note: "" }); 
       });
 
       for (const age in grouped) {
-        const payload = { ageRange: parseInt(age), vaccines: grouped[age] };
+        const payload = { ageRange: parseInt(age), vaccines: grouped[age] }; // แปลงข้อมูลเป็น payload
         await vaccineService.addvaccine(payload);
       }
 
@@ -104,12 +114,14 @@ const VaccinePage = () => {
     }
   };
 
+  // แก้ไขข้อมูลวัคซีน
   const handleEdit = (age) => {
     setEditAge(age);
     setEditVaccines([...groupedByAge[age].vaccines]); // copy เพื่อแก้ไข
     setIsModalOpen(true); // หรือใช้ modal แยกอีกตัวสำหรับแก้ไข
   };
 
+  // ฟังก์ชันสำหรับการแก้ไขข้อมูลวัคซีน
   const handleUpdate = async () => {
   try {
     const payload = {
@@ -128,6 +140,7 @@ const VaccinePage = () => {
 };
 
 
+  // ลบข้อมูลวัคซีน
   const handleDelete = async (idToDelete) => {
     const confirmDelete = () =>
       new Promise((resolve) => {
