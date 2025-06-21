@@ -5,12 +5,10 @@ import { toast } from "react-toastify";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { IoIosCloseCircle } from "react-icons/io";
 
-
 const SignUp = () => {
   const { signup } = useContext(AuthContext);
   const navigate = useNavigate();
   const [isLoggingIn, setIsLoggingIn] = useState(false);
-
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -18,7 +16,6 @@ const SignUp = () => {
     password: "",
     confirmPassword: "",
   });
-
   const [errors, setErrors] = useState({});
   const [showPass, setShowPass] = useState(false);
   const [showConfirmPass, setShowConfirmPass] = useState(false);
@@ -41,11 +38,11 @@ const SignUp = () => {
     else if (!validateEmail(formData.email)) newErrors.email = "อีเมลไม่ถูกต้อง";
     if (!formData.password) newErrors.password = "กรุณากรอกรหัสผ่าน";
     if (!formData.confirmPassword)
-      newErrors.confirmPassword = "กรุณายืนยันรหัสผ่าน"; // เพิ่มการตรวจสอบกรณีไม่กรอกยืนยันรหัสผ่าน
+      newErrors.confirmPassword = "กรุณายืนยันรหัสผ่าน";
     else if (formData.password !== formData.confirmPassword)
-      newErrors.confirmPassword = "รหัสผ่านไม่ตรงกัน"; // ตรวจสอบว่ารหัสผ่านและยืนยันรหัสผ่านตรงกัน
+      newErrors.confirmPassword = "รหัสผ่านไม่ตรงกัน";
 
-    if (Object.keys(newErrors).length) { 
+    if (Object.keys(newErrors).length) {
       setErrors(newErrors);
       return;
     }
@@ -68,178 +65,160 @@ const SignUp = () => {
     }
   };
 
-  const inputBaseClass =
-    "input input-bordered w-full mt-1 focus:outline-none focus:ring-2 focus:ring-[#84C7AE]";
-  const errorClass = "border-red-500";
-
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#A7D7C5] p-4">
-      <div className="bg-white p-8 rounded-xl shadow-md w-full max-w-md relative z-10">
-        {/* ปุ่มปิด */}
-        <button
-          type="button"
-          onClick={() => navigate("/")}
-          className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 text-4xl"
-          aria-label="ยกเลิก"
-        >
-          <IoIosCloseCircle />
-        </button>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#F9D5E5] via-[#E3FBE5] to-[#A7D7C5] px-4 py-10">
+      <div className="w-full max-w-5xl bg-white shadow-xl rounded-3xl overflow-hidden flex flex-col md:flex-row">
 
-        <h2 className="text-center text-lg font-semibold mb-8 mt-10 text-[#32403B]">
-          สร้างบัญชีเพื่อบันทึกวัคซีนและติดตามพัฒนาการของเด็ก
-        </h2>
+        {/* ซ้าย: ฟอร์มสมัครสมาชิก */}
+        <div className="w-full md:w-1/2 p-8 relative">
+          {/* ปุ่มปิด */}
+          <button
+            onClick={() => navigate("/")}
+            className="absolute top-3 right-3 text-gray-400 hover:text-red-500 text-3xl"
+          >
+            <IoIosCloseCircle />
+          </button>
 
+          <h2 className="text-2xl font-bold text-[#4A5B50] mb-2 text-center md:text-left">
+            สร้างบัญชี
+          </h2>
+          <p className="text-sm text-gray-500 mb-6 text-center md:text-left">
+            สำหรับระบบบันทึกวัคซีนและติดตามพัฒนาการเด็ก
+          </p>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="flex gap-4">
-            <div className="flex-1">
-              <label>
-                ชื่อ <span className="text-red-500">*</span>
-              </label>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {/* ชื่อ-นามสกุล */}
+            <div className="flex gap-4">
+              <div className="flex-1">
+                <label className="label text-sm text-gray-700">ชื่อ <span className="text-red-500">*</span> </label>
+                <input
+                  id="SU-01"
+                  name="firstName"
+                  value={formData.firstName}
+                  onChange={handleChange}
+                  placeholder="ชื่อ"
+                  className={`input input-bordered w-full rounded-xl ${errors.firstName ? "input-error" : ""}`}
+                />
+                {errors.firstName && (
+                  <p className="text-red-500 text-xs mt-1">{errors.firstName}</p>
+                )}
+              </div>
+              <div className="flex-1">
+                <label className="label text-sm text-gray-700">นามสกุล <span className="text-red-500">*</span> </label>
+                <input
+                  id="SU-02"
+                  name="lastName"
+                  value={formData.lastName}
+                  onChange={handleChange}
+                  placeholder="นามสกุล"
+                  className={`input input-bordered w-full rounded-xl ${errors.lastName ? "input-error" : ""}`}
+                />
+                {errors.lastName && (
+                  <p className="text-red-500 text-xs mt-1">{errors.lastName}</p>
+                )}
+              </div>
+            </div>
+
+            {/* อีเมล */}
+            <div>
+              <label className="label text-sm text-gray-700">อีเมล <span className="text-red-500">*</span></label>
               <input
-                name="firstName"
-                value={formData.firstName}
+                id="SU-03"
+                type="email"
+                name="email"
+                value={formData.email}
                 onChange={handleChange}
-                placeholder="ชื่อ"
-                className={`${inputBaseClass} ${errors.firstName ? errorClass : ""
-                  }`}
-                aria-invalid={!!errors.firstName}
-                aria-describedby="firstName-error"
+                placeholder="example@email.com"
+                className={`input input-bordered w-full rounded-xl ${errors.email ? "input-error" : ""}`}
               />
-              {errors.firstName && (
-                <p id="firstName-error" className="text-red-500 text-xs mt-1">
-                  {errors.firstName}
-                </p>
+              {errors.email && (
+                <p className="text-red-500 text-xs mt-1">{errors.email}</p>
               )}
             </div>
-            <div className="flex-1">
-              <label>
-                นามสกุล <span className="text-red-500">*</span>
-              </label>
-              <input
-                name="lastName"
-                value={formData.lastName}
-                onChange={handleChange}
-                placeholder="นามสกุล"
-                className={`${inputBaseClass} ${errors.lastName ? errorClass : ""
-                  }`}
-                aria-invalid={!!errors.lastName}
-                aria-describedby="lastName-error"
-              />
-              {errors.lastName && (
-                <p id="lastName-error" className="text-red-500 text-xs mt-1">
-                  {errors.lastName}
-                </p>
-              )}
-            </div>
-          </div>
 
-          <div>
-            <label>
-              อีเมล <span className="text-red-500">*</span>
-            </label>
-            <input
-              name="email"
-              type="email"
-              value={formData.email}
-              onChange={handleChange}
-              placeholder="example@mail.com"
-              className={`${inputBaseClass} ${errors.email ? errorClass : ""}`}
-              aria-invalid={!!errors.email}
-              aria-describedby="email-error"
-            />
-            {errors.email && (
-              <p id="email-error" className="text-red-500 text-xs mt-1">
-                {errors.email}
-              </p>
-            )}
-          </div>
-
-          <div>
-            <label>
-              รหัสผ่าน <span className="text-red-500">*</span>
-            </label>
+            {/* รหัสผ่าน */}
             <div className="relative">
+              <label className="label text-sm text-gray-700">รหัสผ่าน <span className="text-red-500">*</span> </label>
               <input
+                id="SU-04"
                 name="password"
                 type={showPass ? "text" : "password"}
                 value={formData.password}
                 onChange={handleChange}
                 placeholder="••••••••"
-                className={`${inputBaseClass} ${errors.password ? errorClass : ""
-                  }`}
-                aria-invalid={!!errors.password}
-                aria-describedby="password-error"
+                className={`input input-bordered w-full rounded-xl pr-10 ${errors.password ? "input-error" : ""}`}
               />
               <button
                 type="button"
                 onClick={() => setShowPass(!showPass)}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500"
-                aria-label={showPass ? "ซ่อนรหัสผ่าน" : "แสดงรหัสผ่าน"}
+                className="absolute right-3 top-[44px] text-gray-500"
               >
                 {showPass ? <FaEyeSlash /> : <FaEye />}
               </button>
+              {errors.password && (
+                <p className="text-red-500 text-xs mt-1">{errors.password}</p>
+              )}
             </div>
-            {errors.password && (
-              <p id="password-error" className="text-red-500 text-xs mt-1">
-                {errors.password}
-              </p>
-            )}
-          </div>
 
-          <div>
-            <label>
-              ยืนยันรหัสผ่าน <span className="text-red-500">*</span>
-            </label>
+            {/* ยืนยันรหัสผ่าน */}
             <div className="relative">
+              <label className="label text-sm text-gray-700">ยืนยันรหัสผ่าน <span className="text-red-500">*</span> </label>
               <input
+                id="SU-05"
                 name="confirmPassword"
                 type={showConfirmPass ? "text" : "password"}
                 value={formData.confirmPassword}
                 onChange={handleChange}
                 placeholder="••••••••"
-                className={`${inputBaseClass} ${errors.confirmPassword ? errorClass : ""
-                  }`}
-                aria-invalid={!!errors.confirmPassword}
-                aria-describedby="confirmPassword-error"
+                className={`input input-bordered w-full rounded-xl pr-10 ${errors.confirmPassword ? "input-error" : ""}`}
               />
               <button
                 type="button"
                 onClick={() => setShowConfirmPass(!showConfirmPass)}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500"
-                aria-label={showConfirmPass ? "ซ่อนรหัสผ่าน" : "แสดงรหัสผ่าน"}
+                className="absolute right-3 top-[44px] text-gray-500"
               >
                 {showConfirmPass ? <FaEyeSlash /> : <FaEye />}
               </button>
+              {errors.confirmPassword && (
+                <p className="text-red-500 text-xs mt-1">
+                  {errors.confirmPassword}
+                </p>
+              )}
             </div>
-            {errors.confirmPassword && (
-              <p
-                id="confirmPassword-error"
-                className="text-red-500 text-xs mt-1"
-              >
-                {errors.confirmPassword}
-              </p>
-            )}
+
+            {/* ปุ่มสมัคร */}
+            <button
+              type="submit"
+              disabled={isLoggingIn}
+              className={`btn w-full text-white font-semibold text-base rounded-full ${isLoggingIn ? "bg-green-300 cursor-not-allowed" : "bg-[#47b18a] hover:bg-[#5fc2a0]"
+                }`}
+            >
+              {isLoggingIn ? "กำลังสมัคร..." : "สร้างบัญชี"}
+            </button>
+          </form>
+
+          <p className="mt-6 text-center text-sm text-gray-500">
+            มีบัญชีแล้ว?{" "}
+            <a href="/Signin" className="text-pink-500 underline font-medium">
+              เข้าสู่ระบบ
+            </a>
+          </p>
+        </div>
+
+        {/* ขวา: ใส่ข้อความและรูปภาพ */}
+        <div className="hidden md:flex md:w-1/2 bg-[#E3FBE5] items-center justify-center p-8">
+          <div className="text-center">
+            <img
+              src="/Mimicare(1).png"
+              alt="ภาพเด็กน่ารัก"
+              className="w-72 mx-auto mb-4"
+            />
+            <h3 className="text-xl font-bold text-[#47b18a]">MimiCare ยินดีต้อนรับ</h3>
+            <p className="text-gray-600 mt-2 text-sm">
+              สร้างบัญชีเพื่อเริ่มต้นการดูแลพัฒนาการของลูกน้อย
+            </p>
           </div>
-
-          <button
-            type="submit"
-            disabled={isLoggingIn}
-            className={`${isLoggingIn
-              ? "bg-[#47b18a] opacity-50 cursor-not-allowed"
-              : "bg-[#47b18a] hover:bg-[#9fe0c8]"
-              } text-white py-2 rounded-lg w-full transition`}
-          >
-            {isLoggingIn ? " กำลังสร้างบัญชี..." : "สร้างบัญชี"}
-          </button>
-        </form>
-
-        <p className="mt-4 text-center text-gray-500">
-          มีบัญชีแล้ว?{" "}
-          <a href="/Signin" className="text-red-500">
-            เข้าสู่ระบบ
-          </a>
-        </p>
+        </div>
       </div>
     </div>
   );

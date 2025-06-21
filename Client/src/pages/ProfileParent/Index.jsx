@@ -48,7 +48,7 @@ const Index = () => {
               📷 {/* Camera Icon */}
             </label>
             <input
-              id="profilePicInput"
+              id="PV-01"
               type="file"
               accept="image/*"
               onChange={handlePictureChange} // Handle picture change
@@ -64,7 +64,7 @@ const Index = () => {
               <label htmlFor="firstName">ชื่อ *</label>
               <input
                 type="text"
-                id="firstName"
+                id="PV-02"
                 name="firstName"
                 value={firstName}
                 onChange={handleFirstNameChange} // Handle first name change
@@ -77,7 +77,7 @@ const Index = () => {
               <label htmlFor="lastName">นามสกุล *</label>
               <input
                 type="text"
-                id="lastName"
+                id="PV-03"
                 name="lastName"
                 value={lastName}
                 onChange={handleLastNameChange} // Handle last name change
@@ -92,7 +92,7 @@ const Index = () => {
             <label htmlFor="email">อีเมล *</label>
             <input
               type="email"
-              id="email"
+              id="PV-04"
               name="email"
               value={email}
               onChange={handleEmailChange} // Handle email change

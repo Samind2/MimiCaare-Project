@@ -1,43 +1,175 @@
 import React, { useEffect, useState } from "react";
 import vaccineService from "../../../service/standardVaccine.service";
+import receiveVaccineService from "../../../service/receiveVac.service";
 import childService from "../../../service/child.service";
 
 const ViewVac = () => {
   const [vaccines, setVaccines] = useState([]);
   const [children, setChildren] = useState([]);
   const [selectedChild, setSelectedChild] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+  const [receivedVaccines, setReceivedVaccines] = useState([]);
 
+  const [formData, setFormData] = useState({
+    ageRange: null,
+    standardVaccineId: null,
+    receiveDate: "",
+    placeName: "",
+    phoneNumber: "",
+  });
+  const [selectedVaccines, setSelectedVaccines] = useState([]);
 
+  const [isEditMode, setIsEditMode] = useState(false); // โหมดแก้ไขหรือเพิ่มใหม่
+  const [editingRecordId, setEditingRecordId] = useState(null); // id ข้อมูลที่แก้ไข
+
+  // ฟังก์ชันเปิด modal กรอกข้อมูลรับวัคซีน
+  // isEdit = true แก้ไข, false เพิ่มใหม่
+  const openModal = (item, isEdit = false) => {
+    if (isEdit) {
+      // หา record ที่รับวัคซีนนี้แล้ว
+      const record = receivedVaccines.find(
+        (rv) => rv.standardVaccineId === item.id
+      );
+      if (!record) {
+        alert("ไม่พบข้อมูลวัคซีนที่ต้องการแก้ไข");
+        return;
+      }
+
+      setFormData({
+        ageRange: item.ageRange,
+        standardVaccineId: item.id,
+        receiveDate: record.receiveDate
+          ? record.receiveDate.substring(0, 10)
+          : new Date().toISOString().substring(0, 10),
+        placeName: record.placeName || "",
+        phoneNumber: record.phoneNumber || "",
+      });
+      setEditingRecordId(record.id || null);
+      setIsEditMode(true);
+    } else {
+      // เพิ่มใหม่
+      setFormData({
+        ageRange: item.ageRange,
+        standardVaccineId: item.id,
+        receiveDate: new Date().toISOString().substring(0, 10),
+        placeName: "",
+        phoneNumber: "",
+      });
+      setEditingRecordId(null);
+      setIsEditMode(false);
+    }
+
+    setSelectedVaccines(item.vaccines);
+    setShowModal(true);
+  };
+
+  // โหลดข้อมูลวัคซีนมาตรฐาน
   useEffect(() => {
     const fetchVaccines = async () => {
       try {
         const res = await vaccineService.getvaccine();
-        setVaccines(res.data.vaccines || []); // <-- ตรงนี้ปรับตามโครงสร้าง API จริง
+        setVaccines(res.data.vaccines || []);
       } catch (err) {
         console.error("Error fetching vaccines", err);
         setVaccines([]);
       }
     };
-
     fetchVaccines();
   }, []);
 
+  // โหลดข้อมูลเด็ก
   useEffect(() => {
     const fetchChildren = async () => {
       try {
-        const res = await childService.getChildren(); // ใช้ getChildren จาก service
-        const data = res.data.children || res.data || []; // ปรับตามโครงสร้าง response จริง
+        const res = await childService.getChildren();
+        const data = res.data.children || res.data || [];
         setChildren(data);
         if (data.length > 0) {
-          setSelectedChild(data[0]); // ตั้งค่าคนแรกเป็น default
+          setSelectedChild(data[0]);
         }
       } catch (err) {
         console.error("Error fetching children", err);
       }
     };
-
     fetchChildren();
   }, []);
+
+  // โหลดข้อมูลวัคซีนที่เด็กได้รับ ทุกครั้งที่เปลี่ยน selectedChild
+  useEffect(() => {
+    const fetchReceivedVaccines = async () => {
+      if (!selectedChild) return;
+      try {
+        const res = await receiveVaccineService.getByChildId(selectedChild.id);
+        console.log("API getByChildId response:", res.data);
+
+        // ดึงข้อมูลวัคซีนที่ได้รับ (ถ้า vaccines เป็น null ให้แทนด้วย array ว่าง)
+        const receivedData = Array.isArray(res.data.vaccines)
+          ? res.data.vaccines
+          : [];
+
+        setReceivedVaccines(receivedData);
+      } catch (error) {
+        console.error("Error fetching received vaccines", error);
+        setReceivedVaccines([]);
+      }
+    };
+    fetchReceivedVaccines();
+  }, [selectedChild]);
+
+  // ฟังก์ชันตรวจสอบว่าวัคซีนในมาตรฐานนี้ เด็กได้รับแล้วหรือไม่
+  const isVaccineReceived = (standardVaccineId) => {
+    if (!Array.isArray(receivedVaccines)) return false;
+    return receivedVaccines.some(
+      (rv) => rv.standardVaccineId === standardVaccineId
+    );
+  };
+
+  // บันทึกข้อมูลรับวัคซีน (เพิ่มหรือแก้ไข)
+  const handleSaveVaccine = async () => {
+    if (!selectedChild?.id) {
+      alert("กรุณาเลือกเด็กก่อนบันทึก");
+      return;
+    }
+    if (!formData.standardVaccineId) {
+      alert("ข้อมูลวัคซีนไม่ถูกต้อง");
+      return;
+    }
+
+    const payload = {
+      childId: selectedChild.id,
+      standardVaccineId: formData.standardVaccineId,
+      ageRange: formData.ageRange,
+      receiveDate: new Date(formData.receiveDate).toISOString(),
+      placeName: formData.placeName,
+      phoneNumber: formData.phoneNumber,
+    };
+
+    try {
+      if (isEditMode) {
+        // เรียก API แก้ไขข้อมูล โดยใช้ editingRecordId
+        if (!editingRecordId) {
+          alert("ไม่พบข้อมูลสำหรับแก้ไข");
+          return;
+        }
+        await receiveVaccineService.updateById(editingRecordId, payload);
+        alert("แก้ไขข้อมูลสำเร็จ");
+      } else {
+        // เพิ่มใหม่
+        await receiveVaccineService.addFromStandard(payload);
+        alert("บันทึกข้อมูลสำเร็จ");
+      }
+
+      setShowModal(false);
+
+      // โหลดข้อมูลใหม่หลังบันทึกเสร็จ
+      const res = await receiveVaccineService.getByChildId(selectedChild.id);
+      const receivedData = Array.isArray(res.data.vaccines) ? res.data.vaccines : [];
+      setReceivedVaccines(receivedData);
+    } catch (err) {
+      console.error("เกิดข้อผิดพลาดขณะบันทึก", err);
+      alert("เกิดข้อผิดพลาดขณะบันทึก กรุณาลองใหม่");
+    }
+  };
 
   return (
     <div className="p-4">
@@ -49,8 +181,13 @@ const ViewVac = () => {
             <label tabIndex={0} className="btn m-1">
               ตามมาตรฐาน
             </label>
-            <ul tabIndex={0} className="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52">
-              <li><a>เพิ่มเติม</a></li>
+            <ul
+              tabIndex={0}
+              className="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52"
+            >
+              <li>
+                <a>เพิ่มเติม</a>
+              </li>
             </ul>
           </div>
           <div className="dropdown dropdown-hover">
@@ -76,7 +213,12 @@ const ViewVac = () => {
             >
               {children.map((child) => (
                 <li key={child._id}>
-                  <a onClick={() => setSelectedChild(child)}>
+                  <a
+                    onClick={() => {
+                      setSelectedChild(child);
+                      setReceivedVaccines([]); // เคลียร์ข้อมูลเก่า
+                    }}
+                  >
                     {child.firstName} {child.lastName}
                   </a>
                 </li>
@@ -90,10 +232,10 @@ const ViewVac = () => {
         <table className="table table-zebra w-full">
           <thead className="bg-gray-200 text-gray-700 text-sm">
             <tr>
-              <th>อายุ</th>
-              <th>วัคซีน</th>
-              <th>สถานะ</th>
-              <th>การจัดการ</th>
+              <th className="text-center">อายุ</th>
+              <th className="text-center">วัคซีน</th>
+              <th className="text-center">สถานะ</th>
+              <th className="text-center">การจัดการ</th>
             </tr>
           </thead>
           <tbody>
@@ -103,44 +245,127 @@ const ViewVac = () => {
                   ? `${item.ageRange / 12} ปี`
                   : `${item.ageRange} เดือน`;
 
+              const received = isVaccineReceived(item.id);
+
               return (
                 <tr key={index}>
-                  {/* ช่อง อายุ */}
-                  <td className="align-top">{ageText}</td>
+                  <td className="align-middle text-center">{ageText}</td>
 
-                  {/* ช่อง วัคซีน */}
-                  <td className="align-top py-4">
-                    <ul className="space-y-2">
+                  <td className="align-middle text-center py-4">
+                    <ul className="space-y-2 inline-block text-left">
                       {item.vaccines.map((vaccine, i) => (
                         <li key={i}>{vaccine.vaccineName}</li>
                       ))}
                     </ul>
                   </td>
 
-                  {/* ช่อง สถานะ */}
-                  <td className="align-top py-4">
+                  <td className="align-middle text-center py-4">
                     <ul className="space-y-2">
-                      {item.vaccines.map((_, i) => (
+                      {item.vaccines.map((vaccine, i) => (
                         <li key={i}>
-                          <span className="bg-red-600 text-white px-2 py-1 text-xs rounded-full">
-                            ยังไม่ได้รับ
-                          </span>
+                          {received ? (
+                            <span className="bg-green-600 text-white px-2 py-1 text-xs rounded-full">
+                              รับแล้ว
+                            </span>
+                          ) : (
+                            <span className="bg-red-600 text-white px-2 py-1 text-xs rounded-full">
+                              ยังไม่ได้รับ
+                            </span>
+                          )}
                         </li>
                       ))}
                     </ul>
                   </td>
 
-                  {/* ช่อง การจัดการ */}
-                  <td className="align-top">
-                    <button className="btn btn-error btn-sm mt-2">
-                      บันทึกรับวัคซีน
-                    </button>
+                  <td className="align-middle text-center">
+                    {received ? (
+                      <button
+                        className="bg-pink-300 text-pink-900 hover:bg-pink-400 hover:scale-110 transition-transform duration-200 px-5 py-2 rounded-full text-sm font-semibold shadow-lg shadow-pink-200"
+                        onClick={() => openModal(item, true)}
+                      >
+                        แก้ไข
+                      </button>
+                    ) : (
+                      <button
+                        className="bg-blue-300 text-blue-900 hover:bg-blue-400 hover:scale-110 transition-transform duration-200 px-5 py-2 rounded-full text-sm font-semibold shadow-lg shadow-blue-200"
+                        onClick={() => openModal(item, false)}
+                      >
+                        บันทึกรับวัคซีน
+                      </button>
+                    )}
                   </td>
                 </tr>
               );
             })}
           </tbody>
         </table>
+
+        {showModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+            <div className="bg-white p-6 rounded shadow-lg w-full max-w-md">
+              <h2 className="text-xl font-bold mb-4">
+                {isEditMode ? "แก้ไขข้อมูลวัคซีน" : "บันทึกข้อมูลวัคซีน"}
+              </h2>
+
+              <div className="space-y-3">
+                <p>
+                  <strong>ชื่อเด็ก:</strong> {selectedChild?.firstName}{" "}
+                  {selectedChild?.lastName}
+                </p>
+                <p>
+                  <strong>อายุ:</strong>{" "}
+                  {formData.ageRange >= 12
+                    ? `${formData.ageRange / 12} ปี`
+                    : `${formData.ageRange} เดือน`}
+                </p>
+                <p>
+                  <strong>รายการวัคซีน:</strong>
+                </p>
+                <ul className="list-disc list-inside">
+                  {selectedVaccines.map((vac, i) => (
+                    <li key={vac.vaccineName + i}>{vac.vaccineName}</li>
+                  ))}
+                </ul>
+
+                <input
+                  type="date"
+                  className="input input-bordered w-full"
+                  value={formData.receiveDate}
+                  onChange={(e) =>
+                    setFormData({ ...formData, receiveDate: e.target.value })
+                  }
+                />
+                <input
+                  type="text"
+                  placeholder="สถานที่รับวัคซีน"
+                  className="input input-bordered w-full"
+                  value={formData.placeName}
+                  onChange={(e) =>
+                    setFormData({ ...formData, placeName: e.target.value })
+                  }
+                />
+                <input
+                  type="text"
+                  placeholder="เบอร์โทร"
+                  className="input input-bordered w-full"
+                  value={formData.phoneNumber}
+                  onChange={(e) =>
+                    setFormData({ ...formData, phoneNumber: e.target.value })
+                  }
+                />
+              </div>
+
+              <div className="mt-4 flex justify-end gap-2">
+                <button className="btn" onClick={() => setShowModal(false)}>
+                  ยกเลิก
+                </button>
+                <button className="btn btn-primary" onClick={handleSaveVaccine}>
+                  {isEditMode ? "บันทึกการแก้ไข" : "บันทึก"}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

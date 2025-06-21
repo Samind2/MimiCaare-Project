@@ -12,7 +12,7 @@ const Profile = () => {
   const handleLogout = () => {
     logout();
     toast.success("ออกจากระบบสำเร็จ!", { autoClose: 1500 });
-    navigate('/')
+    navigate('/');
     }
   return (
     <div>

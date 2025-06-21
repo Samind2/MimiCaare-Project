@@ -18,11 +18,11 @@ const ProfileChildUpdate = () => {
     const fetchChild = async () => {
       try {
         const res = await childService.getChildById(id);
-        const child = res.data.children; // ใช้ data.children แทน
+        const child = res.data.children;
         setFirstName(child.firstName);
         setLastName(child.lastName);
         setGender(child.gender);
-        setBirthDate(child.birthDate?.split("T")[0]); // เฉพาะวันที่
+        setBirthDate(child.birthDate?.split("T")[0]);
         setImage(child.image);
       } catch (err) {
         toast.error("ไม่สามารถโหลดข้อมูลเด็กได้");
@@ -39,122 +39,132 @@ const ProfileChildUpdate = () => {
 
     const reader = new FileReader();
     reader.readAsDataURL(file);
-
     reader.onload = () => {
-      setImage(reader.result); // อัปเดตรูปภาพเป็น Base64
+      setImage(reader.result);
     };
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
-    // สร้างอ็อบเจ็กต์ข้อมูลที่จะอัปเดต (เฉพาะฟิลด์ที่สามารถแก้ไขได้)
+
     const updatedData = {};
     if (firstName !== "") updatedData.firstName = firstName;
     if (lastName !== "") updatedData.lastName = lastName;
-    if (image !== "") updatedData.image = image; // ส่งเฉพาะรูปภาพที่มีการอัปโหลดใหม่
-  
+    if (image !== "") updatedData.image = image;
+
     try {
-      await childService.updateChild(id, updatedData); // ส่งข้อมูลที่อัปเดตไป
-  
+      await childService.updateChild(id, updatedData);
       toast.success("อัปเดตข้อมูลเด็กสำเร็จ!", {
-        position: "top-center",
-        autoClose: 1000,
+        autoClose: 1200,
         hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
       });
-  
       setTimeout(() => navigate("/profile-child"), 1500);
     } catch (error) {
-      toast.error("เกิดข้อผิดพลาดในการอัปเดต", {
-        position: "top-center",
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
+      toast.error("เกิดข้อผิดพลาดในการอัปเดต");
       console.error(error);
     }
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
-      <div className="card w-96 bg-white shadow-lg">
-        <div className="card-body">
-          <h3 className="text-lg font-bold text-center">อัปเดตข้อมูลเด็ก</h3>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="form-control">
-              <label className="label">ชื่อ</label>
-              <input
-                type="text"
-                className="input input-bordered"
-                value={firstName}
-                onChange={(e) => setFirstName(e.target.value)}
-              />
+    <div className="min-h-screen bg-[#F9F5F6] flex items-center justify-center px-4 py-10">
+      <div className="bg-white w-full max-w-lg rounded-3xl shadow-xl p-8 animate-fadeIn">
+        <h2 className="text-2xl font-semibold text-center text-[#32403B] mb-6">
+          แก้ไขข้อมูลเด็ก
+        </h2>
 
-              <label className="label">นามสกุล</label>
-              <input
-                type="text"
-                className="input input-bordered"
-                value={lastName}
-                onChange={(e) => setLastName(e.target.value)}
-              />
+        <form onSubmit={handleSubmit} className="space-y-5">
+          {/* ชื่อ */}
+          <div>
+            <label className="block mb-1 text-gray-700 font-medium">
+              ชื่อ <span className="text-red-500">*</span>
+            </label>
+            <input
+              id="PC-01"
+              type="text"
+              value={firstName}
+              onChange={(e) => setFirstName(e.target.value)}
+              className="input input-bordered w-full rounded-xl"
+            />
+          </div>
 
-              <label className="label">เพศ</label>
-              <select
-                className="select select-bordered"
-                value={gender}
-                disabled
-                onChange={(e) => setGender(e.target.value)}
-              >
-                <option value="">เลือกเพศ</option>
-                <option value="ชาย">ชาย</option>
-                <option value="หญิง">หญิง</option>
-              </select>
+          {/* นามสกุล */}
+          <div>
+            <label className="block mb-1 text-gray-700 font-medium">
+              นามสกุล <span className="text-red-500">*</span>
+            </label>
+            <input
+              id="PC-02"
+              type="text"
+              value={lastName}
+              onChange={(e) => setLastName(e.target.value)}
+              className="input input-bordered w-full rounded-xl"
+            />
+          </div>
 
-              <label className="label">วันเกิด</label>
-              <input
-                type="date"
-                className="input input-bordered"
-                value={birthDate}
-                disabled
-                onChange={(e) => setBirthDate(e.target.value)}
+          {/* เพศ */}
+          <div>
+            <label className="block mb-1 text-gray-700 font-medium">
+              เพศ
+            </label>
+            <select
+              className="select select-bordered w-full rounded-xl bg-gray-100 text-gray-600"
+              value={gender}
+              disabled
+            >
+              <option value="">เลือกเพศ</option>
+              <option value="ชาย">ชาย</option>
+              <option value="หญิง">หญิง</option>
+            </select>
+          </div>
+
+          {/* วันเกิด */}
+          <div>
+            <label className="block mb-1 text-gray-700 font-medium">
+              วันเกิด
+            </label>
+            <input
+              id="PC-03"
+              type="date"
+              value={birthDate}
+              disabled
+              className="input input-bordered w-full rounded-xl bg-gray-100 text-gray-600"
+            />
+          </div>
+
+          {/* รูปภาพ */}
+          <div>
+            <label className="block mb-1 text-gray-700 font-medium">
+              รูปภาพ
+            </label>
+            <input
+              id="PC-04"
+              type="file"
+              accept="image/*"
+              className="file-input file-input-bordered w-full rounded-xl"
+              onChange={handleImageUpload}
+            />
+          </div>
+
+          {image && (
+            <div className="flex justify-center mt-4">
+              <img
+                src={image}
+                alt="รูปเด็ก"
+                className="w-28 h-28 object-cover rounded-full border border-gray-300 shadow"
               />
             </div>
+          )}
 
-            <div className="form-control">
-              <label className="label">อัปโหลดรูปภาพ</label>
-              <input
-                type="file"
-                accept="image/*"
-                className="file-input w-full"
-                onChange={handleImageUpload}
-              />
-            </div>
-
-            {image && (
-              <div className="text-center">
-                <img
-                  src={image}
-                  alt="เด็ก"
-                  className="w-24 h-24 rounded-full object-cover mx-auto"
-                />
-              </div>
-            )}
-
-            <div className="form-control mt-4">
-              <button type="submit" className="btn btn-primary w-full">
-                อัปเดต
-              </button>
-            </div>
-          </form>
-        </div>
+          {/* ปุ่ม */}
+          <button
+            type="submit"
+            className="btn bg-[#84C7AE] hover:bg-[#6EB39D] text-white w-full rounded-xl font-semibold text-base"
+          >
+            บันทึกการแก้ไข
+          </button>
+        </form>
       </div>
+
       <ToastContainer />
     </div>
   );

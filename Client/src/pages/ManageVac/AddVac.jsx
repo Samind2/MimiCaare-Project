@@ -1,45 +1,59 @@
 import React, { useEffect, useState } from 'react';
 import vaccineService from '../../service/standardVaccine.service';
 import { FaPlus } from 'react-icons/fa';
+import { toast } from "react-toastify";
 
 const VaccinePage = () => {
-  const [vaccineOptions, setVaccineOptions] = useState([]); //เก็บชื่อวัคซีนทั้งหมดที่ใช้ใน datalist
-  const [formRows, setFormRows] = useState([]); // เก็บข้อมูลที่กรอกในฟอร์ม
-  const [showForm, setShowForm] = useState(false); // แสดงหรือซ่อนฟอร์มเพิ่มวัคซีน
-  const [displayRows, setDisplayRows] = useState([]); // เก็บข้อมูลวัคซีนที่จะแสดงในตาราง
+  const [vaccineOptions, setVaccineOptions] = useState([]);
+  const [formRows, setFormRows] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [groupedByAge, setGroupedByAge] = useState({});
+  const [editAge, setEditAge] = useState(null);          // อายุที่กำลังแก้ไข (เช่น 6, 12, 18 ...)
+  const [editVaccines, setEditVaccines] = useState([]);  // รายการวัคซีนที่แก้ไขสำหรับช่วงอายุนี้
+
 
   const ageOptions = ['1 เดือน', '2 เดือน', '4 เดือน', '6 เดือน', '9 เดือน', '1 ปี', '1 ปี 6 เดือน', '2 ปี', '2 ปี 6 เดือน', '11 ปี', '12 ปี'];
 
   useEffect(() => {
-    const fetchVaccines = async () => {
-      try {
-        const res = await vaccineService.getvaccine();
-        const allVaccines = res.data.vaccines;
-
-        const flatRows = allVaccines.flatMap(item => // แปลงข้อมูลแบบซ้อนกันให้เป็นแถวเดียว
-          item.vaccines.map(v => ({
-            age: `${item.ageRange} เดือน`, // แปลงเป็นข้อความเพื่อแสดง
-            ageNum: item.ageRange, // เพิ่มอันนี้เพื่อใช้เรียงลำดับ
-            vaccine: v.vaccineName
-          }))
-        ).sort((a, b) => a.ageNum - b.ageNum); // เรียงตามตัวเลขช่วงอายุ
-
-        setDisplayRows(flatRows);
-
-        // ตั้งค่า vaccine options สำหรับ select box
-        const vaccineNames = [...new Set(flatRows.map(v => v.vaccine))];
-        setVaccineOptions(vaccineNames);
-      } catch (err) {
-        console.error('Error fetching vaccines:', err);
-      }
-    };
-
     fetchVaccines();
   }, []);
 
+  const fetchVaccines = async () => {
+    try {
+      const res = await vaccineService.getvaccine();
+      const allVaccines = res.data.vaccines;
+
+      // สร้าง groupedByAge ให้เก็บ id กับ list วัคซีน
+      const grouped = {};
+      allVaccines.forEach(item => {
+        grouped[item.ageRange] = {
+          id: item.id,
+          vaccines: item.vaccines.map(v => v.vaccineName)
+        };
+      });
+
+      console.log('Grouped by Age:', grouped);
+      setGroupedByAge(grouped);
+
+      // รวมชื่อวัคซีนเพื่อ autocomplete / datalist
+      const vaccineNames = [...new Set(allVaccines.flatMap(item => item.vaccines.map(v => v.vaccineName)))];
+      setVaccineOptions(vaccineNames);
+    } catch (err) {
+      console.error('Error fetching vaccines:', err);
+    }
+  };
+
+  const mapAgeToText = (age) => {
+    if (age >= 12) {
+      const years = age / 12;
+      return years % 1 === 0 ? `${years} ปี` : `${Math.floor(years)} ปี ${(age % 12) * 1} เดือน`;
+    }
+    return `${age} เดือน`;
+  };
+
   const handleAddForm = () => {
-    setShowForm(true);
-    setFormRows([{ age: '', vaccine: '' }]); // เพิ่มแถวแรกทันที
+    setIsModalOpen(true);
+    setFormRows([{ age: '', vaccine: '' }]);
   };
 
   const handleAddRow = () => {
@@ -52,19 +66,10 @@ const VaccinePage = () => {
     setFormRows(updatedRows);
   };
 
-  const mapAgeTextToNumber = (ageText) => { // แปลงข้อความเป็นตัวเลข (เดือน)
+  const mapAgeTextToNumber = (ageText) => {
     const map = {
-      '1 เดือน': 1,
-      '2 เดือน': 2,
-      '4 เดือน': 4,
-      '6 เดือน': 6,
-      '9 เดือน': 9,
-      '1 ปี': 12,
-      '1 ปี 6 เดือน': 18,
-      '2 ปี': 24,
-      '2 ปี 6 เดือน': 30,
-      '11 ปี': 132,
-      '12 ปี': 144,
+      '1 เดือน': 1, '2 เดือน': 2, '4 เดือน': 4, '6 เดือน': 6, '9 เดือน': 9,
+      '1 ปี': 12, '1 ปี 6 เดือน': 18, '2 ปี': 24, '2 ปี 6 เดือน': 30, '11 ปี': 132, '12 ปี': 144,
     };
     return map[ageText] || 0;
   };
@@ -72,153 +77,295 @@ const VaccinePage = () => {
   const handleSave = async () => {
     try {
       const grouped = {};
-
       formRows.forEach((row) => {
         const age = mapAgeTextToNumber(row.age);
         if (!grouped[age]) grouped[age] = [];
-
-        grouped[age].push({
-          vaccineName: row.vaccine,
-          note: ""
-        });
+        grouped[age].push({ vaccineName: row.vaccine, note: "" });
       });
 
       for (const age in grouped) {
-        const payload = {
-          ageRange: parseInt(age),
-          vaccines: grouped[age]
-        };
-
+        const payload = { ageRange: parseInt(age), vaccines: grouped[age] };
         await vaccineService.addvaccine(payload);
       }
 
-      // เพิ่มวัคซีนใหม่ที่ยังไม่มีใน vaccineOptions
       const newVaccineNames = formRows.map(r => r.vaccine).filter(v => !vaccineOptions.includes(v));
       if (newVaccineNames.length > 0) {
         setVaccineOptions(prev => [...new Set([...prev, ...newVaccineNames])]);
       }
 
-      // Clear form
+      toast.success("บันทึกข้อมูลวัคซีนสำเร็จ", { autoClose: 1500 });
+
       setFormRows([]);
-      setShowForm(false);
-
-      // 🔁 ดึงข้อมูลใหม่จากฐานข้อมูล
-      const res = await vaccineService.getvaccine();
-      const allVaccines = res.data.vaccines;
-
-      const flatRows = allVaccines.flatMap(item =>
-        item.vaccines.map(v => ({
-          age: `${item.ageRange} เดือน`,
-          ageNum: item.ageRange,
-          vaccine: v.vaccineName
-        }))
-      ).sort((a, b) => a.ageNum - b.ageNum);
-
-      setDisplayRows(flatRows);
-
+      setIsModalOpen(false);
+      fetchVaccines();
     } catch (error) {
       console.error('Error saving vaccines:', error);
+      toast.error("เกิดข้อผิดพลาด", { autoClose: 1500 });
+    }
+  };
+
+  const handleEdit = (age) => {
+    setEditAge(age);
+    setEditVaccines([...groupedByAge[age].vaccines]); // copy เพื่อแก้ไข
+    setIsModalOpen(true); // หรือใช้ modal แยกอีกตัวสำหรับแก้ไข
+  };
+
+  const handleUpdate = async () => {
+  try {
+    const payload = {
+      ageRange: parseInt(editAge),
+      vaccines: editVaccines.map(v => ({ vaccineName: v, note: "" }))
+    };
+    await vaccineService.UpdateStandardVaccine(groupedByAge[editAge].id, payload); // <-- แก้ตรงนี้
+    toast.success("แก้ไขข้อมูลสำเร็จ");
+    setIsModalOpen(false);
+    setEditAge(null);
+    setEditVaccines([]);
+    fetchVaccines();
+  } catch (error) {
+    toast.error("เกิดข้อผิดพลาดในการแก้ไข");
+  }
+};
+
+
+  const handleDelete = async (idToDelete) => {
+    const confirmDelete = () =>
+      new Promise((resolve) => {
+        const ToastContent = ({ closeToast }) => (
+          <div>
+            <p>คุณต้องการลบข้อมูลวัคซีนใช่หรือไม่?</p>
+            <div className="mt-2 flex justify-end gap-2">
+              <button
+                className="btn btn-sm btn-error"
+                onClick={() => {
+                  closeToast();
+                  resolve(false);
+                }}
+              >
+                ยกเลิก
+              </button>
+              <button
+                className="btn btn-sm btn-success"
+                onClick={() => {
+                  closeToast();
+                  resolve(true);
+                }}
+              >
+                ตกลง
+              </button>
+            </div>
+          </div>
+        );
+
+        toast.info(<ToastContent />, {
+          autoClose: false,
+          closeOnClick: false,
+          closeButton: false,
+          draggable: false,
+        });
+      });
+
+    const confirmed = await confirmDelete();
+    if (!confirmed) return;
+
+    try {
+      await vaccineService.DeleteStandardVaccine(idToDelete);
+      toast.success("ลบข้อมูลสำเร็จ");
+      fetchVaccines();
+    } catch (error) {
+      toast.error("ลบข้อมูลไม่สำเร็จ");
+      console.error(error);
     }
   };
 
   return (
     <div className="p-6 max-w-4xl mx-auto bg-white rounded shadow">
-      <h2 className="text-xl font-semibold mb-4">การจัดการวัคซีน</h2>
-
-      <div className="flex gap-2 mb-4">
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xl font-semibold">การจัดการวัคซีน</h2>
         <button
-          className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded"
+          className="bg-pink-500 hover:bg-pink-600 text-white text-sm px-4 py-2 rounded"
           onClick={handleAddForm}
         >
-          ➕ เพิ่มวัคซีน
-        </button>
-        <button className="bg-orange-400 hover:bg-orange-500 text-white px-3 py-1 rounded">
-          ✏️ แก้ไขวัคซีน
+          <FaPlus className="inline mr-2" />
+          เพิ่มข้อมูลวัคซีน
         </button>
       </div>
 
-      {showForm && (
-        <>
-          <div className="bg-gray-200 grid grid-cols-3 gap-4 p-2 rounded font-semibold text-sm mb-2">
-            <div>ช่วงอายุ</div>
-            <div>ชื่อวัคซีน</div>
-            <div></div>
-          </div>
-
-          {formRows.map((row, index) => (
-            <div key={index} className="grid grid-cols-3 gap-4 items-center mb-2">
-              <select
-                className="border rounded px-2 py-1"
-                value={row.age}
-                onChange={(e) => handleChange(index, 'age', e.target.value)}
-              >
-                <option value="">เลือกอายุ</option>
-                {ageOptions.map((age, i) => (
-                  <option key={i} value={age}>{age}</option>
-                ))}
-              </select>
-
-              <input
-                type="text"
-                className="border rounded px-2 py-1"
-                value={row.vaccine}
-                onChange={(e) => handleChange(index, 'vaccine', e.target.value)}
-                list="vaccine-list"
-              />
-              <datalist id="vaccine-list">
-                {vaccineOptions.map((v, i) => (
-                  <option key={i} value={v} />
-                ))}
-              </datalist>
-
-
-              <div className="flex items-center">
-                {index === formRows.length - 1 && (
-                  <>
+      {Object.keys(groupedByAge).length > 0 ? (
+        <div className="overflow-x-auto">
+          <table className="w-full border-separate border-spacing-y-2 text-sm">
+            <thead className="bg-blue-100 text-blue-800">
+              <tr>
+                <th className="py-3 px-4 text-left rounded-tl-lg">อายุ</th>
+                <th className="py-3 px-4 text-left">วัคซีน</th>
+                <th className="py-3 px-4 text-left rounded-tr-lg">การจัดการ</th>
+              </tr>
+            </thead>
+            <tbody>
+              {Object.entries(groupedByAge).map(([age, group]) => (
+                <tr key={age} className="bg-white shadow rounded-lg hover:scale-[1.01] transition">
+                  <td className="py-3 px-4 rounded-l-lg text-gray-700 font-medium">
+                    {mapAgeToText(Number(age))}
+                  </td>
+                  <td className="py-3 px-4 text-gray-600">
+                    <ul className="list-disc list-inside space-y-1">
+                      {group.vaccines.map((v, idx) => (
+                        <li key={idx}>{v}</li>
+                      ))}
+                    </ul>
+                  </td>
+                  <td className="px-6 py-2 flex gap-2 rounded-r-lg">
                     <button
-                      className="bg-black text-white rounded-full p-1 hover:bg-gray-700 mr-2"
+                      onClick={() => handleEdit(Number(age))}
+                      className="bg-yellow-100 text-yellow-800 hover:bg-yellow-200 hover:scale-105 transition rounded-full px-6 py-2 text-sm font-semibold shadow"
+                    >
+                      แก้ไข
+                    </button>
+                    <button
+                      onClick={() => handleDelete(group.id)}
+                      className="bg-red-100 text-red-700 hover:bg-red-200 hover:scale-105 transition rounded-full px-6 py-2 text-sm font-semibold shadow"
+                    >
+                      ลบ
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ) : (
+        <p className="text-center text-gray-500 italic">ไม่มีข้อมูลวัคซีน</p>
+      )}
+
+      {isModalOpen && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm z-50">
+          <div className="bg-white rounded-xl p-6 w-[90%] max-w-md shadow-lg">
+            <h2 className="text-xl font-bold text-center text-blue-800 mb-4">
+              เพิ่มข้อมูลวัคซีน
+            </h2>
+
+            <div className="space-y-4 max-h-[400px] overflow-y-auto pr-1">
+              {formRows.map((row, index) => (
+                <div key={index} className="flex gap-2 items-center">
+                  <select
+                    id="VC-01"
+                    className="border border-gray-300 rounded-lg px-3 py-2 text-sm w-1/3 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                    value={row.age}
+                    onChange={(e) => handleChange(index, 'age', e.target.value)}
+                  >
+                    <option value="">เลือกอายุ</option>
+                    {ageOptions.map((age, i) => (
+                      <option key={i} value={age}>{age}</option>
+                    ))}
+                  </select>
+
+                  <input
+                    id="VC-02"
+                    type="text"
+                    className="border border-gray-300 rounded-lg px-3 py-2 text-sm w-2/3 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                    value={row.vaccine}
+                    onChange={(e) => handleChange(index, 'vaccine', e.target.value)}
+                    list="vaccine-list"
+                    placeholder="ชื่อวัคซีน"
+                  />
+                  <datalist id="vaccine-list">
+                    {vaccineOptions.map((v, i) => (
+                      <option key={i} value={v} />
+                    ))}
+                  </datalist>
+
+                  {index === formRows.length - 1 && (
+                    <button
+                      className="bg-green-100 text-green-800 hover:bg-green-200 hover:scale-105 transition p-2 rounded-full"
                       onClick={handleAddRow}
                     >
                       <FaPlus size={12} />
                     </button>
-                    <button
-                      className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded"
-                      onClick={handleSave}
-                    >
-                      บันทึก
-                    </button>
-                  </>
-                )}
-              </div>
-            </div>
-          ))}
-        </>
-      )}
-
-      {/* แสดงตารางวัคซีนที่บันทึก */}
-      {displayRows.length > 0 && (
-        <div className="mt-6">
-          <h3 className="text-lg font-semibold mb-2">รายการวัคซีนทั้งหมด</h3>
-          <table className="w-full border border-gray-300">
-            <thead>
-              <tr className="bg-gray-100">
-                <th className="border p-2">ช่วงอายุ</th>
-                <th className="border p-2">ชื่อวัคซีน</th>
-              </tr>
-            </thead>
-            <tbody>
-              {displayRows.map((row, i) => (
-                <tr key={i}>
-                  <td className="border p-2">{row.age}</td>
-                  <td className="border p-2">{row.vaccine}</td>
-                </tr>
+                  )}
+                </div>
               ))}
-            </tbody>
+            </div>
 
-          </table>
+            <div className="mt-6 text-center space-x-2">
+              <button
+                className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg shadow transition"
+                onClick={handleSave}
+              >
+                บันทึก
+              </button>
+              <button
+                className="bg-gray-200 hover:bg-gray-300 text-gray-800 px-6 py-2 rounded-lg shadow transition"
+                onClick={() => setIsModalOpen(false)}
+              >
+                ยกเลิก
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
+      {/* Modal แก้ไข */}
+      {editAge !== null && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm z-50">
+          <div className="bg-white rounded-xl p-6 w-[90%] max-w-md shadow-lg">
+            <h2 className="text-xl font-bold text-center text-blue-800 mb-4">
+              แก้ไขข้อมูลวัคซีน อายุ {mapAgeToText(editAge)}
+            </h2>
+
+            <div className="space-y-4 max-h-[400px] overflow-y-auto pr-1">
+              {editVaccines.map((vaccine, index) => (
+                <div key={index} className="flex gap-2 items-center">
+                  <input
+                  id='"VC-03'
+                    type="text"
+                    className="border border-gray-300 rounded-lg px-3 py-2 text-sm w-full focus:outline-none focus:ring-2 focus:ring-blue-300"
+                    value={vaccine}
+                    onChange={(e) => {
+                      const newVaccines = [...editVaccines];
+                      newVaccines[index] = e.target.value;
+                      setEditVaccines(newVaccines);
+                    }}
+                  />
+                  <button
+                    className="bg-red-100 text-red-700 hover:bg-red-200 p-2 rounded-full"
+                    onClick={() => {
+                      const newVaccines = editVaccines.filter((_, i) => i !== index);
+                      setEditVaccines(newVaccines);
+                    }}
+                  >
+                    ลบ
+                  </button>
+                </div>
+              ))}
+
+              <button
+                className="bg-green-100 text-green-800 hover:bg-green-200 px-4 py-2 rounded"
+                onClick={() => setEditVaccines([...editVaccines, ''])}
+              >
+                เพิ่มวัคซีน
+              </button>
+            </div>
+
+            <div className="mt-6 text-center space-x-2">
+              <button
+                className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg shadow transition"
+                onClick={handleUpdate}
+              >
+                บันทึกการแก้ไข
+              </button>
+              <button
+                className="bg-gray-200 hover:bg-gray-300 text-gray-800 px-6 py-2 rounded-lg shadow transition"
+                onClick={() => {
+                  setEditAge(null);
+                  setEditVaccines([]);
+                }}
+              >
+                ยกเลิก
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -68,7 +68,7 @@ const ProfileUpdate = () => {
                                 <span className="label-text" >ชื่อผู้ใช้</span>
                             </label>
                             <input
-                                id='f-name01'
+                                id='PU-01'
                                 type="text"
                                 placeholder="First Name"
                                 className="input input-bordered w-full"
@@ -79,6 +79,7 @@ const ProfileUpdate = () => {
                                 <span className="label-text">นามสกุล</span>
                             </label>
                             <input
+                                id='PU-02'
                                 type="text"
                                 placeholder="Last Name"
                                 className="input input-bordered w-full"
@@ -89,7 +90,8 @@ const ProfileUpdate = () => {
                                 <span className="label-text">อีเมล</span>
                             </label>
                             <input
-                                type="email"  
+                                id='PU-03'
+                                type="email"
                                 placeholder="Email"
                                 className="input input-bordered w-full"
                                 value={email}
@@ -102,6 +104,7 @@ const ProfileUpdate = () => {
                                 <span className="label-text">อัพโหลดรูปภาพโปรไฟล์</span>
                             </label>
                             <input
+                                id='PU-04'
                                 type="file"
                                 accept="image/*"
                                 className="file-input w-full"

@@ -1,10 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import standardDevService from "../../service/standardDev.service";
+import { FaPlus } from 'react-icons/fa';
 import { toast } from "react-toastify";
 
 const AddDevelopment = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [ageRange, setAgeRange] = useState('');
+    const [editMode, setEditMode] = useState(false); // เก็บสถานะการแก้ไข
+    const [editId, setEditId] = useState(null); // เก็บ id ที่จะแก้ไข
+    const [currentPage, setCurrentPage] = useState(1); // หน้าปัจจุบัน
+    const itemsPerPage = 3; // จำนวนกลุ่มช่วงอายุต่อหน้า
     const [developmentList, setDevelopmentList] = useState([ // เก็บข้อมูลพัฒนาการที 
         { category: '', detail: '', image: '' },
         { category: '', detail: '', image: '' },
@@ -95,8 +100,6 @@ const AddDevelopment = () => {
         try {
             const res = await standardDevService.getDevelop();
             const data = res.data.data;
-
-
             data.sort((a, b) => a.ageRange - b.ageRange); // เรียงตามช่วงอายุ
             setAllDevelopments(data);
         } catch (err) {
@@ -114,8 +117,11 @@ const AddDevelopment = () => {
             return;
         }
 
-        // เช็คว่ามีช่วงอายุ;ซ้ำในฐานข้อมูลหรือไม่
-        const isDuplicate = allDevelopments.some(dev => dev.ageRange === ageRange);
+        // เช็คว่ามีช่วงอายุซ้ำในฐานข้อมูลหรือไม่
+        const isDuplicate = allDevelopments.some(dev =>
+            dev.ageRange === ageRange && (editMode ? dev.id !== editId : true) // ถ้าอยู่ในโหมดแก้ไข ให้ข้าม id ที่กำลังแก้ไข
+        );
+
         if (isDuplicate) {
             toast.warning('ช่วงอายุนี้มีข้อมูลพัฒนาการอยู่แล้ว');
             return;
@@ -132,33 +138,64 @@ const AddDevelopment = () => {
         };
 
         try {
-            await standardDevService.addStandardDev(newData);
-            toast.success("เพิ่มพัฒนาการสำเร็จ!", { autoClose: 1500 });
+            if (editMode) {
+                // แก้ไขข้อมูล
+                await standardDevService.updateStandardDev(editId, newData);
+                toast.success("แก้ไขข้อมูลสำเร็จ!", { autoClose: 1500 });
+            } else {
+                // เพิ่มข้อมูลใหม่
+                await standardDevService.addStandardDev(newData);
+                toast.success("เพิ่มพัฒนาการสำเร็จ!", { autoClose: 1500 });
+            }
+
+            // รีเซ็ตฟอร์ม
             setIsModalOpen(false);
             setAgeRange('');
+            setEditId(null);
+            setEditMode(false);
             setDevelopmentList([
-                { category: '', detail: '' },
-                { category: '', detail: '' },
-                { category: '', detail: '' },
-                { category: '', detail: '' },
-                { category: '', detail: '' },
+                { category: '', detail: '', image: '' },
+                { category: '', detail: '', image: '' },
+                { category: '', detail: '', image: '' },
+                { category: '', detail: '', image: '' },
+                { category: '', detail: '', image: '' },
             ]);
             fetchDevelopments();
         } catch (err) {
-            toast.error('เกิดข้อผิดพลาดในการบันทึก:', err);
+            toast.error("เกิดข้อผิดพลาดในการบันทึกข้อมูล");
+            console.error(err);
         }
     };
 
+    // แก้ไขพัฒนาการ
+    const handleEdit = (devId) => {
+        const devToEdit = allDevelopments.find((dev) => dev.id === devId);
+        if (devToEdit) {
+            setEditMode(true);
+            setEditId(devId);
+            setAgeRange(devToEdit.ageRange);
+            setDevelopmentList(devToEdit.developments.map((item) => ({
+                category: item.category,
+                detail: item.detail,
+                image: item.image || '',
+            })));
+            setIsModalOpen(true);
+        }
+    };
+
+    // แก้ไขพัฒนาการแต่ละรายการ
     const handleDevelopmentChange = (index, key, value) => {
         const updatedList = [...developmentList];
         updatedList[index][key] = value;
         setDevelopmentList(updatedList);
     };
 
+    // เปลี่ยนรูปภาพเมื่อมีการอัปโหลด
+
     const handleImageChange = (index, event) => {
         const file = event.target.files[0];
         if (file) {
-            const reader = new FileReader();
+            const reader = new FileReader();  // ใช้ FileReader เพื่ออ่านไฟล์รูปภาพและแปลงเป็น base64
             reader.onloadend = () => {
                 const updatedList = [...developmentList];
                 updatedList[index].image = reader.result;
@@ -167,8 +204,11 @@ const AddDevelopment = () => {
             reader.readAsDataURL(file);
         }
     };
+
+    // ลบพัฒนาการ
     const handleDelete = async (idToDelete) => {
-        // สร้าง Toast 
+
+        // สร้างtoast เพื่อยืนยันการลบ
         const confirmDelete = () =>
             new Promise((resolve) => {
                 const ToastContent = ({ closeToast }) => ( // ฟังก์ชันที่ใช้แสดงเนื้อหาใน Toast
@@ -218,72 +258,113 @@ const AddDevelopment = () => {
         }
     };
 
+    // แบ่งข้อมูลพัฒนาการเป็นกลุ่มตามช่วงอายุ
+    const totalPages = Math.ceil(allDevelopments.length / itemsPerPage);
+    const paginatedData = allDevelopments.slice(
+        (currentPage - 1) * itemsPerPage,
+        currentPage * itemsPerPage
+    );
+
     return (
         <div className="p-6">
             <div className="flex justify-between items-center mb-4">
                 <h1 className="text-xl font-semibold">การจัดการพัฒนาการ</h1>
                 <button
                     onClick={() => setIsModalOpen(true)}
-                    className="bg-purple-700 hover:bg-purple-800 text-white text-sm px-4 py-2 rounded"
+                    className="flex items-center gap-2 bg-gradient-to-r from-pink-400 to-pink-600 hover:scale-105 transition-transform text-white text-sm px-4 py-2 rounded-xl shadow-lg"
                 >
-                    เพิ่มแผนการพัฒนาการ
+                    <FaPlus className="text-white" />
+                    <span>เพิ่มแผนการพัฒนาการ</span>
                 </button>
             </div>
 
             {/* ตารางแสดงข้อมูล */}
-            <div className="overflow-x-auto">
-                <table className="w-full text-sm text-left border-separate border-spacing-y-2">
-                    <thead className="bg-gray-100 text-gray-700 font-medium">
+            <div className="overflow-x-auto rounded-lg shadow-md border border-pink-200">
+                <table className="min-w-full divide-y divide-pink-200">
+                    <thead className="bg-pink-100">
                         <tr>
-                            <th className="px-4 py-2">ช่วงอายุ</th>
-                            <th className="px-4 py-2">พัฒนาการ</th>
-                            <th className="px-4 py-2">รายละเอียด</th>
-                            <th className="px-4 py-2">รูปภาพ</th>
-                            <th className="px-4 py-2">การจัดการ</th>
+                            <th className="px-6 py-3 text-center text-pink-900 text-sm md:text-base font-semibold rounded-tl-lg">
+                                ช่วงอายุ
+                            </th>
+                            <th className="px-6 py-3 text-left text-pink-900 text-sm md:text-base font-semibold">
+                                พัฒนาการ
+                            </th>
+                            <th className="px-6 py-3 text-left text-pink-900 text-sm md:text-base font-semibold">
+                                รายละเอียด
+                            </th>
+                            <th className="px-6 py-3 text-center text-pink-900 text-sm md:text-base font-semibold">
+                                รูปภาพ
+                            </th>
+                            <th className="px-6 py-3 text-center text-pink-900 text-sm md:text-base font-semibold rounded-tr-lg">
+                                การจัดการ
+                            </th>
                         </tr>
                     </thead>
-                    <tbody>
-                        {allDevelopments.length > 0 ? (
-                            allDevelopments.map((dev, idx) => {
-                                if (dev.developments.length > 0) {
-                                    return dev.developments.map((item, subIdx) => (
-                                        <tr key={`${idx}-${subIdx}`} className="bg-white shadow rounded">
-                                            {subIdx === 0 && (
-                                                <td rowSpan={dev.developments.length} className="px-4 py-2 font-medium align-middle">
-                                                    {getAgeLabel(dev.ageRange)}
-                                                </td>
-                                            )}
-                                            <td className="px-4 py-2 align-middle">{item.category}</td>
-                                            <td className="px-4 py-2 align-middle">{item.detail}</td>
-                                            <td className="px-4 py-2 align-middle">
-                                                {item.image ? (
-                                                    <img src={item.image} alt="รูปภาพพัฒนาการ" className="w-20 h-auto rounded" />
-                                                ) : (
-                                                    <span className="text-gray-400">ไม่มีรูป</span>
+                    <tbody className="bg-white divide-y divide-pink-200">
+                        {paginatedData.length > 0 ? (
+                            paginatedData.map((dev, idx) => {
+                                const realIndex = (currentPage - 1) * itemsPerPage + idx;
+                                const bgGroup = realIndex % 2 === 0 ? "bg-pink-50" : "bg-green-50";
+                                return (
+                                    <React.Fragment key={idx}>
+                                        <tr><td colSpan={5} className="pt-4"></td></tr>
+                                        {dev.developments.map((item, subIdx) => (
+                                            <tr
+                                                key={`${idx}-${subIdx}`}
+                                                className={`${bgGroup} hover:bg-pink-100 transition duration-200`}
+                                            >
+                                                {subIdx === 0 && (
+                                                    <td
+                                                        rowSpan={dev.developments.length}
+                                                        className="px-6 py-4 text-center font-bold text-blue-900 bg-blue-100 rounded-l-xl align-middle select-none"
+                                                    >
+                                                        {getAgeLabel(dev.ageRange)}
+                                                    </td>
                                                 )}
-                                            </td>
-                                            {subIdx === 0 && (
-                                                <td rowSpan={dev.developments.length} className="px-4 py-2 align-middle">
-                                                    <button onClick={() => handleDelete(dev.id)} className="text-red-600 hover:underline">
-                                                        ลบ
-                                                    </button>
+                                                <td className="px-6 py-4 text-gray-700">{item.category}</td>
+                                                <td className="px-6 py-4 text-gray-600">{item.detail}</td>
+                                                <td className="px-6 py-4 text-center">
+                                                    {item.image ? (
+                                                        <img
+                                                            src={item.image}
+                                                            alt="รูปพัฒนาการ"
+                                                            className="w-20 h-20 object-cover rounded-md border border-gray-300 shadow-sm mx-auto"
+                                                        />
+                                                    ) : (
+                                                        <span className="italic text-gray-400">ไม่มีรูป</span>
+                                                    )}
                                                 </td>
-                                            )}
-                                        </tr>
-                                    ));
-                                } else {
-                                    return (
-                                        <tr key={idx}>
-                                            <td colSpan="4" className="text-center text-gray-400 py-4">
-                                                ไม่มีข้อมูลพัฒนาการในช่วงอายุ {getAgeLabel(dev.ageRange)}
-                                            </td>
-                                        </tr>
-                                    );
-                                }
+                                                {subIdx === 0 && (
+                                                    <td
+                                                        rowSpan={dev.developments.length}
+                                                        className="px-6 py-4 text-center bg-pink-100 rounded-r-xl align-middle"
+                                                    >
+                                                        <div className="flex flex-col gap-3 items-center">
+                                                            <button
+                                                                onClick={() => handleDelete(dev.id)}
+                                                                className="bg-red-100 text-red-700 hover:bg-red-200 hover:scale-105 transition px-6 py-2 rounded-full text-sm font-semibold shadow-md"
+                                                                type="button"
+                                                            >
+                                                                ลบ
+                                                            </button>
+                                                            <button
+                                                                onClick={() => handleEdit(dev.id)}
+                                                                className="bg-yellow-100 text-yellow-800 hover:bg-yellow-200 hover:scale-105 transition px-6 py-2 rounded-full text-sm font-semibold shadow-md"
+                                                                type="button"
+                                                            >
+                                                                แก้ไข
+                                                            </button>
+                                                        </div>
+                                                    </td>
+                                                )}
+                                            </tr>
+                                        ))}
+                                    </React.Fragment>
+                                );
                             })
                         ) : (
                             <tr>
-                                <td colSpan="4" className="text-center text-gray-400 py-8">
+                                <td colSpan={5} className="text-center text-gray-400 py-8 italic">
                                     -- ไม่มีข้อมูลพัฒนาการ --
                                 </td>
                             </tr>
@@ -292,10 +373,33 @@ const AddDevelopment = () => {
                 </table>
             </div>
 
+            {/* Pagination */}
+            <div className="flex justify-center mt-4 gap-2">
+                <button
+                    disabled={currentPage === 1}
+                    onClick={() => setCurrentPage(currentPage - 1)}
+                    className="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300 disabled:opacity-50"
+                >ย้อนกลับ</button>
+                {[...Array(totalPages)].map((_, i) => (
+                    <button
+                        key={i}
+                        className={`px-3 py-1 rounded ${currentPage === i + 1 ? 'bg-pink-500 text-white' : 'bg-gray-200'}`}
+                        onClick={() => setCurrentPage(i + 1)}
+                    >{i + 1}</button>
+                ))}
+                <button
+                    disabled={currentPage === totalPages}
+                    onClick={() => setCurrentPage(currentPage + 1)}
+                    className="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300 disabled:opacity-50"
+                >ถัดไป</button>
+            </div>
+
+
+
             {/* Modal */}
             {isModalOpen && (
-                <div className="fixed inset-0 flex items-center justify-center z-50">
-                    <div className="bg-white rounded-xl p-6 w-[90%] max-w-md shadow-lg">
+                <div className="fixed inset-0 flex items-center justify-center bg-black/30 backdrop-blur-md z-50">
+                    <div className="bg-white rounded-2xl shadow-xl p-6 w-[90%] max-w-lg transition-all scale-100">
                         <h2 className="text-xl font-bold text-center text-blue-800 mb-4">
                             เพิ่มเกณฑ์พัฒนาการ
                         </h2>
@@ -305,6 +409,7 @@ const AddDevelopment = () => {
                             <div>
                                 <label className="block mb-1">ช่วงอายุ</label>
                                 <select
+                                id='DEV-01'
                                     className="w-full border rounded px-3 py-2"
                                     value={ageRange}
                                     onChange={(e) => setAgeRange(Number(e.target.value))}
@@ -329,6 +434,7 @@ const AddDevelopment = () => {
                                         <div key={index} className="border rounded p-2 space-y-2 bg-gray-50">
                                             <div className="flex gap-2">
                                                 <select
+                                                    id='DEV-02'
                                                     className="w-1/2 border rounded px-3 py-2"
                                                     value={dev.category}
                                                     onChange={(e) =>
@@ -346,6 +452,7 @@ const AddDevelopment = () => {
                                                 </select>
 
                                                 <select
+                                                id='DEV-03'
                                                     className="w-1/2 border rounded px-3 py-2"
                                                     value={dev.detail}
                                                     onChange={(e) =>
@@ -361,12 +468,36 @@ const AddDevelopment = () => {
                                                 </select>
                                             </div>
 
-                                            <input
-                                                type="file"
-                                                accept="image/*"
-                                                onChange={(e) => handleImageChange(index, e)}
-                                                className="w-full"
-                                            />
+                                            <div className="flex flex-col">
+                                                <label
+                                                    htmlFor={`image-upload-${index}`}
+                                                    className="mb-1 text-sm font-medium text-pink-600 cursor-pointer select-none flex items-center gap-1"
+                                                >
+                                                    <svg
+                                                        xmlns="http://www.w3.org/2000/svg"
+                                                        className="h-4 w-4"
+                                                        fill="none"
+                                                        viewBox="0 0 24 24"
+                                                        stroke="currentColor"
+                                                        strokeWidth={2}
+                                                    >
+                                                        <path
+                                                            strokeLinecap="round"
+                                                            strokeLinejoin="round"
+                                                            d="M3 15a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4v4H3v-4zM7 10l5-5m0 0l5 5m-5-5v12"
+                                                        />
+                                                    </svg>
+                                                    อัปโหลดรูปภาพ
+                                                </label>
+
+                                                <input
+                                                    id={`image-upload-${index}`}
+                                                    type="file"
+                                                    accept="image/*"
+                                                    onChange={(e) => handleImageChange(index, e)}
+                                                    className="file:bg-pink-400 file:text-white file:px-3 file:py-1 file:rounded-full file:border-none file:mr-2 text-sm cursor-pointer"
+                                                />
+                                            </div>
                                         </div>
                                     );
                                 })}
@@ -377,13 +508,13 @@ const AddDevelopment = () => {
                         <div className="mt-6 text-center space-x-2">
                             <button
                                 onClick={handleSubmit}
-                                className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded"
+                                className="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-full font-medium shadow-md hover:scale-105 transition"
                             >
                                 บันทึก
                             </button>
                             <button
                                 onClick={() => setIsModalOpen(false)}
-                                className="bg-gray-300 hover:bg-gray-400 px-4 py-2 rounded"
+                                className="bg-gray-300 hover:bg-gray-400 text-gray-800 px-6 py-2 rounded-full font-medium shadow-md hover:scale-105 transition"
                             >
                                 ยกเลิก
                             </button>

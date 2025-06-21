@@ -11,11 +11,10 @@ const AddChild = () => {
     lastName: '',
     birthDate: '',
     gender: '',
-    image: '', // base64 string
+    image: '',
   });
 
   const [previewImage, setPreviewImage] = useState(null);
-  const [message, setMessage] = useState('');
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -36,113 +35,139 @@ const AddChild = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
+
     const cleanedData = {
       ...formData,
       birthDate: new Date(formData.birthDate).toISOString(),
-      image: formData.image, // ไม่ต้อง strip base64 prefix
     };
-  
+
     try {
-      const res = await childService.addChild(cleanedData);
-  
-      // แสดง success toast
-      toast.success("อัปเดตข้อมูลเด็กสำเร็จ!", {
+      await childService.addChild(cleanedData);
+
+      toast.success("เพิ่มข้อมูลเด็กสำเร็จ!", {
         position: "top-center",
-        autoClose: 1000,
+        autoClose: 1200,
         hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
       });
-  
-      setMessage(res.data.message);
-      setFormData({
-        firstName: '',
-        lastName: '',
-        birthDate: '',
-        gender: '',
-        image: '',
-      });
-      setPreviewImage(null);
-  
-      // รอ 1.5 วินาทีแล้วนำทางไปที่ "/profile-child"
+
       setTimeout(() => navigate("/profile-child"), 1500);
     } catch (err) {
-      // แสดง error toast
       toast.error("เกิดข้อผิดพลาดในการเพิ่มข้อมูล", {
         position: "top-center",
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
       });
       console.error(err);
-      setMessage(err.response?.data?.message || 'เกิดข้อผิดพลาดในการเพิ่มข้อมูล');
     }
   };
-  
 
   return (
-    <div className="max-w-md mx-auto p-4 bg-white shadow-md rounded">
-      <h2 className="text-xl font-semibold mb-4">เพิ่มข้อมูลเด็ก</h2>
-      {message && <p className="mb-2 text-red-500">{message}</p>}
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <input
-          type="text"
-          name="firstName"
-          placeholder="ชื่อ"
-          value={formData.firstName}
-          onChange={handleChange}
-          className="w-full border p-2 rounded"
-          required
-        />
-        <input
-          type="text"
-          name="lastName"
-          placeholder="นามสกุล"
-          value={formData.lastName}
-          onChange={handleChange}
-          className="w-full border p-2 rounded"
-          required
-        />
-        <input
-          type="date"
-          name="birthDate"
-          value={formData.birthDate}
-          onChange={handleChange}
-          className="w-full border p-2 rounded"
-          required
-        />
-        <select
-          name="gender"
-          value={formData.gender}
-          onChange={handleChange}
-          className="w-full border p-2 rounded"
-          required
-        >
-          <option value="">เลือกเพศ</option>
-          <option value="ชาย">ชาย</option>
-          <option value="หญิง">หญิง</option>
-          <option value="อื่นๆ">อื่นๆ</option>
-        </select>
-        <input
-          type="file"
-          accept="image/*"
-          onChange={handleImageUpload}
-          className="w-full"
-        />
-        {previewImage && (
-          <img src={previewImage} alt="preview" className="w-32 h-32 object-cover rounded mx-auto" />
-        )}
-        <button type="submit" className="btn btn-primary w-full">
-          บันทึกข้อมูล
-        </button>
-      </form>
-      <ToastContainer />
+    <div className="min-h-screen bg-[#F9F5F6] flex items-center justify-center px-4 py-10">
+      <div className="bg-white w-full max-w-lg rounded-3xl shadow-xl p-8 animate-fadeIn">
+        <h2 className="text-2xl font-semibold text-center text-[#32403B] mb-6">
+          เพิ่มข้อมูลเด็ก
+        </h2>
+
+        <form onSubmit={handleSubmit} className="space-y-5">
+          {/* ชื่อ */}
+          <div>
+            <label className="block mb-1 text-gray-700 font-medium">
+              ชื่อ <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              name="firstName"
+              value={formData.firstName}
+              onChange={handleChange}
+              placeholder="กรอกชื่อ"
+              className="input input-bordered w-full rounded-xl"
+              required
+            />
+          </div>
+
+          {/* นามสกุล */}
+          <div>
+            <label className="block mb-1 text-gray-700 font-medium">
+              นามสกุล <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              name="lastName"
+              value={formData.lastName}
+              onChange={handleChange}
+              placeholder="กรอกนามสกุล"
+              className="input input-bordered w-full rounded-xl"
+              required
+            />
+          </div>
+
+          {/* วันเกิด */}
+          <div>
+            <label className="block mb-1 text-gray-700 font-medium">
+              วันเกิด <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="date"
+              name="birthDate"
+              value={formData.birthDate}
+              onChange={handleChange}
+              className="input input-bordered w-full rounded-xl"
+              required
+            />
+          </div>
+
+          {/* เพศ */}
+          <div>
+            <label className="block mb-1 text-gray-700 font-medium">
+              เพศ <span className="text-red-500">*</span>
+            </label>
+            <select
+              name="gender"
+              value={formData.gender}
+              onChange={handleChange}
+              className="select select-bordered w-full rounded-xl bg-gray-50"
+              required
+            >
+              <option value="">เลือกเพศ</option>
+              <option value="ชาย">ชาย</option>
+              <option value="หญิง">หญิง</option>
+              <option value="อื่นๆ">อื่นๆ</option>
+            </select>
+          </div>
+
+          {/* รูปภาพ */}
+          <div>
+            <label className="block mb-1 text-gray-700 font-medium">
+              รูปภาพเด็ก
+            </label>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleImageUpload}
+              className="file-input file-input-bordered w-full rounded-xl"
+            />
+          </div>
+
+          {/* แสดงภาพตัวอย่าง */}
+          {previewImage && (
+            <div className="flex justify-center mt-4">
+              <img
+                src={previewImage}
+                alt="preview"
+                className="w-28 h-28 object-cover rounded-full border border-gray-300 shadow"
+              />
+            </div>
+          )}
+
+          {/* ปุ่มบันทึก */}
+          <button
+            type="submit"
+            className="btn bg-[#84C7AE] hover:bg-[#6EB39D] text-white w-full rounded-xl font-semibold text-base"
+          >
+            บันทึกข้อมูล
+          </button>
+        </form>
+
+        <ToastContainer />
+      </div>
     </div>
   );
 };
