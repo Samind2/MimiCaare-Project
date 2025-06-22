@@ -519,6 +519,7 @@ const ViewVac = () => {
               />
 
               <input
+                id="VV-01"
                 type="text"
                 placeholder="สถานที่รับวัคซีน"
                 className="input input-bordered w-full"
@@ -529,6 +530,7 @@ const ViewVac = () => {
               />
 
               <input
+                id="VV-02"
                 type="text"
                 placeholder="เบอร์โทร"
                 className="input input-bordered w-full"
@@ -572,6 +574,7 @@ const ViewVac = () => {
             />
 
             <input
+              id="VVC-01"
               type="text"
               placeholder="สถานที่รับวัคซีน"
               className="input input-bordered w-full my-2"
@@ -582,6 +585,7 @@ const ViewVac = () => {
             />
 
             <input
+              id="VVC-02"
               type="text"
               placeholder="เบอร์โทร"
               className="input input-bordered w-full my-2"
@@ -595,6 +599,7 @@ const ViewVac = () => {
             {customRecords.map((rec, idx) => (
               <div key={idx} className="border p-3 rounded-lg mb-3">
                 <input
+                  id="VVC-03"
                   type="text"
                   placeholder="ชื่อวัคซีน"
                   className="input input-bordered w-full mb-2"
@@ -606,6 +611,7 @@ const ViewVac = () => {
                   }}
                 />
                 <input
+                  id="VVC-04"
                   type="text"
                   placeholder="หมายเหตุ"
                   className="input input-bordered w-full"

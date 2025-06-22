@@ -3,6 +3,8 @@ import standardDevService from '../../../service/standardDev.service';
 import childService from '../../../service/child.service';
 import receiveDevelopService from '../../../service/receiveDev.service';
 import { toast } from 'react-toastify';
+import { FaChevronDown } from "react-icons/fa";
+
 
 const ViewDev = () => {
   // State ตัวแปรหลัก
@@ -64,8 +66,23 @@ const ViewDev = () => {
       const selectedStandard = allDevs.find(dev => Number(dev.ageRange) === Number(selectedAgeRange));
       const standardList = selectedStandard ? selectedStandard.developments : [];
 
-      const resReceived = await receiveDevelopService.getReceiveDevelopByChildId(selectedChild.id);
-      const receivedList = resReceived.data["had receive"] || [];
+      let receivedList = [];
+
+      try {
+        const resReceived = await receiveDevelopService.getReceiveDevelopByChildId(selectedChild.id);
+        receivedList = resReceived.data["had receive"] || [];
+      } catch (err) {
+        // ถ้า error 404 = ยังไม่มีการประเมิน => แสดงเฉพาะ standard
+        if (err.response && err.response.status === 404) {
+          setDevs(standardList);
+          setCheckStates({});
+          setIsSubmitted(false);
+          return;
+        } else {
+          throw err; // กรณี error อื่น เช่น 500
+        }
+      }
+
       const receivedDataForAge = receivedList.find(item => Number(item.ageRange) === Number(selectedAgeRange));
 
       if (receivedDataForAge) {
@@ -100,6 +117,7 @@ const ViewDev = () => {
       console.error(err);
     }
   };
+
 
   const handleCheckChange = (index, value) => {
     if (!isSubmitted) {
@@ -163,30 +181,58 @@ const ViewDev = () => {
         <h2 className="text-xl font-semibold">พัฒนาการของเด็กช่วงอายุ {ageRangeToText(selectedAgeRange)}</h2>
 
         <div className="flex gap-4">
+          {/* ปุ่มเลือกเด็ก */}
           <div className="dropdown dropdown-hover">
-            <div tabIndex={0} role="button" className="btn w-40 h-12 px-3 text-left">
-              <span className="truncate block w-full">
-                {selectedChild ? `${selectedChild.firstName} ${selectedChild.lastName}` : "เลือกเด็ก"}
-              </span>
+            <div
+              tabIndex={0}
+              className="btn bg-pink-100 text-pink-800 hover:bg-pink-200 rounded-xl text-lg w-48 text-left truncate"
+            >
+              {selectedChild
+                ? `${selectedChild.firstName} ${selectedChild.lastName}`
+                : "เลือกเด็ก"}
+              <FaChevronDown className="inline ml-2" />
             </div>
-            <ul tabIndex={0} className="dropdown-content z-50 menu p-2 shadow bg-base-100 rounded-box w-52">
-              {children.map(child => (
-                <li key={child.id}><a onClick={() => setSelectedChild(child)}>{child.firstName} {child.lastName}</a></li>
+            <ul
+              tabIndex={0}
+              className="dropdown-content menu p-3 shadow-lg bg-pink-50 rounded-xl w-56 max-h-60 overflow-auto"
+            >
+              {children.map((child) => (
+                <li key={child.id}>
+                  <a
+                    className="hover:bg-red-200 rounded-md p-2 cursor-pointer"
+                    onClick={() => setSelectedChild(child)}
+                  >
+                    {child.firstName} {child.lastName}
+                  </a>
+                </li>
               ))}
             </ul>
           </div>
 
+          {/* ปุ่มเลือกอายุ */}
           <div className="dropdown dropdown-hover">
-            <label tabIndex={selectedChild ? 0 : -1} className={`btn w-40 h-12 px-3 text-left ${!selectedChild ? 'btn-disabled opacity-60 cursor-not-allowed' : ''}`}>
+            <div
+              tabIndex={0}
+              className="btn bg-blue-200 text-blue-800 hover:bg-blue-300 rounded-xl text-lg cursor-pointer"
+            >
               {ageRangeToText(selectedAgeRange)}
-            </label>
-            {selectedChild && (
-              <ul tabIndex={0} className="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52">
-                {ageRanges.map(range => (
-                  <li key={range}><a onClick={() => setSelectedAgeRange(range)}>{ageRangeToText(range)}</a></li>
-                ))}
-              </ul>
-            )}
+              <FaChevronDown className="inline ml-2" />
+            </div>
+            <ul
+              tabIndex={0}
+              className="dropdown-content block p-3 shadow-lg bg-blue-100 rounded-xl w-56 max-h-60 overflow-y-auto space-y-2"
+            >
+              {ageRanges.map((range) => (
+                <li key={range}>
+                  <a
+                    className="hover:bg-blue-300 rounded-md p-2 cursor-pointer"
+                    onClick={() => setSelectedAgeRange(range)}
+                  >
+                    {ageRangeToText(range)}
+                  </a>
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
       </div>
@@ -214,11 +260,11 @@ const ViewDev = () => {
                     <td className="py-4 px-3 text-center align-top">
                       <div className="flex flex-col space-y-2">
                         <label className="inline-flex items-center space-x-2">
-                          <input type="radio" name={`dev-${idx}`} checked={checkStates[idx] === 'done'} onChange={() => handleCheckChange(idx, 'done')} disabled={isSubmitted} />
+                          <input id='VD-01' type="radio" name={`dev-${idx}`} checked={checkStates[idx] === 'done'} onChange={() => handleCheckChange(idx, 'done')} disabled={isSubmitted} />
                           <span>ทำได้</span>
                         </label>
                         <label className="inline-flex items-center space-x-2">
-                          <input type="radio" name={`dev-${idx}`} checked={checkStates[idx] === 'not-done'} onChange={() => handleCheckChange(idx, 'not-done')} disabled={isSubmitted} />
+                          <input id='VD-02' type="radio" name={`dev-${idx}`} checked={checkStates[idx] === 'not-done'} onChange={() => handleCheckChange(idx, 'not-done')} disabled={isSubmitted} />
                           <span>ทำไม่ได้</span>
                         </label>
                       </div>
