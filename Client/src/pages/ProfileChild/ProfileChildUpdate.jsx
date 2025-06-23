@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import childService from "../../service/child.service";
-import { ToastContainer, toast } from "react-toastify";
+import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 const ProfileChildUpdate = () => {
@@ -55,12 +55,12 @@ const ProfileChildUpdate = () => {
     try {
       await childService.updateChild(id, updatedData);
       toast.success("อัปเดตข้อมูลเด็กสำเร็จ!", {
-        autoClose: 1200,
-        hideProgressBar: true,
+        autoClose: 1500,
       });
       setTimeout(() => navigate("/profile-child"), 1500);
     } catch (error) {
-      toast.error("เกิดข้อผิดพลาดในการอัปเดต");
+      toast.error("เกิดข้อผิดพลาดในการอัปเดต" , {
+        autoClose: 1500,});
       console.error(error);
     }
   };
@@ -166,7 +166,6 @@ const ProfileChildUpdate = () => {
         </form>
       </div>
 
-      <ToastContainer />
     </div>
   );
 };

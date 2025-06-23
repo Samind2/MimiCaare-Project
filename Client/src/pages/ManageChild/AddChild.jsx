@@ -45,15 +45,13 @@ const AddChild = () => {
       await childService.addChild(cleanedData);
 
       toast.success("เพิ่มข้อมูลเด็กสำเร็จ!", {
-        position: "top-center",
-        autoClose: 1200,
-        hideProgressBar: true,
+        autoClose: 1500,
       });
 
       setTimeout(() => navigate("/profile-child"), 1500);
     } catch (err) {
       toast.error("เกิดข้อผิดพลาดในการเพิ่มข้อมูล", {
-        position: "top-center",
+        autoClose: 1500,
       });
       console.error(err);
     }

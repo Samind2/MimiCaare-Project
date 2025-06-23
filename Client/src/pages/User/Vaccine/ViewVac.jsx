@@ -6,8 +6,6 @@ import { toast } from "react-toastify";
 import { FaPlus } from 'react-icons/fa';
 import { FaChevronDown } from "react-icons/fa";
 
-
-
 const ViewVac = () => {
   //  STATE 
   const [vaccines, setVaccines] = useState([]);
@@ -16,9 +14,6 @@ const ViewVac = () => {
   const [receivedVaccines, setReceivedVaccines] = useState([]);
   const [customVaccines, setCustomVaccines] = useState([]);
   const [showCustomOnly, setShowCustomOnly] = useState(false);
-
-
-
 
   // Modal สำหรับวัคซีนมาตรฐาน
   const [showModal, setShowModal] = useState(false);
