@@ -45,6 +45,7 @@ func GenerateToken(userId string, c *gin.Context) (string, error) {
 		HttpOnly: true,
 		Secure:   node_mode != "development",
 		//SameSite: http.SameSiteStrictMode, // ป้องกัน CSRF
+		//SameSite: http.SameSiteNoneMode,
 		SameSite: http.SameSiteNoneMode,
 	}
 
