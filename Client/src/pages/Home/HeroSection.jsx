@@ -27,7 +27,7 @@ const HeroSection = () => {
             {!user ? (
               <button
                 className="btn bg-[#E51317] text-white px-8 py-3 font-semibold rounded-full"
-                onClick={() => navigate("/signup")}
+                onClick={() => navigate("/Signup")}
               >
                 ลงทะเบียน
               </button>

@@ -1,7 +1,7 @@
 import React, { useContext } from 'react'
 import { AuthContext } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
-import { ToastContainer, toast } from "react-toastify";
+import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 
@@ -11,8 +11,9 @@ const Profile = () => {
   const navigate = useNavigate();
   const handleLogout = () => {
     logout();
-    navigate('/signin')
-  }
+    toast.success("ออกจากระบบสำเร็จ!", { autoClose: 1500 });
+    navigate('/');
+    }
   return (
     <div>
 
@@ -51,7 +52,6 @@ const Profile = () => {
           </li>
         </ul>
       </div>
-        <ToastContainer />
     </div>
   )
 }

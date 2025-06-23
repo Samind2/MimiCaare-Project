@@ -8,7 +8,7 @@ const ProfileUpdate = () => {
     const { user, updateProfile } = useContext(AuthContext);
     const [firstName, setFirstName] = useState(user?.firstName || '');
     const [lastName, setLastName] = useState(user?.lastName || '');
-    const [email, setEmail] = useState(user?.email || ''); 
+    const [email, setEmail] = useState(user?.email || '');
     const [picture, setPicture] = useState(user?.picture || '');
     const navigate = useNavigate();
 
@@ -65,9 +65,10 @@ const ProfileUpdate = () => {
                     <form onSubmit={handleSubmit} className="space-y-4">
                         <div className="form-control">
                             <label className="label">
-                                <span className="label-text">ชื่อผู้ใช้</span>
+                                <span className="label-text" >ชื่อผู้ใช้</span>
                             </label>
                             <input
+                                id='PU-01'
                                 type="text"
                                 placeholder="First Name"
                                 className="input input-bordered w-full"
@@ -78,6 +79,7 @@ const ProfileUpdate = () => {
                                 <span className="label-text">นามสกุล</span>
                             </label>
                             <input
+                                id='PU-02'
                                 type="text"
                                 placeholder="Last Name"
                                 className="input input-bordered w-full"
@@ -88,19 +90,21 @@ const ProfileUpdate = () => {
                                 <span className="label-text">อีเมล</span>
                             </label>
                             <input
-                                type="email"  // เปลี่ยนเป็น type="email"
+                                id='PU-03'
+                                type="email"
                                 placeholder="Email"
                                 className="input input-bordered w-full"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}  // แก้ไขอีเมล
                             />
                         </div>
-                        
+
                         <div className="form-control">
                             <label className="label">
                                 <span className="label-text">อัพโหลดรูปภาพโปรไฟล์</span>
                             </label>
                             <input
+                                id='PU-04'
                                 type="file"
                                 accept="image/*"
                                 className="file-input w-full"

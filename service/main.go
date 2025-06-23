@@ -6,8 +6,7 @@ import (
 	"os"
 
 	database "github.com/Samind2/MimiCaare-Project/service/config/database"
-	childrenController "github.com/Samind2/MimiCaare-Project/service/controllers/children"
-	userController "github.com/Samind2/MimiCaare-Project/service/controllers/user"
+	controllers "github.com/Samind2/MimiCaare-Project/service/controllers"
 	corsMiddleware "github.com/Samind2/MimiCaare-Project/service/middlewares/cors"
 	routes "github.com/Samind2/MimiCaare-Project/service/routers"
 	"github.com/gin-gonic/gin"
@@ -32,8 +31,8 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	userController.SetUserCollection(client)
-	childrenController.SetChildrenCollection(client)
+
+	controllers.CollectionControllers(client)
 
 	r := gin.Default()
 
@@ -47,7 +46,11 @@ func main() {
 	// API Routes
 	api := r.Group("/api/v1")
 	routes.UserRoutes(api.Group("/user"))
-
+	routes.ChildrenRoutes(api.Group("/children"))
+	routes.StandardVaccineRoutes(api.Group("/standardVaccine"))
+	routes.StandardDevelopRoutes(api.Group("/standardDevelop"))
+	routes.ReceiveVaccineRoutes(api.Group("/receiveVaccine"))
+	routes.ReceiveDevelopRoutes(api.Group("/receiveDevelop"))
 	// ใช้ PORT จาก .env
 	port := os.Getenv("PORT")
 	if port == "" {

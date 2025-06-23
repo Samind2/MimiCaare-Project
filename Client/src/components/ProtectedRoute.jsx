@@ -10,7 +10,7 @@ const ProtectedRoute = ({ children }) => {
     }
 
     if (!user) {
-        return <Navigate to="/signin" />; // ถ้าไม่มีผู้ใช้ให้ไปที่หน้าเข้าสู่ระบบ
+        return <Navigate to="/Signin" />; // ถ้าไม่มีผู้ใช้ให้ไปที่หน้าเข้าสู่ระบบ
     }
 
     return children; // ถ้ามีผู้ใช้ ให้แสดง children (หน้าเพจที่ต้องการเข้าถึง)

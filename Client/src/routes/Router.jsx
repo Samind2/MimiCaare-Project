@@ -1,16 +1,27 @@
 import React from 'react';
-import { createBrowserRouter } from "react-router-dom"; // ✅ ใช้ react-router-dom
+import { createBrowserRouter } from "react-router-dom"; // 
 import MainLayout from "../layouts/Main";
 import ProtectedRoute from "../components/ProtectedRoute";
 import Home from "../pages/Home/Index";
 import SignUp from "../components/SignUp";
 import Signin from "../components/Signin";
-import Vaccine from "../pages/Vaccine/Index.jsx";
-import Development from "../pages/Development/Index.jsx";
+import Vaccine from "../pages/ManageVac/AddVac.jsx";
+import Development from "../pages/ManageDevelopment/Index.jsx"; //
 import ProfileChild from "../pages/ProfileChild/Index.jsx";
 import ProfileParent from "../pages/ProfileParent/Index.jsx";
 import ProfileUpdate from "../components/Navbar/ProfileUpdate.jsx";
 import Notification from "../pages/Notifications/Index.jsx";
+import ProfileChildUpdate from '../pages/ProfileChild/ProfileChildUpdate.jsx';
+import AddChild from '../pages/ManageChild/AddChild.jsx';
+import AdminLayout from '../layouts/AdminLayout.jsx';
+import AddDevelopment from '../pages/ManageDevelopment/AddDevelopment.jsx';
+import Dashboard from '../pages/Dashboard/Index.jsx';
+import AdminRoute from '../ProtectedRoutes/AdminRoute.jsx'; // นำเข้า AdminRoute
+import AddVaccine from '../pages/ManageVac/AddVac.jsx';
+import ViewVaccine from '../pages/User/Vaccine/Index.jsx';
+import ViewDevelopment from '../pages/User/Development/Index.jsx';
+import ManageRights from '../pages/ManageUser/ManageRights.jsx';
+import AllUser from '../pages/ManageUser/AllUser.jsx';
 
 const router = createBrowserRouter([
     {
@@ -26,22 +37,22 @@ const router = createBrowserRouter([
                 element: <SignUp />
             },
             {
-                path: "/signin", 
+                path: "/signin",
                 element: <Signin />
             },
             {
-                path: "/vaccine",
+                path: "/ViewVaccine",
                 element: (
                     <ProtectedRoute>
-                        <Vaccine />
+                        <ViewVaccine />
                     </ProtectedRoute>
                 )
             },
             {
-                path: "/development",
+                path: "/ViewDevelopment",
                 element: (
                     <ProtectedRoute>
-                        <Development />
+                        <ViewDevelopment />
                     </ProtectedRoute>
                 )
             },
@@ -77,6 +88,54 @@ const router = createBrowserRouter([
                     </ProtectedRoute>
                 )
             },
+            {
+                path: "/addChild",
+                element: (
+                    <ProtectedRoute>
+                        <AddChild />
+                    </ProtectedRoute>
+                )
+            },
+            {
+                path: "/profile-child-update/:id",
+                element: (
+                    <ProtectedRoute>
+                        <ProfileChildUpdate />
+                    </ProtectedRoute>
+                )
+            },
+
+        ],
+    },
+    {
+        path: "dashboard",
+        element: (
+            <AdminRoute>
+                <AdminLayout />
+            </AdminRoute>
+        ),
+        children: [
+            {
+                path: "",
+                element: <Dashboard />,
+            },
+            {
+                path: "add-vaccine",
+                element: <AddVaccine />,
+            },
+            {
+                path: "add-development",
+                element: <AddDevelopment />,
+            }, {
+                path: "ManageRights",
+                element: <ManageRights />,
+            },
+            {
+                path: "AllUser",
+                element: 
+                    <AllUser />
+            },
+
         ],
     },
 ]);

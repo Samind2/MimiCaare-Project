@@ -8,13 +8,13 @@ const Footer = () => {
     <a className="link link-hover">Vaccines</a>
     <a className="link link-hover">Developments</a>
   </nav>
-  <nav>
+  {/* <nav>
     <div className="grid grid-flow-col gap-4">
       <a>
       <img src="/Mimicare(1).png" alt="Logo" className="h-6 lg:f-12 pr-a max-auto" />
       </a>
     </div>
-  </nav>
+  </nav> */}
   <aside>
     <p>Copyright © {new Date().getFullYear()} - All right reserved by Mimi Care Project</p>
   </aside>

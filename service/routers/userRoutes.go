@@ -2,6 +2,7 @@ package routes
 
 import (
 	userController "github.com/Samind2/MimiCaare-Project/service/controllers/user"
+	middleware "github.com/Samind2/MimiCaare-Project/service/middlewares"
 	"github.com/gin-gonic/gin"
 )
 
@@ -9,7 +10,7 @@ import (
 func UserRoutes(router *gin.RouterGroup) {
 	router.POST("/signup", userController.Signup)
 	router.POST("/login", userController.Login)
-	router.POST("/logout", userController.Logout)
-	router.PUT("/update", userController.UpdateProfile)
+	router.POST("/logout", middleware.VerifyToken(), userController.Logout)
+	router.PUT("/update", middleware.VerifyToken(), userController.UpdateProfile)
 
 }

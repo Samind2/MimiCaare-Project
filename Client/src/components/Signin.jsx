@@ -1,126 +1,147 @@
 import React, { useState, useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { useNavigate } from "react-router";
-import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import { toast } from "react-toastify";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { IoIosCloseCircle } from "react-icons/io";
 
 const Signin = () => {
   const { login } = useContext(AuthContext);
   const navigate = useNavigate();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [formData, setFormData] = useState({ email: "", password: "" });
   const [errors, setErrors] = useState({});
-  const [showPassword, setShowPassword] = useState(false); // State for showing/hiding password
+  const [showPassword, setShowPassword] = useState(false);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    setErrors((prev) => ({ ...prev, [name]: "" }));
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    let newErrors = {};
-    // Check if email is entered
-    if (!email.trim()) newErrors.Email = "กรุณากรอกอีเมล";
-    // Check if password is entered
-    if (!password.trim()) newErrors.Password = "กรุณากรอกรหัสผ่าน";
-
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors); // Store errors
-      return; // Stop form submission if there are errors
+    const newErrors = {};
+    if (!formData.email.trim()) newErrors.email = "กรุณากรอกอีเมล";
+    if (!formData.password.trim()) newErrors.password = "กรุณากรอกรหัสผ่าน";
+    if (Object.keys(newErrors).length) {
+      setErrors(newErrors);
+      return;
     }
 
-    const userData = { email, password };
     try {
-      await login(userData); // Call the login function
-      toast.success("เข้าสู่ระบบสำเร็จ!", {
-        position: "top-center",
-        autoClose: 1000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
-
+      setIsLoggingIn(true);
+      const user = await login(formData);
+      toast.success("เข้าสู่ระบบสำเร็จ!", { autoClose: 1500 });
       setTimeout(() => {
-        navigate("/");
-      }, 2000);
+        navigate(user.role === "admin" ? "/dashboard" : "/");
+      }, 1600);
     } catch (error) {
-      toast.error("เกิดข้อผิดพลาดในการเข้าสู่ระบบ!", {
-        position: "top-center",
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
-      console.error("Error in profile update:", error); // เพิ่ม log เพื่อดู error
+      setIsLoggingIn(false);
+      const msg = error.response?.data?.message || "เกิดข้อผิดพลาด";
+      if (msg === "ไม่พบผู้ใช้งาน") setErrors({ email: msg });
+      else if (msg === "รหัสผ่านไม่ถูกต้อง") setErrors({ password: msg });
+      else toast.error(msg);
     }
   };
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center bg-[#EE8A8A] overflow-hidden">
-      <div className="absolute top-0 left-0 w-96 h-96 bg-[#FFD2D1] opacity-80 rounded-xl rotate-6"></div>
-      <div className="absolute bottom-0 right-0 w-96 h-96 bg-[#FFD2D1] opacity-80 rounded-xl -rotate-6"></div>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#FEE9E1] via-[#F9E8F1] to-[#E5F5EF] px-4">
+      <div className="w-full max-w-5xl bg-white shadow-xl rounded-3xl overflow-hidden flex flex-col md:flex-row">
 
-      <div className="absolute top-10 left-10 opacity-60">
-        <img src="/images/BG/BG-L.png" alt="children play" className="w-32 h-32" />
-      </div>
-      <div className="absolute bottom-10 right-10 opacity-60">
-        <img src="/images/BG/BG-R.png" alt="syringe" className="w-32 h-32" />
-      </div>
+        {/* ซ้าย: ฟอร์ม */}
+        <div className="w-full md:w-1/2 p-8 relative">
+          {/* ปุ่มปิด */}
+          <button
+            onClick={() => navigate("/")}
+            className="absolute top-3 right-3 text-gray-400 hover:text-red-400 text-3xl"
+          >
+            <IoIosCloseCircle />
+          </button>
 
-      <div className="bg-white p-8 rounded-2xl shadow-lg w-96 text-center relative z-10">
-        <h2 className="text-lg font-bold text-[#32403B] mb-4">
-          เข้าสู่ระบบเพื่อเข้าถึงบริการสำหรับบันทึกวัคซีน และ ติดตามพัฒนาการของเด็ก
-        </h2>
-        <form onSubmit={handleSubmit}>
-          <div className="mb-3 text-left">
-            <label className="block text-sm font-medium text-gray-700">
-              อีเมล <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="email"
-              className="input input-bordered w-full mt-1"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-            {errors.Email && <p className="text-red-500 text-xs">{errors.Email}</p>}
-          </div>
-          <div className="mb-3 text-left">
-            <label className="block text-sm font-medium text-gray-700">
-              รหัสผ่าน <span className="text-red-500">*</span>
-            </label>
-            <div className="relative">
+          <h2 className="text-2xl font-bold text-pink-600 mb-2 text-center md:text-left">เข้าสู่ระบบ</h2>
+          <p className="text-sm text-gray-500 mb-6 text-center md:text-left">
+            ระบบติดตามพัฒนาการและวัคซีนเด็ก MimiCare
+          </p>
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Email */}
+            <div className="form-control">
+              <label htmlFor="email" className="label text-sm font-medium text-gray-700">
+                อีเมล <span className="text-red-500">*</span>
+              </label>
               <input
-                type={showPassword ? "text" : "password"} // Toggle between password and text
-                className="input input-bordered w-full mt-1"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                id="SI-01"
+                type="email"
+                name="email"
+                placeholder="กรอกอีเมล"
+                value={formData.email}
+                onChange={handleChange}
+                className={`input input-bordered rounded-xl w-full ${errors.email ? "input-error" : ""}`}
+              />
+              {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
+            </div>
+
+            {/* Password */}
+            <div className="form-control relative">
+              <label htmlFor="password" className="label text-sm font-medium text-gray-700">
+                รหัสผ่าน <span className="text-red-500">*</span>
+              </label>
+              <input
+                id="SI-02"
+                type={showPassword ? "text" : "password"}
+                name="password"
+                placeholder="กรอกรหัสผ่าน"
+                value={formData.password}
+                onChange={handleChange}
+                className={`input input-bordered pr-10 rounded-xl w-full ${errors.password ? "input-error" : ""}`}
               />
               <button
                 type="button"
-                onClick={() => setShowPassword(!showPassword)} // Toggle password visibility
-                className="absolute top-1/2 right-3 transform -translate-y-1/2 text-gray-500"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-[44px] text-gray-500"
+                tabIndex={-1}
               >
-                {showPassword ? <FaEyeSlash /> : <FaEye />} {/* Button text based on visibility */}
+                {showPassword ? <FaEyeSlash /> : <FaEye />}
               </button>
+              {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password}</p>}
             </div>
-            {errors.Password && <p className="text-red-500 text-xs">{errors.Password}</p>}
-          </div>
-          <p className="mt-3 text-sm text-gray-500 flex justify-end">
-            หากคุณลืมรหัสผ่าน? <a href="/Signup" className="text-red-500">คลิ๊กที่นี่</a>
-          </p>
-          <button className="bg-[#FA5453] text-white px-4 py-2 rounded-lg w-full hover:bg-[#ff8686] transition duration-300 mt-4">
-            เข้าสู่ระบบ
-          </button>
-        </form>
 
-        <p className="mt-3 text-sm text-gray-500">
-          หากคุณยังไม่มีบัญชีผู้ใช้? <a href="/Signup" className="text-red-500">สมัครสมาชิก</a>
-        </p>
+            {/* Submit */}
+            <button
+              type="submit"
+              disabled={isLoggingIn}
+              className={`btn w-full text-white font-semibold text-base rounded-full transition-all duration-300 ${isLoggingIn ? "bg-pink-300 cursor-not-allowed" : "bg-pink-500 hover:bg-pink-600"}`}
+            >
+              {isLoggingIn ? "กำลังเข้าสู่ระบบ..." : "เข้าสู่ระบบ"}
+            </button>
+          </form>
+
+          <p className="mt-6 text-center text-sm text-gray-500">
+            ยังไม่มีบัญชี?{" "}
+            <a href="/Signup" className="text-pink-500 underline font-medium">
+              สมัครสมาชิก
+            </a>
+          </p>
+        </div>
+
+        {/* ขวา: ข้อความ/รูปภาพ */}
+        <div className="hidden md:flex md:w-1/2 bg-[#F8E8EE] items-center justify-center p-8">
+          <div className="text-center">
+            <img
+              src="/Mimicare(1).png"
+              alt="เด็กน่ารัก"
+              className="w-72 mx-auto mb-4"
+            />
+            <h3 className="text-xl font-bold text-pink-600">ยินดีต้อนรับสู่ MimiCare</h3>
+            <p className="text-gray-600 mt-2 text-sm">
+              ช่วยให้คุณติดตามพัฒนาการและการฉีดวัคซีนของบุตรหลานได้ง่ายขึ้น
+            </p>
+          </div>
+        </div>
       </div>
-      <ToastContainer />
     </div>
+
   );
 };
 
