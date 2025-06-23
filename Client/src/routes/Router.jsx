@@ -11,7 +11,7 @@ import ProfileChild from "../pages/ProfileChild/Index.jsx";
 import ProfileParent from "../pages/ProfileParent/Index.jsx";
 import ProfileUpdate from "../components/Navbar/ProfileUpdate.jsx";
 import Notification from "../pages/Notifications/Index.jsx";
-import ProfileChildUpdate from '../pages/ProfileChild/ProfilechildUpdate.jsx';
+import ProfileChildUpdate from '../pages/ProfileChild/ProfileChildUpdate.jsx';
 import AddChild from '../pages/ManageChild/AddChild.jsx';
 import AdminLayout from '../layouts/AdminLayout.jsx';
 import AddDevelopment from '../pages/ManageDevelopment/AddDevelopment.jsx';
