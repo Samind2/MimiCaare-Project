@@ -6,6 +6,8 @@ import (
 	"os"
 
 	standardDevelopModel "github.com/Samind2/MimiCaare-Project/service/models/standardDev"
+	"github.com/cloudinary/cloudinary-go/v2"
+	"github.com/cloudinary/cloudinary-go/v2/api/uploader"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -24,22 +26,56 @@ func SetStandardDevelopCollection(client *mongo.Client) {
 func AddStandardDevelop(c *gin.Context) {
 	var developData standardDevelopModel.StandardDevelop
 
-	//เช็คข้อมูลก่อนว่ามาป่าว
+	// ดึงข้อมูล JSON เดียวรอบเดียว
 	if err := c.ShouldBindJSON(&developData); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "ข้อมูลไม่ถูกต้อง", "error": err.Error()})
 		return
 	}
 
-	// ตรวจสอบว่ามีพัฒนาการหรือไม่
-	if len(developData.Developments) == 0 {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "กรุณาเพิ่มรายการพัฒนาการอย่างน้อย 1 รายการ"})
+	if developData.AgeRange <= 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "ไม่ควรมีช่วงอายุน้อยกว่าหรือเท่ากับ 0"})
 		return
 	}
 
-	// สร้าง ObjectID ใหม่
+	if len(developData.Developments) == 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "ไม่พบรายการพัฒนาการ"})
+		return
+	}
+
+	// วนตรวจสอบแต่ละรายการ
+	for i := range developData.Developments {
+		record := &developData.Developments[i]
+
+		if record.Category == "" || record.Detail == "" || record.Note == "" || record.Image == "" {
+			c.JSON(http.StatusBadRequest, gin.H{"message": "กรุณากรอกข้อมูลพัฒนาการให้ครบทุกช่อง"})
+			return
+		}
+
+		// อัปโหลดภาพ (ถ้ามี)
+		if record.Image != "" {
+			cloudinaryURL := os.Getenv("CLOUDINARY_URL")
+			cld, err := cloudinary.NewFromURL(cloudinaryURL)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"message": "ไม่สามารถเชื่อมต่อ Cloudinary ได้"})
+				return
+			}
+
+			uploadResponse, err := cld.Upload.Upload(context.TODO(), record.Image, uploader.UploadParams{
+				Folder: "development image",
+			})
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"message": "เกิดข้อผิดพลาดขณะอัปโหลดภาพ"})
+				return
+			}
+
+			// แทนที่ลิงก์ภาพ
+			record.Image = uploadResponse.SecureURL
+		}
+	}
+
 	developData.ID = primitive.NewObjectID()
 
-	// บันทึกลงฐานข้อมูล
+	// บันทึกลง MongoDB
 	_, err := StandardDevelopCollection.InsertOne(context.TODO(), developData)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "ไม่สามารถบันทึกข้อมูลได้", "error": err.Error()})
@@ -99,28 +135,89 @@ func UpdateStandardDevelopByID(c *gin.Context) {
 		return
 	}
 
-	// รับข้อมูล JSON ใหม่ที่ต้องการอัปเดต
+	// รับข้อมูลใหม่จาก JSON
 	var updatedData standardDevelopModel.StandardDevelop
 	if err := c.ShouldBindJSON(&updatedData); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "ข้อมูลไม่ถูกต้อง", "error": err.Error()})
 		return
 	}
 
-	// เตรียมฟิลด์ที่จะแก้ไข
-	updateFields := bson.M{}
-	if updatedData.AgeRange != 0 {
-		updateFields["ageRange"] = updatedData.AgeRange
-	}
-	if len(updatedData.Developments) > 0 {
-		updateFields["developments"] = updatedData.Developments
-	}
-
-	if len(updateFields) == 0 {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "ไม่มีข้อมูลให้อัปเดต"})
+	// ดึงข้อมูลเดิมจากฐานข้อมูล
+	var existingDevRecord standardDevelopModel.StandardDevelop
+	err = StandardDevelopCollection.FindOne(context.TODO(), bson.M{"_id": objectID}).Decode(&existingDevRecord)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"message": "ไม่พบข้อมูลเดิม", "error": err.Error()})
 		return
 	}
 
-	// อัปเดตในฐานข้อมูล
+	// --- รวมข้อมูล ---
+	updatedAge := existingDevRecord.AgeRange
+	if updatedData.AgeRange > 0 {
+		updatedAge = updatedData.AgeRange
+	}
+
+	// รวม DevelopmentItems ทีละรายการ
+	var updatedDevelopments []standardDevelopModel.DevelopmentItem
+	if len(updatedData.Developments) > 0 {
+		for i, updatedItem := range updatedData.Developments {
+			var mergedItem standardDevelopModel.DevelopmentItem
+
+			// ถ้ามีข้อมูลเดิมสำหรับตำแหน่งนี้ ให้ใช้
+			var existingItem standardDevelopModel.DevelopmentItem
+			if i < len(existingDevRecord.Developments) {
+				existingItem = existingDevRecord.Developments[i]
+			}
+
+			// รวมแต่ละฟิลด์
+			if updatedItem.Category != "" {
+				mergedItem.Category = updatedItem.Category
+			} else {
+				mergedItem.Category = existingItem.Category
+			}
+			if updatedItem.Detail != "" {
+				mergedItem.Detail = updatedItem.Detail
+			} else {
+				mergedItem.Detail = existingItem.Detail
+			}
+			if updatedItem.Note != "" {
+				mergedItem.Note = updatedItem.Note
+			} else {
+				mergedItem.Note = existingItem.Note
+			}
+
+			// ตรวจสอบ image ใหม่
+			if updatedItem.Image != "" {
+				cloudinaryURL := os.Getenv("CLOUDINARY_URL")
+				cld, err := cloudinary.NewFromURL(cloudinaryURL)
+				if err != nil {
+					c.JSON(http.StatusInternalServerError, gin.H{"message": "ไม่สามารถเชื่อมต่อ Cloudinary ได้"})
+					return
+				}
+				uploadResponse, err := cld.Upload.Upload(context.TODO(), updatedItem.Image, uploader.UploadParams{
+					Folder: "development image",
+				})
+				if err != nil {
+					c.JSON(http.StatusInternalServerError, gin.H{"message": "อัปโหลดภาพไม่สำเร็จ", "error": err.Error()})
+					return
+				}
+				mergedItem.Image = uploadResponse.SecureURL
+			} else {
+				mergedItem.Image = existingItem.Image
+			}
+
+			updatedDevelopments = append(updatedDevelopments, mergedItem)
+		}
+	} else {
+		// ถ้าไม่ได้ส่ง developments ใหม่มา  ใช้ของเดิมทั้งหมด
+		updatedDevelopments = existingDevRecord.Developments
+	}
+
+	// อัปเดตจริง
+	updateFields := bson.M{
+		"ageRange":     updatedAge,
+		"developments": updatedDevelopments,
+	}
+
 	result, err := StandardDevelopCollection.UpdateOne(
 		context.TODO(),
 		bson.M{"_id": objectID},
@@ -130,14 +227,16 @@ func UpdateStandardDevelopByID(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "อัปเดตล้มเหลว", "error": err.Error()})
 		return
 	}
-	if result.ModifiedCount == 0 {
-		c.JSON(http.StatusNotFound, gin.H{"message": "ไม่พบหรือไม่มีการเปลี่ยนแปลงข้อมูล"})
+	if result.MatchedCount == 0 {
+		c.JSON(http.StatusNotFound, gin.H{"message": "ไม่พบข้อมูลที่ต้องการอัปเดต"})
 		return
 	}
+
+	// ดึงข้อมูลหลังอัปเดต
 	var updatedDoc standardDevelopModel.StandardDevelop
 	err = StandardDevelopCollection.FindOne(context.TODO(), bson.M{"_id": objectID}).Decode(&updatedDoc)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "ดึงข้อมูลหลังอัปเดตไม่สำเร็จ", "error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "ไม่สามารถดึงข้อมูลหลังอัปเดตได้", "error": err.Error()})
 		return
 	}
 
@@ -146,6 +245,7 @@ func UpdateStandardDevelopByID(c *gin.Context) {
 		"data":    updatedDoc,
 	})
 }
+
 func DeleteStandardDevelopByID(c *gin.Context) {
 	id := c.Param("id")
 	objectID, err := primitive.ObjectIDFromHex(id)

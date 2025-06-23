@@ -223,7 +223,7 @@ func UpdateChildrenByID(c *gin.Context) {
 	}
 
 	// อัปเดตเฉพาะฟิลด์ที่มีการเปลี่ยนแปลง
-	updateFields := make(map[string]interface{})
+	updateFields := make(map[string]any)
 	if updatedData.FirstName != "" {
 		updateFields["firstName"] = updatedData.FirstName
 	}
