@@ -31,7 +31,7 @@ func SetStandardDevelopReference(client *mongo.Client) {
 func AddReceiveDevelop(c *gin.Context) {
 	var inputData struct {
 		ChildID           primitive.ObjectID `json:"childId"`
-		Status            bool               `json:"status"`
+		StatusList        []bool             `json:"status"`
 		StandardDevelopID primitive.ObjectID `json:"standardDevelopId"`
 		AgeRange          int                `json:"ageRange"`
 	}
@@ -47,11 +47,24 @@ func AddReceiveDevelop(c *gin.Context) {
 		c.JSON(http.StatusNotFound, gin.H{"message": "ไม่พบข้อมูลพัฒนาการมาตรฐานที่ระบุ", "error": err.Error()})
 		return
 	}
-	// แปลงข้อมูลจากพัฒนาการมาตรฐาน
+	if len(inputData.StatusList) > len(standardDevelop.Developments) {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "จำนวน status มากเกินไป"})
+		return
+	}
+	if len(inputData.StatusList) < len(standardDevelop.Developments) {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "จำนวน status น้อยเกินไป"})
+		return
+	}
+
+	// สร้าง DevelopmentResults โดยให้ status เริ่มต้นตาม input
 	var developmentRecords []receiveDevelopModel.DevelopmentResults
-	for _, development := range standardDevelop.Developments {
+	for i, development := range standardDevelop.Developments {
+		status := false
+		if i < len(inputData.StatusList) {
+			status = inputData.StatusList[i]
+		}
 		developmentRecords = append(developmentRecords, receiveDevelopModel.DevelopmentResults{
-			Status:   inputData.Status,
+			Status:   status,
 			Category: development.Category,
 			Detail:   development.Detail,
 			Image:    development.Image,
@@ -88,40 +101,45 @@ func UpdateReceiveDevelopByID(c *gin.Context) {
 		return
 	}
 
-	var updateData receiveDevelopModel.ReceiveDevelop
-	if err := c.ShouldBindJSON((&updateData)); err != nil {
+	var updateData struct {
+		Status       []bool                                   `json:"status"`       // แยก status array
+		Developments []receiveDevelopModel.DevelopmentResults `json:"developments"` // ข้อมูล developments อื่น
+	}
+	if err := c.ShouldBindJSON(&updateData); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "ข้อมูลไม่ถูกต้อง", "error": err.Error()})
 		return
 	}
+
 	// ดึงข้อมูลเดิมจากฐานข้อมูล
 	var existingDevRecord receiveDevelopModel.ReceiveDevelop
-	err = StandardDevelopCollection.FindOne(context.TODO(), bson.M{"_id": developId}).Decode(&existingDevRecord)
+	err = receiveDevelopCollection.FindOne(context.TODO(), bson.M{"_id": developId}).Decode(&existingDevRecord)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"message": "ไม่พบข้อมูลเดิม", "error": err.Error()})
 		return
 	}
 	// --- รวมข้อมูล ---
 	var updatedDevelopmentsData []receiveDevelopModel.DevelopmentResults
-	if len(updateData.Developments) > 0 {
-		for i, updatedItem := range updateData.Developments {
-			var mergedItem receiveDevelopModel.DevelopmentResults
 
-			// ถ้ามีข้อมูลเดิมสำหรับตำแหน่งนี้ ให้ใช้
-			var existingItem receiveDevelopModel.DevelopmentResults
-			if i < len(existingDevRecord.Developments) {
-				existingItem = existingDevRecord.Developments[i]
-			}
-			// รวมแต่ละฟิลด์
-			if updatedItem.Status != existingItem.Status {
-				mergedItem.Status = updatedItem.Status
-			}
+	for i := range existingDevRecord.Developments {
+		existing := existingDevRecord.Developments[i]
 
-			updatedDevelopmentsData = append(updatedDevelopmentsData, mergedItem)
+		// รวมข้อมูล status แยกจาก StatusList
+		status := existing.Status
+		if i < len(updateData.Status) {
+			status = updateData.Status[i]
 		}
-	} else {
-		// ถ้าไม่มีข้อมูลใหม่ ให้ใช้ข้อมูลเดิม
-		updatedDevelopmentsData = existingDevRecord.Developments
+
+		// รวมข้อมูล field อื่น ๆ
+		merged := receiveDevelopModel.DevelopmentResults{
+			Status:   status,
+			Category: existing.Category,
+			Detail:   existing.Detail,
+			Image:    existing.Image,
+			Note:     existing.Note,
+		}
+		updatedDevelopmentsData = append(updatedDevelopmentsData, merged)
 	}
+
 	// อัปเดตจริง
 	updateFields := bson.M{
 		"developments": updatedDevelopmentsData,

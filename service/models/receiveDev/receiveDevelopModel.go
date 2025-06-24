@@ -8,7 +8,7 @@ type ReceiveDevelop struct {
 	AgeRange      int                  `bson:"ageRange,omitempty" json:"ageRange"`
 	ReceiveDate   primitive.DateTime   `bson:"receiveDate,omitempty" json:"receiveDate"`     // วันที่รับพัฒนาการ
 	StandardDevID primitive.ObjectID   `bson:"standardDevId,omitempty" json:"standardDevId"` // เชื่อมไปที่ standardDevelopModels
-	Developments  []DevelopmentResults `bson:"Estimates,omitempty" json:"Estimates"`
+	Developments  []DevelopmentResults `bson:"developments,omitempty" json:"developments"`
 }
 
 type DevelopmentResults struct {

@@ -224,7 +224,7 @@ func UpdateStandardDevelopByID(c *gin.Context) {
 		bson.M{"$set": updateFields},
 	)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "อัปเดตล้มเหลว", "error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "อัปเดตข้อมูลล้มเหลว", "error": err.Error()})
 		return
 	}
 	if result.MatchedCount == 0 {
