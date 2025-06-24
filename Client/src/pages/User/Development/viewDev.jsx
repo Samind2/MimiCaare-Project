@@ -8,7 +8,7 @@ import { FaChevronDown } from "react-icons/fa";
 
 const ViewDev = () => {
   // State ตัวแปรหลัก
-  const [selectedAgeRange, setSelectedAgeRange] = useState(1); 
+  const [selectedAgeRange, setSelectedAgeRange] = useState(1);
   const [devs, setDevs] = useState([]); // เก็บข้อมูลพัฒนาการที่ได้จาก API
   const [children, setChildren] = useState([]);  // เก็บข้อมูลเด็กทั้งหมด
   const [selectedChild, setSelectedChild] = useState(null); // เก็บข้อมูลเด็กที่เลือก
@@ -19,7 +19,7 @@ const ViewDev = () => {
   const ageRanges = [1, 2, 4, 6, 8, 9, 12, 15, 17, 18, 24, 29, 30, 39, 41, 42, 48, 54, 59, 60, 66, 72, 78];
 
   // แปลงตัวเลขช่วงอายุเป็นข้อความ
-  const ageRangeToText = (ageInt) => { 
+  const ageRangeToText = (ageInt) => {
     switch (ageInt) {
       case 1: return 'แรกเกิด - 1 เดือน';
       case 2: return '1 - 2 เดือน';
@@ -142,6 +142,7 @@ const ViewDev = () => {
       category: item.category,
       detail: item.detail,
       image: item.image || null,
+      note: item.note || '',
     }));
 
     const status = Estimates.every(e => e.status === true);
@@ -249,6 +250,8 @@ const ViewDev = () => {
                 <th className="w-64 py-4 px-3 text-left">ด้านพัฒนาการ</th>
                 <th className="py-4 px-3 text-left">พัฒนาการตามวัย</th>
                 <th className="w-32 py-4 px-3 text-center">รูปภาพ</th>
+                <th className="w-32 py-4 px-3 text-center">ข้อแนะนำ</th>
+
               </tr>
             </thead>
             <tbody>
@@ -274,6 +277,7 @@ const ViewDev = () => {
                     <td className="py-4 px-3 text-center align-top">
                       {item.image ? <img src={item.image} alt="" className="w-24 h-24 object-cover rounded border" /> : <span className="text-gray-400 italic">ไม่มีรูป</span>}
                     </td>
+                    <td className="py-4 px-3 align-top">{item.note}</td>
                   </tr>
                 ))
               )}
