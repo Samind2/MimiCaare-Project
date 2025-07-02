@@ -13,12 +13,14 @@ const AddChild = () => {
     gender: '',
     image: '',
   });
-
+  const [errors, setErrors] = useState({});
   const [previewImage, setPreviewImage] = useState(null);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+    setErrors((prev) => ({ ...prev, [name]: "" }));
+
   };
 
   const handleImageUpload = (e) => {
@@ -35,6 +37,18 @@ const AddChild = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    const newErrors = {};
+    if (!formData.firstName.trim()) newErrors.firstName = "กรุณากรอกชื่อ";
+    if (!formData.lastName.trim()) newErrors.lastName = "กรุณากรอกนามสกุล";
+    if (!formData.birthDate.trim()) newErrors.birthDate = "กรุณาเลือกวันเกิด";
+    if (!formData.gender.trim()) newErrors.gender = "กรุณาเลือกเพศ";
+
+    if (Object.keys(newErrors).length) {
+      setErrors(newErrors);
+      return;
+    }
+
 
     const cleanedData = {
       ...formData,
@@ -76,9 +90,12 @@ const AddChild = () => {
               value={formData.firstName}
               onChange={handleChange}
               placeholder="กรอกชื่อ"
-              className="input input-bordered w-full rounded-xl"
-              required
+              className={`input input-bordered w-full rounded-xl pr-10 ${errors.firstName ? "input-error" : ""}`}
+              // required
             />
+            {errors.firstName && (
+              <p className="text-red-500 text-xs mt-1">{errors.firstName}</p>
+            )}
           </div>
 
           {/* นามสกุล */}
@@ -92,9 +109,12 @@ const AddChild = () => {
               value={formData.lastName}
               onChange={handleChange}
               placeholder="กรอกนามสกุล"
-              className="input input-bordered w-full rounded-xl"
-              required
+              className={`input input-bordered w-full rounded-xl ${errors.lastName ? "input-error" : ""}`}
+              // required
             />
+            {errors.lastName && (
+              <p className="text-red-500 text-xs mt-1">{errors.lastName}</p>
+            )}
           </div>
 
           {/* วันเกิด */}
@@ -107,9 +127,13 @@ const AddChild = () => {
               name="birthDate"
               value={formData.birthDate}
               onChange={handleChange}
-              className="input input-bordered w-full rounded-xl"
-              required
+              className={`input input-bordered w-full rounded-xl ${errors.birthDate ? "input-error" : ""}`}
+              // required
             />
+            {errors.birthDate && (
+              <p className="text-red-500 text-xs mt-1">{errors.birthDate}</p>
+            )}
+
           </div>
 
           {/* เพศ */}
@@ -121,14 +145,17 @@ const AddChild = () => {
               name="gender"
               value={formData.gender}
               onChange={handleChange}
-              className="select select-bordered w-full rounded-xl bg-gray-50"
-              required
+              className={`select select-bordered w-full rounded-xl bg-gray-50 ${errors.gender ? "select-error" : ""}`}
+              // required
             >
               <option value="">เลือกเพศ</option>
               <option value="ชาย">ชาย</option>
               <option value="หญิง">หญิง</option>
               <option value="อื่นๆ">อื่นๆ</option>
             </select>
+            {errors.gender && (
+              <p className="text-red-500 text-xs mt-1">{errors.gender}</p>
+            )}
           </div>
 
           {/* รูปภาพ */}
