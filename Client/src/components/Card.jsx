@@ -38,7 +38,7 @@ const ChildCard = ({ child }) => {
             className="btn-delete btn-outline btn-sm"
             onClick={() => navigate(`/profile-child-update/${child.id}`)}
           >
-            ลบเด็ก
+            ลบข้อมูล
           </button>
         </div>
       </div>
