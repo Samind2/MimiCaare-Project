@@ -17,14 +17,14 @@ const NavBar = () => {
       {/* เมนูด้านซ้าย */}
       <div className="flex gap-6">
         {/* เมนู หน้าหลัก */}
-        <a href="/" className="flex flex-col items-center gap-1 menu-item">
+        <a href="/" data-testid="Home-Page" className="flex flex-col items-center gap-1 menu-item">
           <ImHome3 className="w-6 h-6" />
           <span>หน้าหลัก</span>
         </a>
 
         {/* เมนู ข้อมูลเด็ก */}
         <a
-          href="/profile-child"
+          href="/profile-child" data-testid="Child-Page"
           className="flex flex-col items-center gap-1 menu-item"
         >
           <RiInfoCardFill className="w-6 h-6" />
@@ -33,7 +33,7 @@ const NavBar = () => {
 
         {/* เมนู วัคซีน */}
         <a
-          href="/ViewVaccine"
+          href="/ViewVaccine" data-testid="Vaccine-Page"
           className="flex flex-col items-center gap-1 menu-item"
         >
           <MdOutlineVaccines className="w-6 h-6" />
@@ -42,7 +42,7 @@ const NavBar = () => {
 
         {/* เมนู พัฒนาการ */}
         <a
-          href="/ViewDevelopment"
+          href="/ViewDevelopment" data-testid="Develoment-page"
           className="flex flex-col items-center gap-1 menu-item"
         >
           <FaChild className="w-6 h-6" />
@@ -63,25 +63,25 @@ const NavBar = () => {
 
       {/* เมนูด้านขวา */}
       <div className="flex gap-6 items-center">
-        <button className="btn btn-ghost btn-circle">
-          <a href='/Notification' className="indicator">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
-              />
-            </svg>
-            <span className="badge badge-xs badge-primary indicator-item"></span>
-          </a>
-        </button>
+          <button data-testid="notification-button" className="btn btn-ghost btn-circle">
+            <a href='/Notification' className="indicator">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
+                />
+              </svg>
+              <span className="badge badge-xs badge-primary indicator-item"></span>
+            </a>
+          </button>
         {/* แสดงปุ่ม "เข้าสู่ระบบ" ถ้ายังไม่ได้ล็อกอิน */}
         {!user ? (
           <button
