@@ -173,28 +173,34 @@ const ViewDev = () => {
           <div className="dropdown dropdown-hover">
             <div
               tabIndex={0}
-              className="btn bg-pink-100 text-pink-800 hover:bg-pink-200 rounded-xl text-lg w-48 text-left truncate"
+              className="btn bg-pink-100 text-pink-800 hover:bg-pink-200 rounded-xl text-lg w-48 text-left flex justify-between items-center overflow-hidden"
             >
-              {selectedChild
-                ? `${selectedChild.firstName} ${selectedChild.lastName}`
-                : "เลือกเด็ก"}
+              <span className="truncate inline-block max-w-[85%]">
+
+                {selectedChild
+                  ? `${selectedChild.firstName} ${selectedChild.lastName}`
+                  : "เลือกเด็ก"}
+              </span>
               <FaChevronDown className="inline ml-2" />
             </div>
             <ul
               tabIndex={0}
               className="dropdown-content menu p-3 shadow-lg bg-pink-50 rounded-xl w-56 max-h-60 overflow-auto"
             >
-              {children.map((child) => (
-                <li key={child.id}>
-                  <a
-                    className="hover:bg-red-200 rounded-md p-2 cursor-pointer"
-                    onClick={() => setSelectedChild(child)}
-                  >
-                    {child.firstName} {child.lastName}
-                  </a>
-                </li>
-              ))}
+              {children
+                .filter(child => child.id !== selectedChild?.id) // 👈 กรองเด็กที่เลือกออก
+                .map((child) => (
+                  <li key={child.id}>
+                    <a
+                      className="hover:bg-red-200 rounded-md p-2 cursor-pointer"
+                      onClick={() => setSelectedChild(child)}
+                    >
+                      {child.firstName} {child.lastName}
+                    </a>
+                  </li>
+                ))}
             </ul>
+
           </div>
 
           <div className="dropdown dropdown-hover">
@@ -245,17 +251,33 @@ const ViewDev = () => {
                 devs.map((item, idx) => (
                   <tr key={idx} className={`hover:bg-gray-50 transition ${checkStates[idx] === 'not-done' ? 'bg-red-100' : ''}`}>
                     <td className="py-4 px-3 text-center align-top">
-                      <div className="flex flex-col space-y-2">
-                        <label className="inline-flex items-center space-x-2">
-                          <input type="radio" name={`dev-${idx}`} checked={checkStates[idx] === 'done'} onChange={() => handleCheckChange(idx, 'done')} disabled={isSubmitted} />
-                          <span>ทำได้</span>
-                        </label>
-                        <label className="inline-flex items-center space-x-2">
-                          <input type="radio" name={`dev-${idx}`} checked={checkStates[idx] === 'not-done'} onChange={() => handleCheckChange(idx, 'not-done')} disabled={isSubmitted} />
-                          <span>ทำไม่ได้</span>
-                        </label>
+                      <div className="flex flex-col items-center space-y-2 w-full">
+                        {/* ปุ่มทำได้ */}
+                        <div
+                          className={`cursor-pointer flex justify-center items-center gap-2 w-32 py-2 px-4 border rounded-md transition 
+        ${checkStates[idx] === 'done' ? 'bg-green-100 border-green-500 font-semibold' : 'bg-white border-gray-300'}`}
+                          onClick={() => !isSubmitted && handleCheckChange(idx, 'done')}
+                        >
+                          <span className="text-green-600">
+                            {checkStates[idx] === 'done' && '✓'}
+                          </span>
+                          <span className="label-text">ทำได้</span>
+                        </div>
+
+                        {/* ปุ่มทำไม่ได้ */}
+                        <div
+                          className={`cursor-pointer flex justify-center items-center gap-2 w-32 py-2 px-4 border rounded-md transition 
+        ${checkStates[idx] === 'not-done' ? 'bg-red-100 border-red-500 font-semibold' : 'bg-white border-gray-300'}`}
+                          onClick={() => !isSubmitted && handleCheckChange(idx, 'not-done')}
+                        >
+                          <span className="text-red-600">
+                            {checkStates[idx] === 'not-done' && '✓'}
+                          </span>
+                          <span className="label-text">ทำไม่ได้</span>
+                        </div>
                       </div>
                     </td>
+
                     <td className="py-4 px-3 align-top">{item.category}</td>
                     <td className="py-4 px-3 align-top">{item.detail}</td>
                     <td className="py-4 px-3 text-center align-top">

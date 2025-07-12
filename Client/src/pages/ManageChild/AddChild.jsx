@@ -191,7 +191,6 @@ const AddChild = () => {
           </button>
         </form>
 
-        <ToastContainer />
       </div>
     </div>
   );
