@@ -15,12 +15,12 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-var childrenCollection *mongo.Collection
+var ChildrenCollection *mongo.Collection
 
 // SetUserCollection ตั้งค่า userCollection
 func SetChildrenCollection(client *mongo.Client) {
 	dbName := os.Getenv("DBNAME")
-	childrenCollection = client.Database(dbName).Collection("children")
+	ChildrenCollection = client.Database(dbName).Collection("children")
 }
 
 func AddNewChildren(c *gin.Context) {
@@ -74,7 +74,7 @@ func AddNewChildren(c *gin.Context) {
 	}
 	children.ID = primitive.NewObjectID() // สร้าง ID ใหม่ให้กับเด็ก
 	//add data to database
-	_, err = childrenCollection.InsertOne(context.TODO(), children)
+	_, err = ChildrenCollection.InsertOne(context.TODO(), children)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "ระบบขัดข้อง - เพิ่มข้อมูลเด็กไม่สำเร็จ"})
 		return
@@ -113,7 +113,7 @@ func GetChildrenByParentID(c *gin.Context) {
 	}
 
 	var children []childrenModel.Children
-	pointer, err := childrenCollection.Find(context.TODO(), childrenModel.Children{ParentID: parentId})
+	pointer, err := ChildrenCollection.Find(context.TODO(), childrenModel.Children{ParentID: parentId})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "ระบบขัดข้อง - ไม่สามารถดึงข้อมูลเด็กได้"})
 		return
@@ -167,7 +167,7 @@ func GetChildrenByID(c *gin.Context) {
 	}
 
 	var child childrenModel.Children
-	err = childrenCollection.FindOne(context.TODO(), bson.M{"_id": childObjectID, "parentId": parentId}).Decode(&child)
+	err = ChildrenCollection.FindOne(context.TODO(), bson.M{"_id": childObjectID, "parentId": parentId}).Decode(&child)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"message": "ไม่พบข้อมูลเด็ก"})
 		return
@@ -209,7 +209,7 @@ func UpdateChildrenByID(c *gin.Context) {
 
 	// ตรวจสอบว่าเด็กคนนี้เป็นลูกของผู้ใช้หรือไม่
 	var existingChild childrenModel.Children
-	err = childrenCollection.FindOne(context.TODO(), bson.M{"_id": childObjectID, "parentId": parentId}).Decode(&existingChild)
+	err = ChildrenCollection.FindOne(context.TODO(), bson.M{"_id": childObjectID, "parentId": parentId}).Decode(&existingChild)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"message": "ไม่พบข้อมูลเด็ก"})
 		return
@@ -255,7 +255,7 @@ func UpdateChildrenByID(c *gin.Context) {
 	}
 
 	// อัปเดตข้อมูลในฐานข้อมูล
-	_, err = childrenCollection.UpdateOne(
+	_, err = ChildrenCollection.UpdateOne(
 		context.TODO(),
 		bson.M{"_id": childObjectID, "parentId": parentId},
 		bson.M{"$set": updateFields},

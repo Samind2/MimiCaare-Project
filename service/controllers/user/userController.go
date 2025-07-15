@@ -16,12 +16,12 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-var userCollection *mongo.Collection
+var UserCollection *mongo.Collection
 
 // SetUserCollection ตั้งค่า userCollection
 func SetUserCollection(client *mongo.Client) {
 	dbName := os.Getenv("DBNAME")                                // ดึงค่าชื่อฐานข้อมูลจาก .env
-	userCollection = client.Database(dbName).Collection("users") // ตั้งค่าชื่อ Collection สำหรับผู้ใช้
+	UserCollection = client.Database(dbName).Collection("users") // ตั้งค่าชื่อ Collection สำหรับผู้ใช้
 }
 
 func Signup(c *gin.Context) {
@@ -39,7 +39,7 @@ func Signup(c *gin.Context) {
 	}
 
 	var existingEmail userModel.User
-	err := userCollection.FindOne(context.TODO(), bson.M{"email": user.Email}).Decode(&existingEmail)
+	err := UserCollection.FindOne(context.TODO(), bson.M{"email": user.Email}).Decode(&existingEmail)
 	if err == nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "อีเมลนี้ถูกใช้ไปแล้ว"})
 		return
@@ -63,7 +63,7 @@ func Signup(c *gin.Context) {
 
 	//เพิ่มข้อมูลลงฐานข้อมูล
 	user.ID = primitive.NewObjectID()
-	_, err = userCollection.InsertOne(context.TODO(), user)
+	_, err = UserCollection.InsertOne(context.TODO(), user)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "สมัครสมาชิกล้มเหลว - ระบบขัดข้องระหว่างสมัครสมาชิก"})
 		return
@@ -101,7 +101,7 @@ func Login(c *gin.Context) {
 		return
 	}
 	var user userModel.User
-	err := userCollection.FindOne(context.TODO(), bson.M{"email": req.Email}).Decode(&user)
+	err := UserCollection.FindOne(context.TODO(), bson.M{"email": req.Email}).Decode(&user)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
 			c.JSON(http.StatusNotFound, gin.H{"message": "ไม่พบผู้ใช้งาน"})
@@ -203,7 +203,7 @@ func UpdateProfile(c *gin.Context) {
 	}
 	//เช็คข้อมูล ยูสเซอร์ก่อน
 	var existingUser userModel.User
-	err = userCollection.FindOne(context.TODO(), bson.M{"_id": objectID}).Decode(&existingUser)
+	err = UserCollection.FindOne(context.TODO(), bson.M{"_id": objectID}).Decode(&existingUser)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
 			c.JSON(http.StatusNotFound, gin.H{"message": "ไม่พบผู้ใช้งาน"})
@@ -233,7 +233,7 @@ func UpdateProfile(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "ไม่มีข้อมูลให้อัปเดต"})
 		return
 	}
-	result, err := userCollection.UpdateOne(context.TODO(), bson.M{"_id": objectID}, bson.M{"$set": update})
+	result, err := UserCollection.UpdateOne(context.TODO(), bson.M{"_id": objectID}, bson.M{"$set": update})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "เกิดข้อผิดพลาดขณะอัปเดตโปรไฟล์"})
 		return
