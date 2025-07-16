@@ -79,6 +79,7 @@ const ProfileChildUpdate = () => {
               ชื่อ <span className="text-red-500">*</span>
             </label>
             <input
+              data-testid="EC-firstName"
               id="PC-01"
               type="text"
               value={firstName}
@@ -93,6 +94,7 @@ const ProfileChildUpdate = () => {
               นามสกุล <span className="text-red-500">*</span>
             </label>
             <input
+              data-testid="EC-lastName"
               id="PC-02"
               type="text"
               value={lastName}
@@ -137,6 +139,7 @@ const ProfileChildUpdate = () => {
               รูปภาพ
             </label>
             <input
+              data-testid="EC-imageUpload"
               id="PC-04"
               type="file"
               accept="image/*"
@@ -157,6 +160,7 @@ const ProfileChildUpdate = () => {
 
           {/* ปุ่ม */}
           <button
+          data-testid="submitUpdateChild"
           id="PC-05"
             type="submit"
             className="btn bg-[#84C7AE] hover:bg-[#6EB39D] text-white w-full rounded-xl font-semibold text-base"

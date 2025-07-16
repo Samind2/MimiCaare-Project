@@ -52,6 +52,7 @@ const ProfileUpdate = () => {
                                 <span className="label-text" >ชื่อผู้ใช้</span>
                             </label>
                             <input
+                                data-testid="firstName"
                                 id='PU-01'
                                 type="text"
                                 placeholder="First Name"
@@ -63,6 +64,7 @@ const ProfileUpdate = () => {
                                 <span className="label-text">นามสกุล</span>
                             </label>
                             <input
+                                data-testid="lastName"
                                 id='PU-02'
                                 type="text"
                                 placeholder="Last Name"
@@ -74,6 +76,7 @@ const ProfileUpdate = () => {
                                 <span className="label-text">อีเมล</span>
                             </label>
                             <input
+                                data-testid="email"
                                 id='PU-03'
                                 type="email"
                                 placeholder="Email"
@@ -88,6 +91,7 @@ const ProfileUpdate = () => {
                                 <span className="label-text">อัพโหลดรูปภาพโปรไฟล์</span>
                             </label>
                             <input
+                                data-testid="profilePicture"
                                 id='PU-04'
                                 type="file"
                                 accept="image/*"
@@ -108,7 +112,10 @@ const ProfileUpdate = () => {
                         )}
 
                         <div className="form-control mt-6">
-                            <button type="submit" className="btn bg-red text-white w-full">
+                            <button 
+                            data-testid="submitProfile" 
+                            type="submit" 
+                            className="btn bg-red text-white w-full">
                                 อัปเดตโปรไฟล์
                             </button>
                         </div>

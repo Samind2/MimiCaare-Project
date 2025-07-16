@@ -17,7 +17,8 @@ const NavBar = () => {
       {/* เมนูด้านซ้าย */}
       <div className="flex gap-6">
         {/* เมนู หน้าหลัก */}
-        <a href="/" className="flex flex-col items-center gap-1 menu-item">
+        <a href="/" className="flex flex-col items-center gap-1 menu-item"
+          data-testid="home-Page">
           <ImHome3 className="w-6 h-6" />
           <span>หน้าหลัก</span>
         </a>
@@ -26,6 +27,7 @@ const NavBar = () => {
         <a
           href="/profile-child"
           className="flex flex-col items-center gap-1 menu-item"
+          data-testid="Child-Page"
         >
           <RiInfoCardFill className="w-6 h-6" />
           <span>ข้อมูลเด็ก</span>
@@ -35,6 +37,7 @@ const NavBar = () => {
         <a
           href="/ViewVaccine"
           className="flex flex-col items-center gap-1 menu-item"
+          data-testid="Vaccine-Page"
         >
           <MdOutlineVaccines className="w-6 h-6" />
           <span>วัคซีน</span>
@@ -43,7 +46,9 @@ const NavBar = () => {
         {/* เมนู พัฒนาการ */}
         <a
           href="/ViewDevelopment"
+          data-testid="Develoment-page"
           className="flex flex-col items-center gap-1 menu-item"
+          datatestid="Development-Page"
         >
           <FaChild className="w-6 h-6" />
           <span>พัฒนาการ</span>
@@ -63,7 +68,7 @@ const NavBar = () => {
 
       {/* เมนูด้านขวา */}
       <div className="flex gap-6 items-center">
-        <button className="btn btn-ghost btn-circle">
+        <button data-testid="notification-button" className="btn btn-ghost btn-circle">
           <a href='/Notification' className="indicator">
             <svg
               xmlns="http://www.w3.org/2000/svg"
