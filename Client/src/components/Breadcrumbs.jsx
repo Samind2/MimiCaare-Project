@@ -28,7 +28,7 @@ const Breadcrumbs = ({ shouldHide = false }) => {
 
   const paths = location.pathname.split("/").filter((path) => path);
 
-  // ✅ ดึงชื่อเด็กเมื่อพบว่า path เป็น profile-child-update/:id
+  // ดึงชื่อเด็กแทนId
   useEffect(() => {
     const fetchChildName = async () => {
       if (paths[0] === "profile-child-update" && paths[1]) {
