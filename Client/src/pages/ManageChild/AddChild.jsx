@@ -49,6 +49,20 @@ const AddChild = () => {
       return;
     }
 
+     // ดึงข้อมูลเด็กทั้งหมดเพื่อตรวจสอบชื่อซ้ำ
+    const res = await childService.getChildren();
+    const existingChildren = res.data.children || res.data || [];
+
+    // เช็คนามสกุลซ้ำ
+    const isDuplicate = existingChildren.some(child =>
+      child.lastName.trim().toLowerCase() === formData.lastName.trim().toLowerCase()
+    );
+
+    if (isDuplicate) {
+      toast.error("ชื่อนี้ถูกเพิ่มแล้วในระบบ");
+      return;
+    }
+
 
     const cleanedData = {
       ...formData,

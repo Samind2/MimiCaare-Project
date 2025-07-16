@@ -4,6 +4,7 @@ import { MdSpaceDashboard } from "react-icons/md";
 import { FaUserFriends, FaSyringe, FaChild } from 'react-icons/fa';
 import { FiLogOut } from "react-icons/fi";
 import { AuthContext } from '../context/AuthContext';
+import Breadcrumbs from '../components/Breadcrumbs.jsx';
 
 const AdminLayout = () => {
     const { logout } = useContext(AuthContext)
@@ -12,16 +13,9 @@ const AdminLayout = () => {
     const navigate = useNavigate();
 
     // ใช้ useState เพื่อจัดการสถานะการขยายของ Sidebar
-    const [isSidebarExpanded, setIsSidebarExpanded] = useState(false); 
+    const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
 
-    // สร้าง breadcrumb จาก path ของ location
-    const breadcrumb = location.pathname 
-        .split("/")
-        .filter((path) => path)
-        .map((path, index, array) => {
-            const url = `/${array.slice(0, index + 1).join("/")}`;
-            return { label: path.replace(/-/g, " "), url };
-        });
+
 
     const handleLogout = () => {
         logout();
@@ -29,7 +23,7 @@ const AdminLayout = () => {
     };
 
     // ฟังก์ชันสำหรับตรวจสอบเมนู active แบบ startsWith
-    const isActive = (path) => location.pathname.startsWith(path); 
+    const isActive = (path) => location.pathname.startsWith(path);
 
     return (
         <div>
@@ -64,9 +58,8 @@ const AdminLayout = () => {
                         <nav className="flex flex-col gap-2">
                             <Link
                                 to="/dashboard"
-                                className={`hover:bg-pink-100 rounded-xl flex items-center gap-2 p-2 ${
-                                    isActive("/dashboard") && !isActive("/dashboard/") ? "border-2 border-pink-500 bg-pink-50" : ""
-                                }`}
+                                className={`hover:bg-pink-100 rounded-xl flex items-center gap-2 p-2 ${isActive("/dashboard") && !isActive("/dashboard/") ? "border-2 border-pink-500 bg-pink-50" : ""
+                                    }`}
                             >
                                 <MdSpaceDashboard size={24} />
                                 {isSidebarExpanded && <span>หน้าหลัก</span>}
@@ -74,9 +67,8 @@ const AdminLayout = () => {
 
                             <Link
                                 to="/dashboard/ManageRights"
-                                className={`hover:bg-pink-100 rounded-xl flex items-center gap-2 p-2 ${
-                                    isActive("/dashboard/ManageRights") ? "border-2 border-pink-500 bg-pink-50" : ""
-                                }`}
+                                className={`hover:bg-pink-100 rounded-xl flex items-center gap-2 p-2 ${isActive("/dashboard/ManageRights") ? "border-2 border-pink-500 bg-pink-50" : ""
+                                    }`}
                             >
                                 <FaUserFriends size={20} />
                                 {isSidebarExpanded && <span>จัดการสิทธิ์ผู้ใช้</span>}
@@ -84,9 +76,8 @@ const AdminLayout = () => {
 
                             <Link
                                 to="/dashboard/add-Vaccine"
-                                className={`hover:bg-pink-100 rounded-xl flex items-center gap-2 p-2 ${
-                                    isActive("/dashboard/add-Vaccine") ? "border-2 border-pink-500 bg-pink-50" : ""
-                                }`}
+                                className={`hover:bg-pink-100 rounded-xl flex items-center gap-2 p-2 ${isActive("/dashboard/add-Vaccine") ? "border-2 border-pink-500 bg-pink-50" : ""
+                                    }`}
                             >
                                 <FaSyringe size={20} />
                                 {isSidebarExpanded && <span>จัดการข้อมูลวัคซีน</span>}
@@ -94,9 +85,8 @@ const AdminLayout = () => {
 
                             <Link
                                 to="/dashboard/add-Development"
-                                className={`hover:bg-pink-100 rounded-xl flex items-center gap-2 p-2 ${
-                                    isActive("/dashboard/add-Development") ? "border-2 border-pink-500 bg-pink-50" : ""
-                                }`}
+                                className={`hover:bg-pink-100 rounded-xl flex items-center gap-2 p-2 ${isActive("/dashboard/add-Development") ? "border-2 border-pink-500 bg-pink-50" : ""
+                                    }`}
                             >
                                 <FaChild size={20} />
                                 {isSidebarExpanded && <span>ข้อมูลพัฒนาการ</span>}
@@ -104,9 +94,8 @@ const AdminLayout = () => {
 
                             <Link
                                 to="/dashboard/AllUser"
-                                className={`hover:bg-pink-100 rounded-xl flex items-center gap-2 p-2 ${
-                                    isActive("/dashboard/AllUser") ? "border-2 border-pink-500 bg-pink-50" : ""
-                                }`}
+                                className={`hover:bg-pink-100 rounded-xl flex items-center gap-2 p-2 ${isActive("/dashboard/AllUser") ? "border-2 border-pink-500 bg-pink-50" : ""
+                                    }`}
                             >
                                 <FaUserFriends size={20} />
                                 {isSidebarExpanded && <span>ผู้ใช้ทั้งหมด</span>}
@@ -128,26 +117,10 @@ const AdminLayout = () => {
                     {/* Main Content */}
                     <div className="flex-1 flex flex-col w-full">
                         {/* Breadcrumb Navigation */}
-                        <div className="p-4 bg-gray-100 border-b text-gray-700">
-                            <nav className="text-sm breadcrumbs">
-                                <ul className="flex space-x-2">
-                                    {breadcrumb.map((item, index) => (
-                                        <li key={index} className="flex items-center">
-                                            <span className="mx-2">/</span>
-                                            {index === breadcrumb.length - 1 ? (
-                                                <span className="text-gray-500">{item.label}</span>
-                                            ) : (
-                                                <Link
-                                                    to={item.url}
-                                                    className="text-red hover:underline"
-                                                >
-                                                    {item.label}
-                                                </Link>
-                                            )}
-                                        </li>
-                                    ))}
-                                </ul>
-                            </nav>
+                        <div className="w-full bg-white shadow-md px-4 sm:px-6 lg:px-8">
+                            <div className="max-w-7xl mx-auto">
+                                <Breadcrumbs />
+                            </div>
                         </div>
 
                         {/* Page content here */}

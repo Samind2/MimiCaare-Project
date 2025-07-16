@@ -405,7 +405,7 @@ const AddDevelopment = () => {
             {/* Modal */}
             {isModalOpen && (
                 <div className="fixed inset-0 flex items-center justify-center bg-black/30 backdrop-blur-md z-50">
-                    <div className="bg-white rounded-2xl shadow-xl p-6 w-[90%] max-w-lg transition-all scale-100">
+                    <div className="bg-white rounded-xl shadow-xl p-6 w-[90%] max-w-lg transition-all scale-100">
                         <h2 className="text-xl font-bold text-center text-blue-800 mb-4">
                             เพิ่มเกณฑ์พัฒนาการ
                         </h2>

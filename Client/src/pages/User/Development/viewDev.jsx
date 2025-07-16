@@ -163,7 +163,7 @@ const ViewDev = () => {
   };
 
   return (
-    <div className="p-6 max-w-5xl mx-auto">
+    <div className="p-6 mx-auto w-full max-w-full">
       <h1 className="text-3xl font-bold mb-6 text-center">ประเมินพัฒนาการ</h1>
 
       <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
@@ -188,7 +188,7 @@ const ViewDev = () => {
               className="dropdown-content menu p-3 shadow-lg bg-pink-50 rounded-xl w-56 max-h-60 overflow-auto"
             >
               {children
-                .filter(child => child.id !== selectedChild?.id) // 👈 กรองเด็กที่เลือกออก
+                .filter(child => child.id !== selectedChild?.id) // กรองเด็กที่เลือกออก
                 .map((child) => (
                   <li key={child.id}>
                     <a
@@ -234,56 +234,60 @@ const ViewDev = () => {
         <div className="text-center text-red-500 font-semibold mt-6">กรุณาเลือกเด็กก่อนเพื่อทำการประเมิน</div>
       ) : (
         <div className="overflow-x-auto mb-10">
-          <table className="min-w-full bg-white border border-gray-300 rounded-md shadow-md">
-            <thead className="bg-[#F5F7FA] text-gray-700 text-sm uppercase font-bold">
+          <table className="table table-zebra w-full">
+            <thead className="bg-gray-200 text-gray-700 text-sm">
               <tr>
-                <th className="w-32 py-4 px-3 text-center">ประเมิน</th>
-                <th className="w-64 py-4 px-3 text-left">ด้านพัฒนาการ</th>
-                <th className="py-4 px-3 text-left">พัฒนาการตามวัย</th>
-                <th className="w-32 py-4 px-3 text-center">รูปภาพ</th>
-                <th className="w-32 py-4 px-3 text-center">ข้อแนะนำ</th>
+                <th className="text-center">ประเมิน</th>
+                <th className="text-left">ด้านพัฒนาการ</th>
+                <th className="text-left">พัฒนาการตามวัย</th>
+                <th className="text-center">รูปภาพ</th>
+                <th className="text-center">ข้อแนะนำ</th>
               </tr>
             </thead>
             <tbody>
               {devs.length === 0 ? (
-                <tr><td colSpan={5} className="text-center py-6 text-gray-500 italic">ไม่มีข้อมูลในช่วงอายุนี้</td></tr>
+                <tr>
+                  <td colSpan={5} className="text-center py-6 text-gray-500 italic">ไม่มีข้อมูลในช่วงอายุนี้</td>
+                </tr>
               ) : (
                 devs.map((item, idx) => (
                   <tr key={idx} className={`hover:bg-gray-50 transition ${checkStates[idx] === 'not-done' ? 'bg-red-100' : ''}`}>
-                    <td className="py-4 px-3 text-center align-top">
+                    <td className="text-center align-top">
                       <div className="flex flex-col items-center space-y-2 w-full">
                         {/* ปุ่มทำได้ */}
                         <div
-                          className={`cursor-pointer flex justify-center items-center gap-2 w-32 py-2 px-4 border rounded-md transition 
-        ${checkStates[idx] === 'done' ? 'bg-green-100 border-green-500 font-semibold' : 'bg-white border-gray-300'}`}
+                          className={`cursor-pointer flex justify-center items-center gap-2 py-2 px-4 border rounded-md transition 
+                      ${checkStates[idx] === 'done' ? 'bg-green-100 border-green-500 font-semibold' : 'bg-white border-gray-300'}`}
                           onClick={() => !isSubmitted && handleCheckChange(idx, 'done')}
+                          style={{ minWidth: '120px' }}
                         >
-                          <span className="text-green-600">
-                            {checkStates[idx] === 'done' && '✓'}
-                          </span>
+                          <span className="text-green-600">{checkStates[idx] === 'done' && '✓'}</span>
                           <span className="label-text">ทำได้</span>
                         </div>
 
                         {/* ปุ่มทำไม่ได้ */}
                         <div
-                          className={`cursor-pointer flex justify-center items-center gap-2 w-32 py-2 px-4 border rounded-md transition 
-        ${checkStates[idx] === 'not-done' ? 'bg-red-100 border-red-500 font-semibold' : 'bg-white border-gray-300'}`}
+                          className={`cursor-pointer flex justify-center items-center gap-2 py-2 px-4 border rounded-md transition 
+                      ${checkStates[idx] === 'not-done' ? 'bg-red-100 border-red-500 font-semibold' : 'bg-white border-gray-300'}`}
                           onClick={() => !isSubmitted && handleCheckChange(idx, 'not-done')}
+                          style={{ minWidth: '120px' }}
                         >
-                          <span className="text-red-600">
-                            {checkStates[idx] === 'not-done' && '✓'}
-                          </span>
+                          <span className="text-red-600">{checkStates[idx] === 'not-done' && '✓'}</span>
                           <span className="label-text">ทำไม่ได้</span>
                         </div>
                       </div>
                     </td>
 
-                    <td className="py-4 px-3 align-top">{item.category}</td>
-                    <td className="py-4 px-3 align-top">{item.detail}</td>
-                    <td className="py-4 px-3 text-center align-top">
-                      {item.image ? <img src={item.image} alt="" className="w-24 h-24 object-cover rounded border" /> : <span className="text-gray-400 italic">ไม่มีรูป</span>}
+                    <td className="align-top">{item.category}</td>
+                    <td className="align-top">{item.detail}</td>
+                    <td className="text-center align-top">
+                      {item.image ? (
+                        <img src={item.image} alt="" className="w-24 h-24 object-cover rounded border" />
+                      ) : (
+                        <span className="text-gray-400 italic">ไม่มีรูป</span>
+                      )}
                     </td>
-                    <td className="py-4 px-3 align-top">{item.note}</td>
+                    <td className="align-top">{item.note}</td>
                   </tr>
                 ))
               )}
@@ -291,7 +295,6 @@ const ViewDev = () => {
           </table>
         </div>
       )}
-
       <div className="text-center mt-6">
         {!selectedChild ? (
           <button className="bg-gray-400 text-white px-8 py-3 rounded-md" disabled>กรุณาเลือกเด็กก่อน</button>
