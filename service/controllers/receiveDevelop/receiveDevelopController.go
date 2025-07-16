@@ -31,7 +31,7 @@ func SetStandardDevelopReference(client *mongo.Client) {
 func AddReceiveDevelop(c *gin.Context) {
 	var inputData struct {
 		ChildID           primitive.ObjectID `json:"childId"`
-		Status            bool               `json:"status"`
+		StatusList        []bool             `json:"status"`
 		StandardDevelopID primitive.ObjectID `json:"standardDevelopId"`
 		AgeRange          int                `json:"ageRange"`
 	}
@@ -47,11 +47,24 @@ func AddReceiveDevelop(c *gin.Context) {
 		c.JSON(http.StatusNotFound, gin.H{"message": "ไม่พบข้อมูลพัฒนาการมาตรฐานที่ระบุ", "error": err.Error()})
 		return
 	}
-	// แปลงข้อมูลจากพัฒนาการมาตรฐาน
+	if len(inputData.StatusList) > len(standardDevelop.Developments) {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "จำนวน status มากเกินไป"})
+		return
+	}
+	if len(inputData.StatusList) < len(standardDevelop.Developments) {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "จำนวน status น้อยเกินไป"})
+		return
+	}
+
+	// สร้าง DevelopmentResults โดยให้ status เริ่มต้นตาม input
 	var developmentRecords []receiveDevelopModel.DevelopmentResults
-	for _, development := range standardDevelop.Developments {
+	for i, development := range standardDevelop.Developments {
+		status := false
+		if i < len(inputData.StatusList) {
+			status = inputData.StatusList[i]
+		}
 		developmentRecords = append(developmentRecords, receiveDevelopModel.DevelopmentResults{
-			Status:   inputData.Status,
+			Status:   status,
 			Category: development.Category,
 			Detail:   development.Detail,
 			Image:    development.Image,
@@ -88,56 +101,73 @@ func UpdateReceiveDevelopByID(c *gin.Context) {
 		return
 	}
 
-	//  ดึงข้อมูลเดิมจากฐานข้อมูล
-	var existing receiveDevelopModel.ReceiveDevelop
-	err = receiveDevelopCollection.FindOne(context.TODO(), bson.M{"_id": developId}).Decode(&existing)
-	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"message": "ไม่พบข้อมูล"})
-		return
-	}
-
-	// ตรวจสอบว่า ReceiveDate เกิน 7 วันหรือไม่
-	receiveTime := existing.ReceiveDate.Time()
-	if time.Since(receiveTime) > 7*24*time.Hour {
-		c.JSON(http.StatusForbidden, gin.H{"message": "ไม่สามารถแก้ไขได้ เนื่องจากข้อมูลถูกบันทึกแล้วเกิน 7 วัน"})
-		return
-	}
-
-	//  รับข้อมูลที่ส่งมา
 	var updateData struct {
-		StatusUpdates []bool `json:"statusUpdates"`
+		Status       []bool                                   `json:"status"`       // แยก status array
+		Developments []receiveDevelopModel.DevelopmentResults `json:"developments"` // ข้อมูล developments อื่น
 	}
-
 	if err := c.ShouldBindJSON(&updateData); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "ข้อมูลไม่ถูกต้อง", "error": err.Error()})
 		return
 	}
 
-	//ตรวจสอบว่า length ตรงกับข้อมูลเดิม
-	if len(updateData.StatusUpdates) != len(existing.Developments) {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "จำนวน status ไม่ตรงกับข้อมูลเดิม"})
+	// ดึงข้อมูลเดิมจากฐานข้อมูล
+	var existingDevRecord receiveDevelopModel.ReceiveDevelop
+	err = receiveDevelopCollection.FindOne(context.TODO(), bson.M{"_id": developId}).Decode(&existingDevRecord)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"message": "ไม่พบข้อมูลเดิม", "error": err.Error()})
 		return
 	}
+	// --- รวมข้อมูล ---
+	var updatedDevelopmentsData []receiveDevelopModel.DevelopmentResults
 
-	// อัปเดตเฉพาะ Status
-	for i := range existing.Developments {
-		existing.Developments[i].Status = updateData.StatusUpdates[i]
+	for i := range existingDevRecord.Developments {
+		existing := existingDevRecord.Developments[i]
+
+		// รวมข้อมูล status แยกจาก StatusList
+		status := existing.Status
+		if i < len(updateData.Status) {
+			status = updateData.Status[i]
+		}
+
+		// รวมข้อมูล field อื่น ๆ
+		merged := receiveDevelopModel.DevelopmentResults{
+			Status:   status,
+			Category: existing.Category,
+			Detail:   existing.Detail,
+			Image:    existing.Image,
+			Note:     existing.Note,
+		}
+		updatedDevelopmentsData = append(updatedDevelopmentsData, merged)
 	}
 
-	// ทำการอัปเดต
-	_, err = receiveDevelopCollection.UpdateOne(
-		context.TODO(),
+	// อัปเดตจริง
+	updateFields := bson.M{
+		"developments": updatedDevelopmentsData,
+	}
+
+	result, err := receiveDevelopCollection.UpdateOne(context.TODO(),
 		bson.M{"_id": developId},
-		bson.M{"$set": bson.M{"Estimates": existing.Developments}},
+		bson.M{"$set": updateFields},
 	)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "อัปเดตไม่สำเร็จ", "error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "อัปเดตข้อมูลล้มเหลว", "error": err.Error()})
 		return
 	}
-
+	if result.MatchedCount == 0 {
+		c.JSON(http.StatusNotFound, gin.H{"message": "ไม่พบข้อมูลที่ต้องการอัปเดต"})
+		return
+	}
+	// ดึงข้อมูลหลังอัปเดต
+	var updatedDoc receiveDevelopModel.ReceiveDevelop
+	err = receiveDevelopCollection.FindOne(context.TODO(), bson.M{"_id": developId}).Decode(&updatedDoc)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "ไม่สามารถดึงข้อมูลหลังอัปเดตได้", "error": err.Error()})
+		return
+	}
+	// ส่งข้อมูลกลับไปยังผู้ใช้
 	c.JSON(http.StatusOK, gin.H{
-		"message":        "อัปเดตสำเร็จ",
-		"receiveDevelop": existing,
+		"message": "อัปเดตสำเร็จ",
+		"data":    updatedDoc,
 	})
 }
 

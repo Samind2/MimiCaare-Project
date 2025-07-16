@@ -1,7 +1,7 @@
 import React, { useContext, useState } from 'react';
 import { AuthContext } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { ToastContainer, toast } from "react-toastify";
+import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 const ProfileUpdate = () => {
@@ -30,32 +30,16 @@ const ProfileUpdate = () => {
             const userData = { firstName, lastName, email, picture };  // ส่งข้อมูลอีเมลไปด้วย
             await updateProfile(userData);  // อัปเดตข้อมูลโปรไฟล์
             console.log("Toast showing");
-            toast.success("อัพเดทโปรไฟล์สำเร็จ!", {
-                position: "top-center",
-                autoClose: 1000,
-                hideProgressBar: true,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                progress: undefined,
-            });
+            toast.success("อัพเดทโปรไฟล์สำเร็จ!",  { autoClose: 1500 });
 
             setTimeout(() => {
                 navigate("/profile-parent");
             }, 2000);
         } catch (error) {
-            toast.error("เกิดข้อผิดพลาดในการอัพเดทโปรไฟล์!", {
-                position: "top-center",
-                autoClose: 5000,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                progress: undefined,
-            });
+            toast.error("เกิดข้อผิดพลาดในการอัพเดทโปรไฟล์!",  { autoClose: 1500 });
             console.error("Error in profile update:", error); // เพิ่ม log เพื่อดู error
         }
-    };
+    }
 
     return (
         <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
@@ -68,6 +52,7 @@ const ProfileUpdate = () => {
                                 <span className="label-text" >ชื่อผู้ใช้</span>
                             </label>
                             <input
+                                data-testid="firstName"
                                 id='PU-01'
                                 type="text"
                                 placeholder="First Name"
@@ -79,6 +64,7 @@ const ProfileUpdate = () => {
                                 <span className="label-text">นามสกุล</span>
                             </label>
                             <input
+                                data-testid="lastName"
                                 id='PU-02'
                                 type="text"
                                 placeholder="Last Name"
@@ -90,6 +76,7 @@ const ProfileUpdate = () => {
                                 <span className="label-text">อีเมล</span>
                             </label>
                             <input
+                                data-testid="email"
                                 id='PU-03'
                                 type="email"
                                 placeholder="Email"
@@ -104,6 +91,7 @@ const ProfileUpdate = () => {
                                 <span className="label-text">อัพโหลดรูปภาพโปรไฟล์</span>
                             </label>
                             <input
+                                data-testid="profilePicture"
                                 id='PU-04'
                                 type="file"
                                 accept="image/*"
@@ -124,14 +112,16 @@ const ProfileUpdate = () => {
                         )}
 
                         <div className="form-control mt-6">
-                            <button type="submit" className="btn bg-red text-white w-full">
+                            <button 
+                            data-testid="submitProfile" 
+                            type="submit" 
+                            className="btn bg-red text-white w-full">
                                 อัปเดตโปรไฟล์
                             </button>
                         </div>
                     </form>
                 </div>
             </div>
-            <ToastContainer />
         </div>
     );
 };

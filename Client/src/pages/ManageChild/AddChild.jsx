@@ -13,12 +13,14 @@ const AddChild = () => {
     gender: '',
     image: '',
   });
-
+  const [errors, setErrors] = useState({});
   const [previewImage, setPreviewImage] = useState(null);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+    setErrors((prev) => ({ ...prev, [name]: "" }));
+
   };
 
   const handleImageUpload = (e) => {
@@ -36,6 +38,32 @@ const AddChild = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    const newErrors = {};
+    if (!formData.firstName.trim()) newErrors.firstName = "กรุณากรอกชื่อ";
+    if (!formData.lastName.trim()) newErrors.lastName = "กรุณากรอกนามสกุล";
+    if (!formData.birthDate.trim()) newErrors.birthDate = "กรุณาเลือกวันเกิด";
+    if (!formData.gender.trim()) newErrors.gender = "กรุณาเลือกเพศ";
+
+    if (Object.keys(newErrors).length) {
+      setErrors(newErrors);
+      return;
+    }
+
+     // ดึงข้อมูลเด็กทั้งหมดเพื่อตรวจสอบชื่อซ้ำ
+    const res = await childService.getChildren();
+    const existingChildren = res.data.children || res.data || [];
+
+    // เช็คนามสกุลซ้ำ
+    const isDuplicate = existingChildren.some(child =>
+      child.lastName.trim().toLowerCase() === formData.lastName.trim().toLowerCase()
+    );
+
+    if (isDuplicate) {
+      toast.error("ชื่อนี้ถูกเพิ่มแล้วในระบบ");
+      return;
+    }
+
+
     const cleanedData = {
       ...formData,
       birthDate: new Date(formData.birthDate).toISOString(),
@@ -45,15 +73,13 @@ const AddChild = () => {
       await childService.addChild(cleanedData);
 
       toast.success("เพิ่มข้อมูลเด็กสำเร็จ!", {
-        position: "top-center",
-        autoClose: 1200,
-        hideProgressBar: true,
+        autoClose: 1500,
       });
 
       setTimeout(() => navigate("/profile-child"), 1500);
     } catch (err) {
       toast.error("เกิดข้อผิดพลาดในการเพิ่มข้อมูล", {
-        position: "top-center",
+        autoClose: 1500,
       });
       console.error(err);
     }
@@ -73,14 +99,18 @@ const AddChild = () => {
               ชื่อ <span className="text-red-500">*</span>
             </label>
             <input
+              data-testid="firstName-Chihd"
               type="text"
               name="firstName"
               value={formData.firstName}
               onChange={handleChange}
               placeholder="กรอกชื่อ"
-              className="input input-bordered w-full rounded-xl"
-              required
+              className={`input input-bordered w-full rounded-xl pr-10 ${errors.firstName ? "input-error" : ""}`}
+              // required
             />
+            {errors.firstName && (
+              <p className="text-red-500 text-xs mt-1">{errors.firstName}</p>
+            )}
           </div>
 
           {/* นามสกุล */}
@@ -89,14 +119,18 @@ const AddChild = () => {
               นามสกุล <span className="text-red-500">*</span>
             </label>
             <input
+              data-testid="lastName-Chihd"
               type="text"
               name="lastName"
               value={formData.lastName}
               onChange={handleChange}
               placeholder="กรอกนามสกุล"
-              className="input input-bordered w-full rounded-xl"
-              required
+              className={`input input-bordered w-full rounded-xl ${errors.lastName ? "input-error" : ""}`}
+              // required
             />
+            {errors.lastName && (
+              <p className="text-red-500 text-xs mt-1">{errors.lastName}</p>
+            )}
           </div>
 
           {/* วันเกิด */}
@@ -105,13 +139,18 @@ const AddChild = () => {
               วันเกิด <span className="text-red-500">*</span>
             </label>
             <input
+              data-testid="birthDate-Chihd"
               type="date"
               name="birthDate"
               value={formData.birthDate}
               onChange={handleChange}
-              className="input input-bordered w-full rounded-xl"
-              required
+              className={`input input-bordered w-full rounded-xl ${errors.birthDate ? "input-error" : ""}`}
+              // required
             />
+            {errors.birthDate && (
+              <p className="text-red-500 text-xs mt-1">{errors.birthDate}</p>
+            )}
+
           </div>
 
           {/* เพศ */}
@@ -120,17 +159,21 @@ const AddChild = () => {
               เพศ <span className="text-red-500">*</span>
             </label>
             <select
+              data-testid="gender-Chihd"
               name="gender"
               value={formData.gender}
               onChange={handleChange}
-              className="select select-bordered w-full rounded-xl bg-gray-50"
-              required
+              className={`select select-bordered w-full rounded-xl bg-gray-50 ${errors.gender ? "select-error" : ""}`}
+              // required
             >
               <option value="">เลือกเพศ</option>
               <option value="ชาย">ชาย</option>
               <option value="หญิง">หญิง</option>
               <option value="อื่นๆ">อื่นๆ</option>
             </select>
+            {errors.gender && (
+              <p className="text-red-500 text-xs mt-1">{errors.gender}</p>
+            )}
           </div>
 
           {/* รูปภาพ */}
@@ -139,6 +182,7 @@ const AddChild = () => {
               รูปภาพเด็ก
             </label>
             <input
+              data-testid="image-Chihd"
               type="file"
               accept="image/*"
               onChange={handleImageUpload}
@@ -159,6 +203,7 @@ const AddChild = () => {
 
           {/* ปุ่มบันทึก */}
           <button
+            data-testid="submit-button"
             type="submit"
             className="btn bg-[#84C7AE] hover:bg-[#6EB39D] text-white w-full rounded-xl font-semibold text-base"
           >
@@ -166,7 +211,6 @@ const AddChild = () => {
           </button>
         </form>
 
-        <ToastContainer />
       </div>
     </div>
   );

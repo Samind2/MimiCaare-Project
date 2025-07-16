@@ -128,7 +128,7 @@ func UpdateStandardVaccine(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "อัปเดตข้อมูลวัคซีนสำเร็จ"})
+	c.JSON(http.StatusOK, gin.H{"message": "อัปเดตข้อมูลวัคซีนสำเร็จ", "data": updatedData})
 }
 
 func DeleteStandardVaccine(c *gin.Context) {

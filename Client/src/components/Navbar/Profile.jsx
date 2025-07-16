@@ -19,6 +19,7 @@ const Profile = () => {
 
       <div className="dropdown dropdown-end">
         <div
+          data-testid="profile-avatar"
           tabIndex={0}
           role="button"
           className="btn btn-ghost btn-circle avatar"
@@ -41,12 +42,14 @@ const Profile = () => {
           </li>
           <div className="divider my-1"></div>
           <li>
-            <a className="justify-center text-[#E51317]" href='/profile-parent'>
+            <a data-testid="profile-page"
+              className="justify-center text-[#E51317]" href='/profile-parent'>
               Profile
             </a>
           </li>
           <li>
-            <button onClick={handleLogout} className='justify-center text-[#E51317] w-full'>
+            <button data-testid="logout-button"
+            onClick={handleLogout} className='justify-center text-[#E51317] w-full'>
               Logout
             </button>
           </li>

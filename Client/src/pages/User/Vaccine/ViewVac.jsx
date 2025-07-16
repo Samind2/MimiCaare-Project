@@ -6,8 +6,6 @@ import { toast } from "react-toastify";
 import { FaPlus } from 'react-icons/fa';
 import { FaChevronDown } from "react-icons/fa";
 
-
-
 const ViewVac = () => {
   //  STATE 
   const [vaccines, setVaccines] = useState([]);
@@ -16,9 +14,6 @@ const ViewVac = () => {
   const [receivedVaccines, setReceivedVaccines] = useState([]);
   const [customVaccines, setCustomVaccines] = useState([]);
   const [showCustomOnly, setShowCustomOnly] = useState(false);
-
-
-
 
   // Modal สำหรับวัคซีนมาตรฐาน
   const [showModal, setShowModal] = useState(false);
@@ -41,7 +36,12 @@ const ViewVac = () => {
     phoneNumber: "",
   });
   const [customRecords, setCustomRecords] = useState([{ vaccineName: "", note: "" }]);
+  const vaccineOptions = [
+  { label: "วัคซีนตามมาตรฐาน", value: false },
+  { label: "วัคซีนเพิ่มเติม", value: true },
+];
 
+const filteredOptions = vaccineOptions.filter(option => option.value !== showCustomOnly);
   //  ฟังก์ชันเปิด Modal มาตรฐาน 
   const openModal = (item, isEdit = false) => {
     if (isEdit) {
@@ -288,7 +288,7 @@ const ViewVac = () => {
   };
 
   return (
-    <div className="p-4">
+    <div className="p-4 pb-24">
       <h1 className="text-xl font-semibold mb-4">วัคซีนที่เด็กควรได้รับ</h1>
 
       {/* Dropdown สำหรับเลือกเด็ก */}
@@ -305,22 +305,16 @@ const ViewVac = () => {
             tabIndex={0}
             className="dropdown-content menu p-3 shadow-lg bg-blue-100 rounded-xl w-56"
           >
-            <li>
+            {filteredOptions.map((option, idx) => (
+            <li key={idx}>
               <a
                 className="hover:bg-blue-300 rounded-md p-2 cursor-pointer"
-                onClick={() => setShowCustomOnly(false)} // เลือกวัคซีนตามมาตรฐาน
+                onClick={() => setShowCustomOnly(option.value)} // เลือกวัคซีนตามมาตรฐาน
               >
-                วัคซีนตามมาตรฐาน
+                {option.label}
               </a>
             </li>
-            <li>
-              <a
-                className="hover:bg-blue-300 rounded-md p-2 cursor-pointer"
-                onClick={() => setShowCustomOnly(true)} // เลือกวัคซีนเพิ่มเติม (กรอกเอง)
-              >
-                วัคซีนเพิ่มเติม
-              </a>
-            </li>
+            ))}
           </ul>
         </div>
 
@@ -338,7 +332,9 @@ const ViewVac = () => {
             tabIndex={0}
             className="dropdown-content menu p-3 shadow-lg bg-pink-50 rounded-xl w-56 max-h-60 overflow-auto"
           >
-            {children.map((child) => (
+            {children
+            .filter((child) => child.id !== selectedChild?.id) // กรองเด็กที่เลือกอยู่ออก
+            .map((child) => (
               <li key={child._id}>
                 <a
                   className="hover:bg-pink-200 rounded-md p-2"
@@ -442,7 +438,7 @@ const ViewVac = () => {
                       {new Date(item.receiveDate).toLocaleDateString("th-TH")}
                     </td>
                     <td className="text-center">
-                      <ul className="text-left">
+                      <ul className="text-center">
                         {item.records.map((rec, i) => (
                           <li key={i}>{rec.vaccineName}</li>
                         ))}
@@ -451,7 +447,7 @@ const ViewVac = () => {
                     <td className="text-center">{item.placeName}</td>
                     <td className="text-center">{item.phoneNumber}</td>
                     <td className="text-center">
-                      <ul className="text-left">
+                      <ul className="text-center">
                         {item.records.map((rec, i) => (
                           <li key={i}>{rec.note || "-"}</li>
                         ))}

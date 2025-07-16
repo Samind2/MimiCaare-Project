@@ -11,12 +11,11 @@ const AddDevelopment = () => {
     const [currentPage, setCurrentPage] = useState(1); // หน้าปัจจุบัน
     const itemsPerPage = 3; // จำนวนกลุ่มช่วงอายุต่อหน้า
     const [developmentList, setDevelopmentList] = useState([ // เก็บข้อมูลพัฒนาการที 
-        { category: '', detail: '', image: '' },
-        { category: '', detail: '', image: '' },
-        { category: '', detail: '', image: '' },
-        { category: '', detail: '', image: '' },
-        { category: '', detail: '', image: '' },
-    ]);
+        { category: '', detail: '', image: '', note: '' },
+        { category: '', detail: '', image: '', note: '' }, 
+        { category: '', detail: '', image: '', note: '' }, 
+        { category: '', detail: '', image: '', note: '' }, 
+        { category: '', detail: '', image: '', note: '' },]);
     const [allDevelopments, setAllDevelopments] = useState([]); // เก็บข้อมูลพัฒนาการทั้งหมดจากฐานข้อมูล
 
     // ช่วงอายุที่ใช้
@@ -154,11 +153,11 @@ const AddDevelopment = () => {
             setEditId(null);
             setEditMode(false);
             setDevelopmentList([
-                { category: '', detail: '', image: '' },
-                { category: '', detail: '', image: '' },
-                { category: '', detail: '', image: '' },
-                { category: '', detail: '', image: '' },
-                { category: '', detail: '', image: '' },
+                { category: '', detail: '', image: '', note: '', },
+                { category: '', detail: '', image: '', note: '', }, 
+                { category: '', detail: '', image: '', note: '', }, 
+                { category: '', detail: '', image: '', note: '', }, 
+                { category: '', detail: '', image: '', note: '', },
             ]);
             fetchDevelopments();
         } catch (err) {
@@ -178,6 +177,7 @@ const AddDevelopment = () => {
                 category: item.category,
                 detail: item.detail,
                 image: item.image || '',
+                note: item.note || '',
             })));
             setIsModalOpen(true);
         }
@@ -194,15 +194,16 @@ const AddDevelopment = () => {
 
     const handleImageChange = (index, event) => {
         const file = event.target.files[0];
-        if (file) {
-            const reader = new FileReader();  // ใช้ FileReader เพื่ออ่านไฟล์รูปภาพและแปลงเป็น base64
-            reader.onloadend = () => {
-                const updatedList = [...developmentList];
-                updatedList[index].image = reader.result;
-                setDevelopmentList(updatedList);
-            };
-            reader.readAsDataURL(file);
-        }
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            const base64Image = reader.result;
+            const updatedList = [...developmentList];
+            updatedList[index].image = base64Image;
+            setDevelopmentList(updatedList);
+        };
+        reader.readAsDataURL(file);
     };
 
     // ลบพัฒนาการ
@@ -296,6 +297,9 @@ const AddDevelopment = () => {
                                 รูปภาพ
                             </th>
                             <th className="px-6 py-3 text-center text-pink-900 text-sm md:text-base font-semibold rounded-tr-lg">
+                                ข้อแนะนำ
+                            </th>
+                            <th className="px-6 py-3 text-center text-pink-900 text-sm md:text-base font-semibold rounded-tr-lg">
                                 การจัดการ
                             </th>
                         </tr>
@@ -334,11 +338,13 @@ const AddDevelopment = () => {
                                                         <span className="italic text-gray-400">ไม่มีรูป</span>
                                                     )}
                                                 </td>
+                                                <td className="px-6 py-4 text-gray-600">{item.note}</td>
                                                 {subIdx === 0 && (
                                                     <td
                                                         rowSpan={dev.developments.length}
                                                         className="px-6 py-4 text-center bg-pink-100 rounded-r-xl align-middle"
                                                     >
+                                                        
                                                         <div className="flex flex-col gap-3 items-center">
                                                             <button
                                                                 onClick={() => handleDelete(dev.id)}
@@ -399,7 +405,7 @@ const AddDevelopment = () => {
             {/* Modal */}
             {isModalOpen && (
                 <div className="fixed inset-0 flex items-center justify-center bg-black/30 backdrop-blur-md z-50">
-                    <div className="bg-white rounded-2xl shadow-xl p-6 w-[90%] max-w-lg transition-all scale-100">
+                    <div className="bg-white rounded-xl shadow-xl p-6 w-[90%] max-w-lg transition-all scale-100">
                         <h2 className="text-xl font-bold text-center text-blue-800 mb-4">
                             เพิ่มเกณฑ์พัฒนาการ
                         </h2>
@@ -409,7 +415,7 @@ const AddDevelopment = () => {
                             <div>
                                 <label className="block mb-1">ช่วงอายุ</label>
                                 <select
-                                id='DEV-01'
+                                    id='DEV-01'
                                     className="w-full border rounded px-3 py-2"
                                     value={ageRange}
                                     onChange={(e) => setAgeRange(Number(e.target.value))}
@@ -452,7 +458,7 @@ const AddDevelopment = () => {
                                                 </select>
 
                                                 <select
-                                                id='DEV-03'
+                                                    id='DEV-03'
                                                     className="w-1/2 border rounded px-3 py-2"
                                                     value={dev.detail}
                                                     onChange={(e) =>
@@ -491,13 +497,23 @@ const AddDevelopment = () => {
                                                 </label>
 
                                                 <input
-                                                    id={`image-upload-${index}`}
                                                     type="file"
                                                     accept="image/*"
                                                     onChange={(e) => handleImageChange(index, e)}
-                                                    className="file:bg-pink-400 file:text-white file:px-3 file:py-1 file:rounded-full file:border-none file:mr-2 text-sm cursor-pointer"
+                                                    className="file-input file-input-bordered w-full"
+                                                />
+
+                                            </div>
+                                            <div>
+                                                <input
+                                                    type="text"
+                                                    placeholder="หมายเหตุ"
+                                                    value={dev.note ?? ''}
+                                                    onChange={(e) => handleDevelopmentChange(index, "note", e.target.value)}
+                                                    className="input input-bordered w-full"
                                                 />
                                             </div>
+
                                         </div>
                                     );
                                 })}

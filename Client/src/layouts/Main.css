@@ -4,16 +4,6 @@ body {
   font-family: "Prompt", sans-serif;
 }
 
-/* Section Container ปรับความกว้างให้เหมาะสมกับทุกหน้าจอ */
-.section-container {
-  max-width: 1280px; /* max-w-screen-xl */
-  width: 100%;
-  margin-left: auto;
-  margin-right: auto;
-  padding: 1rem; 
-  padding-left: 2rem; 
-  padding-right: 2rem;
-}
 
 @media (min-width: 640px) { /* sm */
   .section-container {
@@ -38,7 +28,7 @@ body {
 
 @media (min-width: 1536px) { /* 2xl */
   .section-container {
-    max-width: 1400px; /* ไม่กว้างเกินไป */
+    max-width: 1400px; 
     padding-left: 6rem;
     padding-right: 6rem;
   }
