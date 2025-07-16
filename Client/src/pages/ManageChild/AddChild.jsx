@@ -85,6 +85,7 @@ const AddChild = () => {
               ชื่อ <span className="text-red-500">*</span>
             </label>
             <input
+              data-testid="firstName-Chihd"
               type="text"
               name="firstName"
               value={formData.firstName}
@@ -104,6 +105,7 @@ const AddChild = () => {
               นามสกุล <span className="text-red-500">*</span>
             </label>
             <input
+              data-testid="lastName-Chihd"
               type="text"
               name="lastName"
               value={formData.lastName}
@@ -123,6 +125,7 @@ const AddChild = () => {
               วันเกิด <span className="text-red-500">*</span>
             </label>
             <input
+              data-testid="birthDate-Chihd"
               type="date"
               name="birthDate"
               value={formData.birthDate}
@@ -142,6 +145,7 @@ const AddChild = () => {
               เพศ <span className="text-red-500">*</span>
             </label>
             <select
+              data-testid="gender-Chihd"
               name="gender"
               value={formData.gender}
               onChange={handleChange}
@@ -164,6 +168,7 @@ const AddChild = () => {
               รูปภาพเด็ก
             </label>
             <input
+              data-testid="image-Chihd"
               type="file"
               accept="image/*"
               onChange={handleImageUpload}
@@ -184,6 +189,7 @@ const AddChild = () => {
 
           {/* ปุ่มบันทึก */}
           <button
+            data-testid="submit-button"
             type="submit"
             className="btn bg-[#84C7AE] hover:bg-[#6EB39D] text-white w-full rounded-xl font-semibold text-base"
           >

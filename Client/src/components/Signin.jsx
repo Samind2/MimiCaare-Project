@@ -71,6 +71,7 @@ const Signin = () => {
                 อีเมล <span className="text-red-500">*</span>
               </label>
               <input
+                data-testid="email-Login"
                 id="SI-01"
                 type="email"
                 name="email"
@@ -88,6 +89,7 @@ const Signin = () => {
                 รหัสผ่าน <span className="text-red-500">*</span>
               </label>
               <input
+                data-testid="password-Login"
                 id="SI-02"
                 type={showPassword ? "text" : "password"}
                 name="password"

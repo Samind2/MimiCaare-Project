@@ -31,6 +31,7 @@ const Index = () => {
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl font-bold text-[#444]">รายการเด็กในระบบ</h1>
           <button
+            data-testid="B-AddChild"
             className="btn bg-[#FA5453] hover:bg-[#ff7676] text-white px-6 py-2 rounded-full shadow-md transition duration-300"
             onClick={() => navigate("/addChild")}
           >
