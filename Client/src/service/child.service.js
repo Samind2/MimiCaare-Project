@@ -23,6 +23,8 @@ const updateChild = async (childId, childData) => {
   return await api.put(`${API_URL}/update/${childId}`, childData);
 };
 
+
+
 const childService = {
   addChild,
   getChildren,

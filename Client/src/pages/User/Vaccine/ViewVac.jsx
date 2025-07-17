@@ -37,11 +37,11 @@ const ViewVac = () => {
   });
   const [customRecords, setCustomRecords] = useState([{ vaccineName: "", note: "" }]);
   const vaccineOptions = [
-  { label: "วัคซีนตามมาตรฐาน", value: false },
-  { label: "วัคซีนเพิ่มเติม", value: true },
-];
+    { label: "วัคซีนตามมาตรฐาน", value: false },
+    { label: "วัคซีนเพิ่มเติม", value: true },
+  ];
 
-const filteredOptions = vaccineOptions.filter(option => option.value !== showCustomOnly);
+  const filteredOptions = vaccineOptions.filter(option => option.value !== showCustomOnly);
   //  ฟังก์ชันเปิด Modal มาตรฐาน 
   const openModal = (item, isEdit = false) => {
     if (isEdit) {
@@ -306,14 +306,14 @@ const filteredOptions = vaccineOptions.filter(option => option.value !== showCus
             className="dropdown-content menu p-3 shadow-lg bg-blue-100 rounded-xl w-56"
           >
             {filteredOptions.map((option, idx) => (
-            <li key={idx}>
-              <a
-                className="hover:bg-blue-300 rounded-md p-2 cursor-pointer"
-                onClick={() => setShowCustomOnly(option.value)} // เลือกวัคซีนตามมาตรฐาน
-              >
-                {option.label}
-              </a>
-            </li>
+              <li key={idx}>
+                <a
+                  className="hover:bg-blue-300 rounded-md p-2 cursor-pointer"
+                  onClick={() => setShowCustomOnly(option.value)} // เลือกวัคซีนตามมาตรฐาน
+                >
+                  {option.label}
+                </a>
+              </li>
             ))}
           </ul>
         </div>
@@ -323,9 +323,11 @@ const filteredOptions = vaccineOptions.filter(option => option.value !== showCus
             tabIndex={0}
             className="btn bg-pink-100 text-pink-800 hover:bg-pink-200 rounded-xl text-lg w-48 text-left truncate"
           >
-            {selectedChild
-              ? `${selectedChild.firstName} ${selectedChild.lastName}`
-              : "เลือกเด็ก"}
+            <span className="truncate inline-block max-w-[85%]">
+              {selectedChild
+                ? `${selectedChild.firstName} ${selectedChild.lastName}`
+                : "เลือกเด็ก"}
+            </span>
             <FaChevronDown className="inline ml-2" />
           </div>
           <ul
@@ -333,20 +335,20 @@ const filteredOptions = vaccineOptions.filter(option => option.value !== showCus
             className="dropdown-content menu p-3 shadow-lg bg-pink-50 rounded-xl w-56 max-h-60 overflow-auto"
           >
             {children
-            .filter((child) => child.id !== selectedChild?.id) // กรองเด็กที่เลือกอยู่ออก
-            .map((child) => (
-              <li key={child._id}>
-                <a
-                  className="hover:bg-pink-200 rounded-md p-2"
-                  onClick={() => {
-                    setSelectedChild(child);
-                    setReceivedVaccines([]);
-                  }}
-                >
-                  {child.firstName} {child.lastName}
-                </a>
-              </li>
-            ))}
+              .filter((child) => child.id !== selectedChild?.id) // กรองเด็กที่เลือกอยู่ออก
+              .map((child) => (
+                <li key={child._id}>
+                  <a
+                    className="hover:bg-pink-200 rounded-md p-2"
+                    onClick={() => {
+                      setSelectedChild(child);
+                      setReceivedVaccines([]);
+                    }}
+                  >
+                    {child.firstName} {child.lastName}
+                  </a>
+                </li>
+              ))}
           </ul>
         </div>
 

@@ -13,7 +13,7 @@ const AddChild = () => {
     gender: '',
     image: '',
   });
-  const [isSigningUp, setIsSigningUp] = useState(false);
+  const [isAddingChild, setIsAddingChild] = useState(false);
   const [errors, setErrors] = useState({});
   const [previewImage, setPreviewImage] = useState(null);
 
@@ -71,7 +71,7 @@ const AddChild = () => {
     };
 
     try {
-      setIsSigningUp(true);
+      setIsAddingChild(true);
       await childService.addChild(cleanedData);
       toast.success("เพิ่มข้อมูลเด็กสำเร็จ!", {
         autoClose: 1500,
@@ -79,7 +79,7 @@ const AddChild = () => {
 
       setTimeout(() => navigate("/profile-child"), 1500);
     } catch (err) {
-      setIsSigningUp(false);
+      setIsAddingChild(false);
       toast.error("เกิดข้อผิดพลาดในการเพิ่มข้อมูล", {
         autoClose: 1500,
       });
@@ -207,10 +207,10 @@ const AddChild = () => {
           <button
             data-testid="submit-button"
             type="submit"
-            disabled={isSigningUp}
+            disabled={isAddingChild}
             className="btn bg-[#84C7AE] hover:bg-[#6EB39D] text-white w-full rounded-xl font-semibold text-base"
           >
-            {isSigningUp ? "กำลังบันทึก..." : "บันทึกข้อมูล"}
+            {isAddingChild ? "กำลังเพิ่มข้อมูล..." : "บันทึกข้อมูล"}
 
           </button>
         </form>
