@@ -8,7 +8,7 @@ import { IoIosCloseCircle } from "react-icons/io";
 const SignUp = () => {
   const { signup } = useContext(AuthContext);
   const navigate = useNavigate();
-  const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [isSigningUp, setIsSigningUp] = useState(false);
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -48,14 +48,14 @@ const SignUp = () => {
     }
 
     try {
-      setIsLoggingIn(true);
+      setIsSigningUp(true);
       await signup(formData);
       toast.success("ลงทะเบียนสำเร็จ!", { autoClose: 1500 });
       setTimeout(() => {
         navigate("/");
       }, 1600);
     } catch (error) {
-      setIsLoggingIn(false);
+      setIsSigningUp(false);
       const msg = error.response?.data?.message || "เกิดข้อผิดพลาด";
       if (msg === "อีเมลนี้ถูกใช้งานแล้ว") {
         setErrors((prev) => ({ ...prev, email: msg }));
@@ -189,11 +189,11 @@ const SignUp = () => {
             {/* ปุ่มสมัคร */}
             <button
               type="submit"
-              disabled={isLoggingIn}
+              disabled={isSigningUp}
               className={`btn w-full text-white font-semibold text-base rounded-full ${isLoggingIn ? "bg-green-300 cursor-not-allowed" : "bg-[#47b18a] hover:bg-[#5fc2a0]"
                 }`}
             >
-              {isLoggingIn ? "กำลังสมัคร..." : "สร้างบัญชี"}
+              {isSigningUp ? "กำลังสมัคร..." : "สร้างบัญชี"}
             </button>
           </form>
 
