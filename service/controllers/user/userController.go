@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/Samind2/MimiCaare-Project/service/config/token"
+	token "github.com/Samind2/MimiCaare-Project/service/config/token"
 	userModel "github.com/Samind2/MimiCaare-Project/service/models/user"
 	"github.com/cloudinary/cloudinary-go/v2"
 	"github.com/cloudinary/cloudinary-go/v2/api/uploader"
@@ -135,18 +135,20 @@ func Login(c *gin.Context) {
 }
 
 func Logout(c *gin.Context) {
-	// ลบ token ออกจาก coockie
+	// ✅ ใช้ Config กลาง
+	sameSite, secure := token.GetCookieConfig()
+
 	cookie := &http.Cookie{
 		Name:     "jwt",
 		Value:    "",
 		Path:     "/",
-		MaxAge:   -1,
+		MaxAge:   -1, // ลบทันที
 		HttpOnly: true,
-		Secure:   false,                 //ก่อนขึ้นโฮสต้องเปลี่ยนเป็น true
-		SameSite: http.SameSiteNoneMode, // ต้องใช้ None ถ้าเป็น cross-origin
+		Secure:   secure,
+		SameSite: sameSite,
 	}
-	http.SetCookie(c.Writer, cookie)
 
+	http.SetCookie(c.Writer, cookie)
 	c.JSON(http.StatusOK, gin.H{"message": "ออกจากระบบสำเร็จ"})
 }
 
