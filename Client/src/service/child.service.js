@@ -23,13 +23,16 @@ const updateChild = async (childId, childData) => {
   return await api.put(`${API_URL}/update/${childId}`, childData);
 };
 
-
+const deleteChild = async (childId, childData) => {
+  return await api.delete(`${API_URL}/delete/${childId}`, childData);
+};
 
 const childService = {
   addChild,
   getChildren,
   getChildById,
   updateChild,
+  deleteChild
 };
 
 export default childService;

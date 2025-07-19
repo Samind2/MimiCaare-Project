@@ -1,8 +1,9 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 
-const ChildCard = ({ child }) => {
-  const { firstName, lastName, gender, birthDate, image } = child;
+
+const ChildCard = ({ child, onDelete }) => {
+  const { firstName, lastName, gender, birthDate, image, id } = child;
   const navigate = useNavigate();
 
   return (
@@ -28,13 +29,13 @@ const ChildCard = ({ child }) => {
         <div className="card-actions justify-end mt-auto">
           <button
             className="btn-edit btn-outline btn-sm"
-            onClick={() => navigate(`/profile-child-update/${child.id}`)}
+            onClick={() => navigate(`/profile-child-update/${id}`)}
           >
             แก้ไขข้อมูล
           </button>
           <button
             className="btn-delete btn-outline btn-sm"
-            onClick={() => navigate(`/profile-child-update/${child.id}`)}
+            onClick={() => onDelete(id)}
           >
             ลบข้อมูล
           </button>
@@ -43,5 +44,6 @@ const ChildCard = ({ child }) => {
     </div>
   );
 };
+
 
 export default ChildCard;

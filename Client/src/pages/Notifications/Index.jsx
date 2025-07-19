@@ -1,8 +1,10 @@
 import React from 'react'
-
+import Notification from './Notification'
 const Index = () => {
   return (
-    <div>Index</div>
+    <div>
+      <Notification />
+    </div>
   )
 }
 
