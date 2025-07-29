@@ -190,7 +190,7 @@ const SignUp = () => {
             <button
               type="submit"
               disabled={isSigningUp}
-              className={`btn w-full text-white font-semibold text-base rounded-full ${isLoggingIn ? "bg-green-300 cursor-not-allowed" : "bg-[#47b18a] hover:bg-[#5fc2a0]"
+              className={`btn w-full text-white font-semibold text-base rounded-full ${isSigningUp ? "bg-green-300 cursor-not-allowed" : "bg-[#47b18a] hover:bg-[#5fc2a0]"
                 }`}
             >
               {isSigningUp ? "กำลังสมัคร..." : "สร้างบัญชี"}
