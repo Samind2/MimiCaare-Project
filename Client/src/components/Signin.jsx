@@ -111,6 +111,7 @@ const Signin = () => {
 
             {/* Submit */}
             <button
+              data-testid="submit-Login"
               type="submit"
               disabled={isLoggingIn}
               className={`btn w-full text-white font-semibold text-base rounded-full transition-all duration-300 ${isLoggingIn ? "bg-pink-300 cursor-not-allowed" : "bg-pink-500 hover:bg-pink-600"}`}
