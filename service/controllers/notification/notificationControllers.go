@@ -17,6 +17,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-co-op/gocron"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -166,6 +167,7 @@ func RunNotificationJob7Day() {
 						"title":    fmt.Sprintf("แจ้งเตือน อีก 7 วัน มีวัคซีนที่ต้องเข้ารับในช่วงอายุ %d เดือน", vaccine.AgeRange),
 						"message":  vaccineArray, // เก็บเป็น Array JSON
 						"date":     time.Now(),
+						"isRead":   false, // สถานะการอ่านเริ่มต้นเป็น false
 					})
 				}
 			}
@@ -209,6 +211,7 @@ func RunNotificationJob7Day() {
 						"title":    fmt.Sprintf("แจ้งเตือน อีก 7 วัน มีพัฒนาการที่ต้องประเมินในช่วงอายุ %d เดือน", dev.AgeRange),
 						"message":  devArray, // ✅ เก็บเป็น Array JSON
 						"date":     time.Now(),
+						"isRead":   false, // สถานะการอ่านเริ่มต้นเป็น false
 					})
 				}
 			}
@@ -272,6 +275,7 @@ func RunNotificationJob3Day() {
 						"title":    fmt.Sprintf("แจ้งเตือน อีก 3 วัน มีวัคซีนที่ต้องเข้ารับในช่วงอายุ %d เดือน", vaccine.AgeRange),
 						"message":  vaccineArray, // เก็บเป็น Array JSON
 						"date":     time.Now(),
+						"isRead":   false, // สถานะการอ่านเริ่มต้นเป็น false
 					})
 				}
 			}
@@ -315,6 +319,7 @@ func RunNotificationJob3Day() {
 						"title":    fmt.Sprintf("แจ้งเตือน อีก 3 วัน มีพัฒนาการที่ต้องประเมินในช่วงอายุ %d เดือน", dev.AgeRange),
 						"message":  devArray, // ✅ เก็บเป็น Array JSON
 						"date":     time.Now(),
+						"isRead":   false, // สถานะการอ่านเริ่มต้นเป็น false
 					})
 				}
 			}
@@ -369,4 +374,49 @@ func GetNotifyByUserID(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, gin.H{"notifications": notifications})
 
+}
+
+func MarkNotificationAsRead(c *gin.Context) {
+	// ดึง userId จาก cookies
+	jwtCookie, err := c.Cookie("jwt")
+	if err != nil {
+		c.JSON(http.StatusForbidden, gin.H{"message": "ไม่ได้รับอนุญาต - ไม่มีคุกกี้"})
+		return
+	}
+	// ยืนยันและดึงข้อมูลจาก JWT
+	userClaims, err := token.ValidateToken(jwtCookie)
+	if err != nil {
+		c.JSON(http.StatusForbidden, gin.H{"message": "ไม่พบโทเค็น"})
+		return
+	}
+	userId := userClaims.UserId // ดึง userId จาก claims
+
+	notifyId := c.Param("id")
+	notifyObjectId, err := primitive.ObjectIDFromHex(notifyId)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "ID ไม่ถูกต้อง"})
+		return
+	}
+
+	var existingNotify notificationModel.Notification
+	err = notificationCollection.FindOne(context.TODO(), bson.M{"_id": notifyObjectId, "userId": userId}).Decode(&existingNotify)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			c.JSON(http.StatusNotFound, gin.H{"message": "ไม่พบการแจ้งเตือน"})
+		} else {
+			c.JSON(http.StatusInternalServerError, gin.H{"message": "เกิดข้อผิดพลาดในการค้นหาการแจ้งเตือน"})
+		}
+		return
+	}
+
+	// อัปเดตสถานะการอ่าน
+	_, err = notificationCollection.UpdateOne(context.TODO(), bson.M{"_id": notifyObjectId}, bson.M{"$set": bson.M{"isRead": true}})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "ไม่สามารถอัปเดตสถานะการอ่านได้"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"message":      "อัปเดตสถานะการอ่านสำเร็จ",
+		"notification": existingNotify,
+	})
 }

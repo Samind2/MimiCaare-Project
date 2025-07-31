@@ -51,8 +51,8 @@ func main() {
 	routes.StandardDevelopRoutes(api.Group("/standardDevelop"))
 	routes.ReceiveVaccineRoutes(api.Group("/receiveVaccine"))
 	routes.ReceiveDevelopRoutes(api.Group("/receiveDevelop"))
-	routes.SendMail(api.Group("/sendMail"))
 	routes.NotificationRoutes(api.Group("/notify"))
+	routes.SendMail(api.Group("/sendMail"))
 
 	// ใช้ PORT จาก .env
 	port := os.Getenv("PORT")

@@ -13,4 +13,5 @@ func NotificationRoutes(router *gin.RouterGroup) {
 		c.JSON(200, gin.H{"message": "เรียกฟังก์ชันแจ้งเตือนเรียบร้อยแล้ว"})
 	})
 	router.GET("/get", middleware.VerifyToken(), notificationController.GetNotifyByUserID)
+	router.PUT("/read/:id", middleware.VerifyToken(), notificationController.MarkNotificationAsRead)
 }
