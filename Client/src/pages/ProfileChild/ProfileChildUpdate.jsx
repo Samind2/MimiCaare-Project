@@ -13,6 +13,8 @@ const ProfileChildUpdate = () => {
   const [gender, setGender] = useState("");
   const [birthDate, setBirthDate] = useState("");
   const [image, setImage] = useState("");
+  const [isEditing, setIsEditing] = useState(false);
+
 
   useEffect(() => {
     const fetchChild = async () => {
@@ -53,14 +55,17 @@ const ProfileChildUpdate = () => {
     if (image !== "") updatedData.image = image;
 
     try {
+       setIsEditing(true);
       await childService.updateChild(id, updatedData);
       toast.success("อัปเดตข้อมูลเด็กสำเร็จ!", {
         autoClose: 1500,
       });
       setTimeout(() => navigate("/profile-child"), 1500);
     } catch (error) {
-      toast.error("เกิดข้อผิดพลาดในการอัปเดต" , {
-        autoClose: 1500,});
+      setIsEditing(false);
+      toast.error("เกิดข้อผิดพลาดในการอัปเดต", {
+        autoClose: 1500,
+      });
       console.error(error);
     }
   };
@@ -157,11 +162,12 @@ const ProfileChildUpdate = () => {
 
           {/* ปุ่ม */}
           <button
-          id="PC-05"
+            id="PC-05"
             type="submit"
+            disabled={isEditing}
             className="btn bg-[#84C7AE] hover:bg-[#6EB39D] text-white w-full rounded-xl font-semibold text-base"
           >
-            บันทึกการแก้ไข
+            {isEditing ? "กำลังบันทึกการแก้ไข..." : "บันทึกการแก้ไข"}
           </button>
         </form>
       </div>

@@ -4,13 +4,13 @@ import { FaPlus } from 'react-icons/fa';
 import { toast } from "react-toastify";
 
 const AddDevelopment = () => {
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [ageRange, setAgeRange] = useState('');
+    const [isModalOpen, setIsModalOpen] = useState(false); // เก็บสถานะเปิด/ปิด modal
+    const [ageRange, setAgeRange] = useState(''); // เก็บช่วงอายุที่เลือก
     const [editMode, setEditMode] = useState(false); // เก็บสถานะการแก้ไข
     const [editId, setEditId] = useState(null); // เก็บ id ที่จะแก้ไข
     const [currentPage, setCurrentPage] = useState(1); // หน้าปัจจุบัน
     const itemsPerPage = 3; // จำนวนกลุ่มช่วงอายุต่อหน้า
-    const [developmentList, setDevelopmentList] = useState([ // เก็บข้อมูลพัฒนาการที 
+    const [developmentList, setDevelopmentList] = useState([ // เก็บข้อมูลพัฒนาการที่กรอก
         { category: '', detail: '', image: '', note: '' },
         { category: '', detail: '', image: '', note: '' }, 
         { category: '', detail: '', image: '', note: '' }, 
@@ -66,11 +66,11 @@ const AddDevelopment = () => {
 
         // สำหรับเลขเดือนอื่น แปลงเป็นปีและเดือน
         const years = Math.floor(months / 12);
-        const remMonths = months % 12;
+        const remainingMonths  = months % 12;
 
         let result = "";
         if (years > 0) result += `${years} ปี`;
-        if (remMonths > 0) result += (years > 0 ? ` ${remMonths} เดือน` : `${remMonths} เดือน`);
+        if (remainingMonths  > 0) result += (years > 0 ? ` ${remainingMonths } เดือน` : `${remainingMonths } เดือน`);
         return result;
     };
 

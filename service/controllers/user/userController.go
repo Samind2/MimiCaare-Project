@@ -2,8 +2,10 @@ package userController
 
 import (
 	"context"
+	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/Samind2/MimiCaare-Project/service/config/token"
 	userModel "github.com/Samind2/MimiCaare-Project/service/models/user"
@@ -135,18 +137,24 @@ func Login(c *gin.Context) {
 }
 
 func Logout(c *gin.Context) {
-	// ลบ token ออกจาก coockie
+	sameSite, secure := token.GetCookieConfig()
+	//  ตรวจสอบค่าที่ได้จาก GetCookieConfig()
+	log.Println("SameSite:", sameSite)
+	log.Println("Secure:", secure)
+
+	//  ต้องตั้ง Path ให้ตรงกับตอน set
 	cookie := &http.Cookie{
 		Name:     "jwt",
 		Value:    "",
 		Path:     "/",
 		MaxAge:   -1,
+		Expires:  time.Unix(0, 0),
 		HttpOnly: true,
-		Secure:   false,                 //ก่อนขึ้นโฮสต้องเปลี่ยนเป็น true
-		SameSite: http.SameSiteNoneMode, // ต้องใช้ None ถ้าเป็น cross-origin
+		Secure:   secure,
+		SameSite: sameSite,
 	}
 	http.SetCookie(c.Writer, cookie)
-
+	log.Println("Set-Cookie:", cookie)
 	c.JSON(http.StatusOK, gin.H{"message": "ออกจากระบบสำเร็จ"})
 }
 

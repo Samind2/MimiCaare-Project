@@ -11,4 +11,5 @@ func ChildrenRoutes(router *gin.RouterGroup) {
 	router.GET("/get", middleware.VerifyToken(), childrenController.GetChildrenByParentID)
 	router.GET("/get/:id", middleware.VerifyToken(), childrenController.GetChildrenByID)
 	router.PUT("/update/:id", middleware.VerifyToken(), childrenController.UpdateChildrenByID)
+	router.DELETE("/delete/:id", middleware.VerifyToken(), childrenController.DeleteChildrenByID)
 }

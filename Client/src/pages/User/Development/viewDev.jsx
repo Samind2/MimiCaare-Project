@@ -75,7 +75,7 @@ const ViewDev = () => {
         }
       }
 
-      // ใช้ filter + sort หา receive ล่าสุดของช่วงอายุ
+      // ใช้ filter + sort หา receive ล่าสุดของอายุ
       const receivedDataForAgeList = receivedList
         .filter(item => Number(item.ageRange) === Number(selectedAgeRange))
         .sort((a, b) => new Date(b.receiveDate) - new Date(a.receiveDate));
@@ -299,9 +299,14 @@ const ViewDev = () => {
         {!selectedChild ? (
           <button className="bg-gray-400 text-white px-8 py-3 rounded-md" disabled>กรุณาเลือกเด็กก่อน</button>
         ) : !isSubmitted ? (
-          <button className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-md" onClick={handleSubmit}>บันทึก</button>
+          <button
+            className="px-5 py-2 rounded-full text-sm font-semibold shadow-lg bg-blue-300 text-blue-900 hover:bg-blue-400 hover:scale-110 transition-transform duration-200"
+            onClick={handleSubmit}
+          >
+            บันทึก
+          </button>
         ) : (
-          <button className="bg-yellow-500 hover:bg-yellow-600 text-white px-8 py-3 rounded-md" onClick={() => setIsSubmitted(false)}>แก้ไข</button>
+          <button className="px-5 py-2 rounded-full text-sm font-semibold shadow-lg bg-pink-300 text-pink-900 hover:bg-pink-400" onClick={() => setIsSubmitted(false)}>แก้ไข</button>
         )}
       </div>
     </div>

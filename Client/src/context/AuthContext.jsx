@@ -55,6 +55,7 @@ const AuthProvider = ({ children }) => {
 
   const logout = () => {
     TokenService.removeUser();
+    userService.logout(); // เรียก API logout ด้วยไอสัส By E'Pashon
     setUser(null);
   };
 

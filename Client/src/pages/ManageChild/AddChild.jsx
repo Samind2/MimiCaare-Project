@@ -13,7 +13,7 @@ const AddChild = () => {
     gender: '',
     image: '',
   });
-  const [isSigningUp, setIsSigningUp] = useState(false);
+  const [isAddingChild, setIsAddingChild] = useState(false);
   const [errors, setErrors] = useState({});
   const [previewImage, setPreviewImage] = useState(null);
 
@@ -57,11 +57,19 @@ const AddChild = () => {
       console.warn("ไม่มีข้อมูลเด็ก หรือไม่สามารถโหลดได้", err);
     }
 
+      const isDuplicateName = existingChildren.some(child =>
+      child.firstName.trim().toLowerCase() === formData.firstName.trim().toLowerCase()
+    );
+    if (isDuplicateName) {
+      toast.error("ชื่อนี้ถูกเพิ่มแล้วในระบบ");
+      return;
+    }
+
     const isDuplicate = existingChildren.some(child =>
       child.lastName.trim().toLowerCase() === formData.lastName.trim().toLowerCase()
     );
     if (isDuplicate) {
-      toast.error("ชื่อนี้ถูกเพิ่มแล้วในระบบ");
+      toast.error("นามสกุลนี้ถูกเพิ่มแล้วในระบบ");
       return;
     }
 
@@ -71,7 +79,7 @@ const AddChild = () => {
     };
 
     try {
-      setIsSigningUp(true);
+      setIsAddingChild(true);
       await childService.addChild(cleanedData);
       toast.success("เพิ่มข้อมูลเด็กสำเร็จ!", {
         autoClose: 1500,
@@ -79,7 +87,7 @@ const AddChild = () => {
 
       setTimeout(() => navigate("/profile-child"), 1500);
     } catch (err) {
-      setIsSigningUp(false);
+      setIsAddingChild(false);
       toast.error("เกิดข้อผิดพลาดในการเพิ่มข้อมูล", {
         autoClose: 1500,
       });
@@ -101,7 +109,7 @@ const AddChild = () => {
               ชื่อ <span className="text-red-500">*</span>
             </label>
             <input
-              data-testid="firstName-Chihd"
+              data-testid="firstName-Child"
               type="text"
               name="firstName"
               value={formData.firstName}
@@ -121,7 +129,7 @@ const AddChild = () => {
               นามสกุล <span className="text-red-500">*</span>
             </label>
             <input
-              data-testid="lastName-Chihd"
+              data-testid="lastName-Child"
               type="text"
               name="lastName"
               value={formData.lastName}
@@ -141,7 +149,7 @@ const AddChild = () => {
               วันเกิด <span className="text-red-500">*</span>
             </label>
             <input
-              data-testid="birthDate-Chihd"
+              data-testid="birthDate-Child"
               type="date"
               name="birthDate"
               value={formData.birthDate}
@@ -161,7 +169,7 @@ const AddChild = () => {
               เพศ <span className="text-red-500">*</span>
             </label>
             <select
-              data-testid="gender-Chihd"
+              data-testid="gender-Child"
               name="gender"
               value={formData.gender}
               onChange={handleChange}
@@ -184,7 +192,7 @@ const AddChild = () => {
               รูปภาพเด็ก
             </label>
             <input
-              data-testid="image-Chihd"
+              data-testid="image-Child"
               type="file"
               accept="image/*"
               onChange={handleImageUpload}
@@ -207,10 +215,10 @@ const AddChild = () => {
           <button
             data-testid="submit-button"
             type="submit"
-            disabled={isSigningUp}
+            disabled={isAddingChild}
             className="btn bg-[#84C7AE] hover:bg-[#6EB39D] text-white w-full rounded-xl font-semibold text-base"
           >
-            {isSigningUp ? "กำลังบันทึก..." : "บันทึกข้อมูล"}
+            {isAddingChild ? "กำลังเพิ่มข้อมูล..." : "บันทึกข้อมูล"}
 
           </button>
         </form>
