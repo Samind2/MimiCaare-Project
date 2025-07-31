@@ -12,7 +12,6 @@ const getUser = () => { // ดึงข้อมูลผู้ใช้จา�
 };
 
 const removeUser = () => { // ลบข้อมูลผู้ใช้และ token จาก cookies
-  cookies.remove("jwt", { path: "/" });  // ลบ jwt cookie
   cookies.remove("user", { path: "/" }); // ลบ user cookie
 };
 

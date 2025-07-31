@@ -57,11 +57,19 @@ const AddChild = () => {
       console.warn("ไม่มีข้อมูลเด็ก หรือไม่สามารถโหลดได้", err);
     }
 
+      const isDuplicateName = existingChildren.some(child =>
+      child.firstName.trim().toLowerCase() === formData.firstName.trim().toLowerCase()
+    );
+    if (isDuplicateName) {
+      toast.error("ชื่อนี้ถูกเพิ่มแล้วในระบบ");
+      return;
+    }
+
     const isDuplicate = existingChildren.some(child =>
       child.lastName.trim().toLowerCase() === formData.lastName.trim().toLowerCase()
     );
     if (isDuplicate) {
-      toast.error("ชื่อนี้ถูกเพิ่มแล้วในระบบ");
+      toast.error("นามสกุลนี้ถูกเพิ่มแล้วในระบบ");
       return;
     }
 
