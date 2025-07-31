@@ -10,8 +10,10 @@ func NotificationRoutes(router *gin.RouterGroup) {
 	router.GET("/test", func(c *gin.Context) {
 		go notificationController.RunNotificationJob7Day()
 		go notificationController.RunNotificationJob3Day()
+		go notificationController.RunNotificationJobToDay()
 		c.JSON(200, gin.H{"message": "เรียกฟังก์ชันแจ้งเตือนเรียบร้อยแล้ว"})
 	})
 	router.GET("/get", middleware.VerifyToken(), notificationController.GetNotifyByUserID)
 	router.PUT("/read/:id", middleware.VerifyToken(), notificationController.MarkNotificationAsRead)
+	router.PUT("/read-all", middleware.VerifyToken(), notificationController.MarkReadAllNotifications)
 }

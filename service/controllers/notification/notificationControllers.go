@@ -117,6 +117,7 @@ func StartScheduler() {
 		log.Println("Start checking notifications...")
 		RunNotificationJob7Day()
 		RunNotificationJob3Day()
+		RunNotificationJobToDay()
 	})
 
 	s.StartAsync()
@@ -337,6 +338,114 @@ func RunNotificationJob3Day() {
 	log.Println("✅ การแจ้งเตือนเสร็จสิ้น")
 }
 
+func RunNotificationJobToDay() {
+	children := fetchChildren()
+	jobs := []func(){}
+
+	for _, child := range children {
+		childCopy := child
+		vaccines := fetchStandardVaccines()
+		develops := fetchStandardDevelopments()
+
+		// ตรวจอายุของเด็ก
+		for _, vaccine := range vaccines {
+			expectedDate := child.BirthDate.Time().AddDate(0, vaccine.AgeRange, 0)
+			daysUntil := int(time.Until(expectedDate).Hours() / 24)
+
+			if daysUntil == 0 {
+				filter := bson.M{
+					"childId":  childCopy.ID,
+					"type":     "vaccine",
+					"ageRange": vaccine.AgeRange,
+				}
+
+				exists, _ := notificationCollection.CountDocuments(context.TODO(), filter)
+
+				if exists == 0 {
+					// เก็บรายการวัคซีนเป็น Array JSON
+					var vaccineArray []bson.M
+					for _, item := range vaccine.Vaccines {
+						vaccineArray = append(vaccineArray, bson.M{
+							"vaccineName": item.VaccineName,
+							"note":        item.Note,
+						})
+					}
+
+					jobs = append(jobs, func() {
+						log.Printf("แจ้งเตือนวัคซีน (อายุ %d เดือน) ให้ผู้ปกครองของ %s\n",
+							vaccine.AgeRange, childCopy.FirstName)
+					})
+
+					_, _ = notificationCollection.InsertOne(context.Background(), bson.M{
+						"userId":   childCopy.ParentID,
+						"childId":  childCopy.ID,
+						"type":     "vaccine",
+						"ageRange": vaccine.AgeRange,
+						"title":    fmt.Sprintf("แจ้งเตือน วันนี้ มีวัคซีนที่ต้องเข้ารับในช่วงอายุ %d เดือน", vaccine.AgeRange),
+						"message":  vaccineArray, // เก็บเป็น Array JSON
+						"date":     time.Now(),
+						"isRead":   false, // สถานะการอ่านเริ่มต้นเป็น false
+					})
+				}
+			}
+
+		}
+
+		for _, dev := range develops {
+			expectedDate := child.BirthDate.Time().AddDate(0, dev.AgeRange, 0)
+			daysUntil := int(time.Until(expectedDate).Hours() / 24)
+
+			if daysUntil == 0 {
+				filter := bson.M{
+					"childId":  childCopy.ID,
+					"type":     "development",
+					"ageRange": dev.AgeRange,
+				}
+
+				exists, _ := notificationCollection.CountDocuments(context.TODO(), filter)
+
+				if exists == 0 {
+					// ✅ เก็บรายการพัฒนาการเป็น Array JSON
+					var devArray []bson.M
+					for _, item := range dev.Developments {
+						devArray = append(devArray, bson.M{
+							"category": item.Category,
+							"detail":   item.Detail,
+							"note":     item.Note,
+						})
+					}
+
+					jobs = append(jobs, func() {
+						log.Printf("แจ้งเตือนพัฒนาการ (อายุ %d เดือน) ให้ผู้ปกครองของ %s\n",
+							dev.AgeRange, childCopy.FirstName)
+					})
+
+					_, _ = notificationCollection.InsertOne(context.Background(), bson.M{
+						"userId":   childCopy.ParentID,
+						"childId":  childCopy.ID,
+						"type":     "development",
+						"ageRange": dev.AgeRange,
+						"title":    fmt.Sprintf("แจ้งเตือน วันนี้ มีพัฒนาการที่ต้องประเมินในช่วงอายุ %d เดือน", dev.AgeRange),
+						"message":  devArray, // ✅ เก็บเป็น Array JSON
+						"date":     time.Now(),
+						"isRead":   false, // สถานะการอ่านเริ่มต้นเป็น false
+					})
+				}
+			}
+
+		}
+	}
+
+	if len(jobs) == 0 {
+		log.Println("ไม่มีเด็กที่ต้องแจ้งเตือนในวันนี้")
+		return
+	}
+
+	log.Printf("พบ %d การแจ้งเตือน กำลังดำเนินการ...\n", len(jobs))
+	worker.RunWorkerPool(jobs)
+	log.Println("✅ การแจ้งเตือนเสร็จสิ้น")
+}
+
 func GetNotifyByUserID(c *gin.Context) {
 	// ดึง userId จาก cookies
 	jwtCookie, err := c.Cookie("jwt")
@@ -419,4 +528,28 @@ func MarkNotificationAsRead(c *gin.Context) {
 		"message":      "อัปเดตสถานะการอ่านสำเร็จ",
 		"notification": existingNotify,
 	})
+}
+
+func MarkReadAllNotifications(c *gin.Context) {
+	// ดึง userId จาก cookies
+	jwtCookie, err := c.Cookie("jwt")
+	if err != nil {
+		c.JSON(http.StatusForbidden, gin.H{"message": "ไม่ได้รับอนุญาต - ไม่มีคุกกี้"})
+		return
+	}
+	// ยืนยันและดึงข้อมูลจาก JWT
+	userClaims, err := token.ValidateToken(jwtCookie)
+	if err != nil {
+		c.JSON(http.StatusForbidden, gin.H{"message": "ไม่พบโทเค็น"})
+		return
+	}
+
+	userId := userClaims.UserId // ดึง userId จาก claims
+	// อัปเดตสถานะการอ่านทั้งหมด
+	_, err = notificationCollection.UpdateMany(context.TODO(), bson.M{"userId": userId}, bson.M{"$set": bson.M{"isRead": true}})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "ไม่สามารถอัปเดตสถานะการอ่านได้"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "อัปเดตสถานะการอ่านทั้งหมดสำเร็จ"})
 }
