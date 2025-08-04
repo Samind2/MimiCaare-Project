@@ -1,3 +1,14 @@
+/* Responsive Navbar */
+@media screen and (max-width: 768px) {
+  .nav-left,
+  .nav-right {
+    display: none;
+  }
+  .mobile-menu {
+    display: block;
+  }
+}
+
 /* เมนู */
 .menu-item {
     transition: all 0.3s ease;

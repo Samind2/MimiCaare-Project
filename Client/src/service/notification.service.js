@@ -12,9 +12,21 @@ const getNotificationsByUserId = () => {
   return api.get(`${API_URL}/get`);
 };
 
+// ทำเครื่องหมายว่าอ่านแล้วเฉพาะรายการเดียว
+const markAsRead = (id) => {
+  return api.put(`${API_URL}/read/${id}`);
+};
+
+// ทำเครื่องหมายว่าอ่านแล้วทั้งหมด
+const markAllAsRead = () => {
+  return api.put(`${API_URL}/read-all`);
+};
+
 const NotificationService = {
   runNotificationJob,
   getNotificationsByUserId,
+  markAsRead,
+  markAllAsRead
 };
 
 export default NotificationService;
