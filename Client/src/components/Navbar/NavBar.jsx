@@ -1,6 +1,6 @@
 import React, { useContext, useState } from "react";
 import { ImHome3 } from "react-icons/im";
-import { MdOutlineVaccines } from "react-icons/md";
+import { MdOutlineVaccines, MdNotifications } from "react-icons/md";
 import { GiHamburgerMenu } from "react-icons/gi";
 import { AuthContext } from "../../context/AuthContext";
 import { FaChild } from "react-icons/fa";
@@ -49,12 +49,8 @@ const NavBar = () => {
         <div className="nav-right hidden md:flex gap-6 items-center justify-end flex-1">
           {user && (
             <button className="btn btn-ghost btn-circle">
-              <a href='/Notification' className="indicator">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none"
-                  viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
-                    d="M15 17h5l-1.405-1.405..." />
-                </svg>
+              <a href="/Notification" className="indicator">
+                <MdNotifications className="h-5 w-5" />
                 <span className="badge badge-xs badge-primary indicator-item"></span>
               </a>
             </button>
@@ -78,24 +74,24 @@ const NavBar = () => {
         />
       </div>
 
-        {/* Mobile menu */}
-        {isMobileMenuOpen && (
-          <div className="mobile-menu mt-4 md:hidden">
-            <a href="/" className="block py-2 menu-item">หน้าหลัก</a>
-            <a href="/profile-child" className="block py-2 menu-item">ข้อมูลเด็ก</a>
-            <a href="/ViewVaccine" className="block py-2 menu-item">วัคซีน</a>
-            <a href="/ViewDevelopment" className="block py-2 menu-item">พัฒนาการ</a>
-            {!user ? (
-              <button className="btn w-full mt-2" onClick={() => navigate("/Signin")}>
-                เข้าสู่ระบบ
-              </button>
-            ) : (
-              <a href="/profile-parent" className="block py-2 menu-item">โปรไฟล์</a>
-            )}
-          </div>
-        )}
-      </div>
-      );
+      {/* Mobile menu */}
+      {isMobileMenuOpen && (
+        <div className="mobile-menu mt-4 md:hidden">
+          <a href="/" className="block py-2 menu-item">หน้าหลัก</a>
+          <a href="/profile-child" className="block py-2 menu-item">ข้อมูลเด็ก</a>
+          <a href="/ViewVaccine" className="block py-2 menu-item">วัคซีน</a>
+          <a href="/ViewDevelopment" className="block py-2 menu-item">พัฒนาการ</a>
+          {!user ? (
+            <button className="btn w-full mt-2" onClick={() => navigate("/Signin")}>
+              เข้าสู่ระบบ
+            </button>
+          ) : (
+            <a href="/profile-parent" className="block py-2 menu-item">โปรไฟล์</a>
+          )}
+        </div>
+      )}
+    </div>
+  );
 };
 
-      export default NavBar;
+export default NavBar;
