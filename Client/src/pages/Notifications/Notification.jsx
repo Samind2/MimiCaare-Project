@@ -36,7 +36,7 @@ const Notification = () => {
 
   return (
     <div className="p-4">
-      <h2 className="text-lg font-bold mb-4">📌 รายการแจ้งเตือน</h2>
+      <h2 className="text-lg font-bold mb-4">รายการแจ้งเตือน</h2>
       {notifications.length === 0 ? (
         <p>ไม่มีการแจ้งเตือน</p>
       ) : (
