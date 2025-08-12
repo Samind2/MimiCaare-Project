@@ -126,6 +126,13 @@ const Signin = () => {
               สมัครสมาชิก
             </a>
           </p>
+
+          <p className="mt-6 text-center text-sm text-gray-500">
+            หากลืมรหัสผ่าน {" "}
+            <a href="/reset-password" className="text-pink-500 underline font-medium">
+              รีเซ็ตรหัสผ่าน
+            </a>
+          </p>
         </div>
 
         {/* ขวา: ข้อความ/รูปภาพ */}

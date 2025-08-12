@@ -66,7 +66,7 @@ const AuthProvider = ({ children }) => {
 
       console.log("Updated User Data:", updatedUser);
 
-      const newUserData = { ...user, ...updatedUser };
+      const newUserData = { ...user, ...updatedUser }; // Spread Operator 
 
       TokenService.setUser(newUserData);
       setUser({ ...newUserData });

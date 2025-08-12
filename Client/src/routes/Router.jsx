@@ -22,6 +22,7 @@ import ViewVaccine from '../pages/User/Vaccine/Index.jsx';
 import ViewDevelopment from '../pages/User/Development/Index.jsx';
 import ManageRights from '../pages/ManageUser/ManageRights.jsx';
 import AllUser from '../pages/ManageUser/AllUser.jsx';
+import ResetPassword from '../pages/ManagePassword/ResetPassword.jsx'; // นำเข้า ResetPassword
 
 const router = createBrowserRouter([
     {
@@ -39,6 +40,10 @@ const router = createBrowserRouter([
             {
                 path: "/signin",
                 element: <Signin />
+            },
+            {
+                path: "/reset-password",
+                element: <ResetPassword />
             },
             {
                 path: "/ViewVaccine",
