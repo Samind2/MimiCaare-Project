@@ -43,6 +43,7 @@ const AddChild = () => {
     if (!formData.lastName.trim()) newErrors.lastName = "กรุณากรอกนามสกุล";
     if (!formData.birthDate.trim()) newErrors.birthDate = "กรุณาเลือกวันเกิด";
     if (!formData.gender.trim()) newErrors.gender = "กรุณาเลือกเพศ";
+    if (!formData.image.trim()) newErrors.image = "กรุณาอัพโหลดรูปภาพ";
 
     if (Object.keys(newErrors).length) {
       setErrors(newErrors);
@@ -194,9 +195,9 @@ const AddChild = () => {
             <input
               data-testid="image-Child"
               type="file"
-              accept="image/*"
+              accept="image/png, image/jpeg"
               onChange={handleImageUpload}
-              className="file-input file-input-bordered w-full rounded-xl"
+              className={`file-input file-input-bordered w-full rounded-xl ${errors.image ? "file-input-error" : ""}`}
             />
           </div>
 

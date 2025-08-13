@@ -12,6 +12,7 @@ const ViewDev = () => {
   const [selectedChild, setSelectedChild] = useState(null);
   const [checkStates, setCheckStates] = useState({});
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [currentIndex, setCurrentIndex] = useState(0);
 
   const ageRanges = [1, 2, 4, 6, 8, 9, 12, 15, 17, 18, 24, 29, 30, 39, 41, 42, 48, 54, 59, 60, 66, 72, 78];
 
@@ -115,6 +116,15 @@ const ViewDev = () => {
     }
   };
 
+  const handleAnswer = (value) => {
+    setCheckStates(prev => ({ ...prev, [currentIndex]: value }));
+
+    if (currentIndex < devs.length - 1) {
+      setCurrentIndex(currentIndex + 1);
+    } else {
+      setIsSubmitted(true);
+    }
+  };
 
   // 
   const handleCheckChange = (index, value) => {
@@ -231,84 +241,90 @@ const ViewDev = () => {
       </div>
 
       {!selectedChild ? (
-        <div className="text-center text-red-500 font-semibold mt-6">กรุณาเลือกเด็กก่อนเพื่อทำการประเมิน</div>
+        <div className="text-center text-red-500 font-semibold mt-6">
+          กรุณาเลือกเด็กก่อนเพื่อทำการประเมิน
+        </div>
+      ) : !isSubmitted ? (
+        // โหมดทีละข้อ
+        devs.length > 0 ? (
+          <div className="bg-white shadow-lg rounded-xl p-6 text-center">
+            <h2 className="text-lg font-semibold mb-4">
+              ข้อ {currentIndex + 1} / {devs.length}
+            </h2>
+            <p className="text-gray-600 mb-2">ด้าน: {devs[currentIndex].category}</p>
+            <p className="font-medium mb-4">{devs[currentIndex].detail}</p>
+            {devs[currentIndex].image && (
+              <img
+                src={devs[currentIndex].image}
+                alt=""
+                className="mx-auto w-32 h-32 object-cover rounded border mb-4"
+              />
+            )}
+            <p className="text-sm text-gray-500 mb-6">{devs[currentIndex].note}</p>
+
+            <div className="flex justify-center gap-6">
+              <button
+                onClick={() => handleAnswer('done')}
+                className="px-5 py-2 bg-green-200 text-green-900 rounded-lg hover:bg-green-300"
+              >
+                ทำได้
+              </button>
+              <button
+                onClick={() => handleAnswer('not-done')}
+                className="px-5 py-2 bg-red-200 text-red-900 rounded-lg hover:bg-red-300"
+              >
+                ทำไม่ได้
+              </button>
+            </div>
+          </div>
+        ) : (
+          <p className="text-center text-gray-500 italic">ไม่มีข้อมูลในช่วงอายุนี้</p>
+        )
       ) : (
-        <div className="overflow-x-auto mb-10">
-          <table className="table table-zebra w-full">
-            <thead className="bg-gray-200 text-gray-700 text-sm">
-              <tr>
-                <th className="text-center">ประเมิน</th>
-                <th className="text-left">ด้านพัฒนาการ</th>
-                <th className="text-left">พัฒนาการตามวัย</th>
-                <th className="text-center">รูปภาพ</th>
-                <th className="text-center">ข้อแนะนำ</th>
-              </tr>
-            </thead>
-            <tbody>
-              {devs.length === 0 ? (
+        // โหมดสรุปผล
+        <div>
+          <div className="overflow-x-auto mb-6">
+            <table className="table table-zebra w-full">
+              <thead className="bg-gray-200 text-gray-700 text-sm">
                 <tr>
-                  <td colSpan={5} className="text-center py-6 text-gray-500 italic">ไม่มีข้อมูลในช่วงอายุนี้</td>
+                  <th className="text-center">ผลประเมิน</th>
+                  <th className="text-left">ด้านพัฒนาการ</th>
+                  <th className="text-left">พัฒนาการตามวัย</th>
+                  <th className="text-center">รูปภาพ</th>
+                  <th className="text-center">ข้อแนะนำ</th>
                 </tr>
-              ) : (
-                devs.map((item, idx) => (
-                  <tr key={idx} className={`hover:bg-gray-50 transition ${checkStates[idx] === 'not-done' ? 'bg-red-100' : ''}`}>
-                    <td className="text-center align-top">
-                      <div className="flex flex-col items-center space-y-2 w-full">
-                        {/* ปุ่มทำได้ */}
-                        <div
-                          className={`cursor-pointer flex justify-center items-center gap-2 py-2 px-4 border rounded-md transition 
-                      ${checkStates[idx] === 'done' ? 'bg-green-100 border-green-500 font-semibold' : 'bg-white border-gray-300'}`}
-                          onClick={() => !isSubmitted && handleCheckChange(idx, 'done')}
-                          style={{ minWidth: '120px' }}
-                        >
-                          <span className="text-green-600">{checkStates[idx] === 'done' && '✓'}</span>
-                          <span className="label-text">ทำได้</span>
-                        </div>
-
-                        {/* ปุ่มทำไม่ได้ */}
-                        <div
-                          className={`cursor-pointer flex justify-center items-center gap-2 py-2 px-4 border rounded-md transition 
-                      ${checkStates[idx] === 'not-done' ? 'bg-red-100 border-red-500 font-semibold' : 'bg-white border-gray-300'}`}
-                          onClick={() => !isSubmitted && handleCheckChange(idx, 'not-done')}
-                          style={{ minWidth: '120px' }}
-                        >
-                          <span className="text-red-600">{checkStates[idx] === 'not-done' && '✓'}</span>
-                          <span className="label-text">ทำไม่ได้</span>
-                        </div>
-                      </div>
+              </thead>
+              <tbody>
+                {devs.map((item, idx) => (
+                  <tr key={idx} className={checkStates[idx] === 'not-done' ? 'bg-red-100' : ''}>
+                    <td className="text-center">
+                      {checkStates[idx] === 'done' ? '✓ ทำได้' : '✗ ทำไม่ได้'}
                     </td>
-
-                    <td className="align-top">{item.category}</td>
-                    <td className="align-top">{item.detail}</td>
-                    <td className="text-center align-top">
+                    <td>{item.category}</td>
+                    <td>{item.detail}</td>
+                    <td className="text-center">
                       {item.image ? (
                         <img src={item.image} alt="" className="w-24 h-24 object-cover rounded border" />
                       ) : (
                         <span className="text-gray-400 italic">ไม่มีรูป</span>
                       )}
                     </td>
-                    <td className="align-top">{item.note}</td>
+                    <td>{item.note}</td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <div className="flex justify-center">
+            <button
+              onClick={handleSubmit}
+              className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+            >
+              บันทึกข้อมูล
+            </button>
+          </div>
         </div>
       )}
-      <div className="text-center mt-6">
-        {!selectedChild ? (
-          <button className="bg-gray-400 text-white px-8 py-3 rounded-md" disabled>กรุณาเลือกเด็กก่อน</button>
-        ) : !isSubmitted ? (
-          <button
-            className="px-5 py-2 rounded-full text-sm font-semibold shadow-lg bg-blue-300 text-blue-900 hover:bg-blue-400 hover:scale-110 transition-transform duration-200"
-            onClick={handleSubmit}
-          >
-            บันทึก
-          </button>
-        ) : (
-          <button className="px-5 py-2 rounded-full text-sm font-semibold shadow-lg bg-pink-300 text-pink-900 hover:bg-pink-400" onClick={() => setIsSubmitted(false)}>แก้ไข</button>
-        )}
-      </div>
     </div>
   );
 };

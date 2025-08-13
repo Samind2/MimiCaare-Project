@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import { ImHome3 } from "react-icons/im";
 import { MdOutlineVaccines, MdNotifications } from "react-icons/md";
 import { GiHamburgerMenu } from "react-icons/gi";
@@ -7,17 +7,37 @@ import { FaChild } from "react-icons/fa";
 import { RiInfoCardFill } from "react-icons/ri";
 import { useNavigate } from "react-router-dom";
 import Profile from "./Profile";
+import NotificationService from "../../service/notification.service";
 import "./Navbar.css";
 
 const NavBar = () => {
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [hasUnread, setHasUnread] = useState(false);
+
+
+  useEffect(() => {
+    if (user) {
+      fetchNotifications();
+    }
+  }, [user]);
+
+  const fetchNotifications = async () => {
+    try {
+      const response = await NotificationService.getNotificationsByUserId();
+      const notifications = response.data.notifications || [];
+      const unreadExists = notifications.some(n => !n.isRead); // เช็คว่ามีแจ้งเตือนที่ยังไม่อ่านไหม
+      setHasUnread(unreadExists);
+    } catch (error) {
+      console.error("ไม่สามารถดึงข้อมูลแจ้งเตือน", error);
+    }
+  };
 
   return (
     <div className="relative bg-white shadow-md px-4 py-4">
       <div className="flex items-center justify-between w-full">
-        {/* ซ้าย */}
+        {/* เมนูซ้าย */}
         <div className="nav-left hidden md:flex gap-6 items-center flex-1">
           {/* เมนูไอคอน */}
           <a href="/" className="flex flex-col items-center menu-item">
@@ -38,20 +58,22 @@ const NavBar = () => {
           </a>
         </div>
 
-        {/* กลาง (โลโก้) */}
+        {/* เมนูตรงกลางโลโก้ */}
         <div className="flex justify-center flex-1">
           <a href="/">
             <img src="/Mimicare(1).png" alt="Logo" className="h-16 md:h-20" />
           </a>
         </div>
 
-        {/* ขวา */}
+        {/* เมนูขวา */}
         <div className="nav-right hidden md:flex gap-6 items-center justify-end flex-1">
           {user && (
-            <button className="btn btn-ghost btn-circle">
+            <button className="btn btn-ghost btn-circle relative">
               <a href="/Notification" className="indicator">
                 <MdNotifications className="h-5 w-5" />
-                <span className="badge badge-xs badge-primary indicator-item"></span>
+                {hasUnread && ( // ✅ แสดงจุดแดงถ้ามีแจ้งเตือนที่ยังไม่อ่าน
+                  <span className="badge badge-xs badge-primary indicator-item"></span>
+                )}
               </a>
             </button>
           )}

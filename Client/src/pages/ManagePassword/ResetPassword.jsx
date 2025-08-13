@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from 'react-router';
 import mailService from "../../service/resendmail.service";
 import { toast } from "react-toastify";
 import { FaKey } from "react-icons/fa";
@@ -8,22 +9,21 @@ const ResetPassword = () => {
     const [email, setEmail] = useState("");
     const [firstName, setFirstName] = useState("");
     const [loading, setLoading] = useState(false);
+    const navigate = useNavigate();
+
 
     const handleResetPassword = async (e) => {
         e.preventDefault();
         try {
             setLoading(true);
-            const res = await mailService.sendPasswordToMail({
+            await mailService.sendPasswordToMail({
                 email,
                 firstName,
             });
 
-            if (res.status === 200) {
-                toast.success(res.data.message || "ส่งรหัสผ่านใหม่สำเร็จ");
-            } else {
-                toast.error(res.data.message || "เกิดข้อผิดพลาด");
-            }
-        } catch (err) {
+            toast.success("ส่งรหัสผ่านใหม่สำเร็จ");
+            navigate("/signin");
+        } catch (error) {
             setLoading(false);
             toast.error("ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์");
         }
@@ -62,10 +62,7 @@ const ResetPassword = () => {
                     <button
                         type="submit"
                         disabled={loading}
-                        className={`w-full py-2 px-4 rounded-lg text-white font-medium transition-all duration-300 ${loading
-                            ? "bg-blue-300 cursor-not-allowed"
-                            : "bg-blue-500 hover:bg-blue-600 shadow-md hover:shadow-lg"
-                            }`}
+                        className={`btn w-full text-white font-semibold text-base rounded-full transition-all duration-300`}
                     >
                         {loading ? "กำลังส่ง..." : "ส่งรหัสผ่านใหม่ไปที่อีเมล"}
                     </button>

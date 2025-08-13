@@ -2,33 +2,47 @@ import React, { useEffect, useState } from 'react';
 import NotificationService from '../../service/notification.service';
 import { toast } from 'react-toastify';
 import { PiBellSimpleRingingFill } from "react-icons/pi";
-import { FaChild, FaRegCalendarAlt } from "react-icons/fa";
-
-
-
-
+import { FaChild } from "react-icons/fa";
+import { useNavigate } from 'react-router-dom';
+// import { FaRegCalendarAlt } from "react-icons/fa"; // ปฏิทิน
 
 const Notification = () => {
   const [notifications, setNotifications] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchNotifications();
   }, []);
 
+  // ดึงข้อมูลการแจ้งเตือน
   const fetchNotifications = async () => {
     try {
       const response = await NotificationService.getNotificationsByUserId();
-      console.log(response.data); // ตรวจสอบข้อมูลที่ได้มา
       setNotifications(response.data.notifications || []);
     } catch (error) {
-      toast.error('เกิดข้อผิดพลาดในการดึงการแจ้งเตือน');
+      console.log('เกิดข้อผิดพลาดในการดึงการแจ้งเตือน');
     }
   };
 
-  const markAsRead = async (id) => {
+  // เมื่อกดที่แจ้งเตือน
+  const handleNotificationClick = async (notify) => {
     try {
-      await NotificationService.markAsRead(id);
-      fetchNotifications(); // refresh
+      if (!notify.isRead) { //เช็คว่าแจ้งเตือนยังไม่ได้อ่าน
+        await NotificationService.markAsRead(notify.id); // เมื่อกดแล้วจะเปลี่ยนสถานะว่าอ่านแล้ว
+        fetchNotifications(); 
+      }
+
+      // เช็คประเภทแล้วเปลี่ยนหน้าไปที่หน้าประเมินพัฒนาการกับบันทึกการรับวัคซีน
+      switch (notify.type) {
+        case 'vaccine':
+          navigate('/ViewVaccine');
+          break;
+        case 'development':
+          navigate('/ViewDevelopment');
+          break;
+        default:
+          console.log("ไม่มีเส้นทางสำหรับประเภทนี้");
+      }
     } catch {
       toast.error("ไม่สามารถอัปเดตสถานะได้");
     }
@@ -42,13 +56,20 @@ const Notification = () => {
       ) : (
         <ul className="space-y-3">
           {notifications.map((notify) => (
-            <li key={notify.id} className="bg-white border shadow rounded p-4">
+            <li
+              key={notify.id}
+              onClick={() => handleNotificationClick(notify)} //คลิกทั้งรายการ
+              className={`border shadow rounded p-4 cursor-pointer hover:bg-gray-50 ${
+                notify.isRead
+                  ? "bg-white"
+                  : "bg-red-50 border-red-300"
+              }`}
+            >
               <div className="flex items-center gap-2">
                 <PiBellSimpleRingingFill className="text-yellow-500" />
                 <span>{notify.title || 'ไม่มีหัวข้อ'}</span>
               </div>
 
-              // เตรียมข้อมูลสำหรับแสดงชื่อเด็ก
               {notify.childName && (
                 <p className="text-xs text-gray-500 mt-2 flex items-center gap-1">
                   <FaChild />
@@ -56,46 +77,20 @@ const Notification = () => {
                 </p>
               )}
 
-              <div className="mt-1 text-sm text-gray-700">
-                {Array.isArray(notify.message) ? (
-                  <ul className="list-disc pl-5">
-                    {notify.message.map((msg, i) => (
-                      <li key={i}>
-                        {msg.vaccineName && <span>วัคซีน: {msg.vaccineName}</span>}
-                        {msg.category && <span> หมวด: {msg.category}</span>}
-                        {msg.detail && <span> | รายละเอียด: {msg.detail}</span>}
-                        {msg.note && <span> | หมายเหตุ: {msg.note}</span>}
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  <p>{notify.message || 'ไม่มีข้อความ'}</p>
-                )}
-              </div>
-
-              <p className="text-xs text-gray-500 mt-2 flex items-center gap-1">
-                <FaRegCalendarAlt />
-                วันที่: {notify.date ? new Date(notify.date).toLocaleString() : "ไม่มีข้อมูลวันที่"}
-              </p>
-
-              {!notify.isRead && (
-                <div className="flex items-center gap-2">
-                  <p className="text-xs text-red-500 font-medium">ยังไม่ได้อ่าน</p>
-                  <button
-                    className="text-xs text-blue-500 underline"
-                    onClick={() => markAsRead(notify.id)}
-                  >
-                    ทำเครื่องหมายว่าอ่านแล้ว
-                  </button>
-                </div>
+              {notify.ageRange && (
+                <p className="text-sm mt-1">ช่วงอายุ: {notify.ageRange} เดือน</p>
               )}
+
+              {notify.type && (
+                <p className="text-sm mt-1">ประเภท: {notify.type}</p>
+              )}
+
             </li>
           ))}
         </ul>
       )}
     </div>
   );
-
 };
 
 export default Notification;
