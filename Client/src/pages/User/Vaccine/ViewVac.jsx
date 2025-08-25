@@ -389,7 +389,13 @@ const ViewVac = () => {
                     <td className="text-center py-4">
                       <ul className="space-y-2 inline-block text-left">
                         {item.vaccines.map((vaccine, i) => (
-                          <li key={i}>{vaccine.vaccineName}</li>
+                          <li
+                            key={i}
+                            className="tooltip tooltip-top"
+                            data-tip={`วัคซีนนี้ต้องฉีดทั้งหมด ${item.vaccines.length} เข็ม`}
+                          >
+                            {vaccine.vaccineName}
+                          </li>
                         ))}
                       </ul>
                     </td>
@@ -429,7 +435,7 @@ const ViewVac = () => {
                 <th className="text-center">สถานที่</th>
                 <th className="text-center">เบอร์โทร</th>
                 <th className="text-center">หมายเหตุ</th>
-                <th className="text-center">การจัดการ</th> {/* เพิ่มคอลัมน์นี้ */}
+                <th className="text-center">การจัดการ</th> {/* เพิ่มคอลัมน์ฟนี้ */}
               </tr>
             </thead>
             <tbody>

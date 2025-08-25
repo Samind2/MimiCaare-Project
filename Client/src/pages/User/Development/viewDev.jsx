@@ -4,6 +4,9 @@ import childService from '../../../service/child.service';
 import receiveDevelopService from '../../../service/receiveDev.service';
 import { toast } from 'react-toastify';
 import { FaChevronDown } from "react-icons/fa";
+import { IoMdClose, IoMdCheckmark } from "react-icons/io";
+
+
 
 const ViewDev = () => {
   const [selectedAgeRange, setSelectedAgeRange] = useState(1);
@@ -51,6 +54,7 @@ const ViewDev = () => {
     fetchAssessmentOrStandard();
   }, [selectedChild, selectedAgeRange]);
 
+  // เรียกดูข้อมูลการประเมินพัฒนาการตามมาตรฐาน
   const fetchAssessmentOrStandard = async () => {
     if (!selectedChild) return;
 
@@ -118,34 +122,28 @@ const ViewDev = () => {
 
   const handleAnswer = (value) => {
     setCheckStates(prev => ({ ...prev, [currentIndex]: value }));
+    const updated = { ...checkStates, [currentIndex]: value };
 
     if (currentIndex < devs.length - 1) {
       setCurrentIndex(currentIndex + 1);
     } else {
-      setIsSubmitted(true);
+      autoSubmit(updated);
     }
   };
 
-  // 
-  const handleCheckChange = (index, value) => {
-    if (!isSubmitted) {
-      setCheckStates(prev => ({ ...prev, [index]: value }));
-    }
-  };
-
-  const handleSubmit = async () => {
+  const autoSubmit = async (finalCheckStates) => {
     if (!selectedChild || devs.length === 0) {
       toast.error("กรุณาเลือกเด็ก และช่วงอายุให้เรียบร้อย");
       return;
     }
 
-    const keys = Object.keys(checkStates);
+    const keys = Object.keys(finalCheckStates);
     if (keys.length < devs.length) {
       toast.error("กรุณาประเมินพัฒนาการให้ครบทุกข้อ");
       return;
     }
 
-    const statusList = devs.map((_, idx) => checkStates[idx] === 'done');
+    const statusList = devs.map((_, idx) => finalCheckStates[idx] === 'done');
 
     try {
       const standardDev = await standardDevService.getDevelop();
@@ -163,7 +161,7 @@ const ViewDev = () => {
       };
 
       await receiveDevelopService.addReceiveDevelop(payload);
-      toast.success("บันทึกข้อมูลสำเร็จ");
+      toast.success("บันทึกข้อมูลสำเร็จ ✅");
       setIsSubmitted(true);
       await fetchAssessmentOrStandard();
     } catch (err) {
@@ -171,6 +169,7 @@ const ViewDev = () => {
       console.error(err);
     }
   };
+
 
   return (
     <div className="p-6 mx-auto w-full max-w-full">
@@ -296,9 +295,18 @@ const ViewDev = () => {
               </thead>
               <tbody>
                 {devs.map((item, idx) => (
-                  <tr key={idx} className={checkStates[idx] === 'not-done' ? 'bg-red-100' : ''}>
-                    <td className="text-center">
-                      {checkStates[idx] === 'done' ? '✓ ทำได้' : '✗ ทำไม่ได้'}
+                  <tr key={idx}>
+                    <td
+                      className={`text-center font-bold ${checkStates[idx] === "done"
+                          ? "bg-green-100 text-green-700"
+                          : "bg-red-100 text-red-700"
+                        }`}
+                    >
+                      {checkStates[idx] === "done" ? (
+                        <IoMdCheckmark className="inline text-xl" />
+                      ) : (
+                        <IoMdClose className="inline text-xl" />
+                      )}
                     </td>
                     <td>{item.category}</td>
                     <td>{item.detail}</td>
@@ -314,14 +322,6 @@ const ViewDev = () => {
                 ))}
               </tbody>
             </table>
-          </div>
-          <div className="flex justify-center">
-            <button
-              onClick={handleSubmit}
-              className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
-            >
-              บันทึกข้อมูล
-            </button>
           </div>
         </div>
       )}
