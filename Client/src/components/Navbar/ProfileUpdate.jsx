@@ -10,6 +10,7 @@ const ProfileUpdate = () => {
     const [lastName, setLastName] = useState(user?.lastName || '');
     const [email, setEmail] = useState(user?.email || '');
     const [picture, setPicture] = useState(user?.picture || '');
+    const [isProfileUpdating, setIsProfileUpdating] = useState(false);
     const navigate = useNavigate();
 
     const handleImageUpload = async (e) => {
@@ -27,16 +28,18 @@ const ProfileUpdate = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
+            setIsProfileUpdating(true);
             const userData = { firstName, lastName, email, picture };  // ส่งข้อมูลอีเมลไปด้วย
             await updateProfile(userData);  // อัปเดตข้อมูลโปรไฟล์
             console.log("Toast showing");
-            toast.success("อัพเดทโปรไฟล์สำเร็จ!",  { autoClose: 1500 });
+            toast.success("อัพเดทโปรไฟล์สำเร็จ!", { autoClose: 1500 });
 
             setTimeout(() => {
                 navigate("/profile-parent");
             }, 2000);
         } catch (error) {
-            toast.error("เกิดข้อผิดพลาดในการอัพเดทโปรไฟล์!",  { autoClose: 1500 });
+            setIsProfileUpdating(false);
+            toast.error("เกิดข้อผิดพลาดในการอัพเดทโปรไฟล์!", { autoClose: 1500 });
             console.error("Error in profile update:", error); // เพิ่ม log เพื่อดู error
         }
     }
@@ -112,11 +115,14 @@ const ProfileUpdate = () => {
                         )}
 
                         <div className="form-control mt-6">
-                            <button 
-                            data-testid="submitProfile" 
-                            type="submit" 
-                            className="btn bg-red text-white w-full">
-                                อัปเดตโปรไฟล์
+                            <button
+                                data-testid="submitProfile"
+                                type="submit"
+                                disabled={isProfileUpdating}
+                                className={`btn w-full text-white font-semibold text-base rounded-full ${isProfileUpdating ? "bg-green-300 cursor-not-allowed" : "bg-[#47b18a] hover:bg-[#5fc2a0]"
+                                    }`}
+                            >
+                                {isProfileUpdating ? "กำลังอัพเดท..." : "อัพเดทโปรไฟล์"}
                             </button>
                         </div>
                     </form>
@@ -125,6 +131,8 @@ const ProfileUpdate = () => {
         </div>
     );
 };
+
+
 
 export default ProfileUpdate;
 
