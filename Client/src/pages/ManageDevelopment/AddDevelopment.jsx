@@ -55,7 +55,6 @@ const AddDevelopment = () => {
     };
 
     const convertMonthsToYearText = (months) => {
-        // กรณีพิเศษแสดงข้อความช่วงสั้นๆ
         if (months === 1) return "แรกเกิด - 1 เดือน";
         if (months === 2) return "1 - 2 เดือน";
         if (months === 4) return "3 - 4 เดือน";
@@ -70,7 +69,7 @@ const AddDevelopment = () => {
 
         let result = "";
         if (years > 0) result += `${years} ปี`;
-        if (remainingMonths  > 0) result += (years > 0 ? ` ${remainingMonths } เดือน` : `${remainingMonths } เดือน`);
+        if (remainingMonths > 0) result += (years > 0 ? ` ${remainingMonths } เดือน` : `${remainingMonths } เดือน`);
         return result;
     };
 
@@ -118,7 +117,7 @@ const AddDevelopment = () => {
 
         // เช็คว่ามีช่วงอายุซ้ำในฐานข้อมูลหรือไม่
         const isDuplicate = allDevelopments.some(dev =>
-            dev.ageRange === ageRange && (editMode ? dev.id !== editId : true) // ถ้าอยู่ในโหมดแก้ไข ให้ข้าม id ที่กำลังแก้ไข
+            dev.ageRange === ageRange && (editMode ? dev.id !== editId : true) 
         );
 
         if (isDuplicate) {

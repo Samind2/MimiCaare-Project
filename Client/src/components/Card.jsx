@@ -7,7 +7,7 @@ const ChildCard = ({ child, onDelete }) => {
   const navigate = useNavigate();
 
   return (
-    <div className="card shadow-lg rounded-xl overflow-hidden bg-white w-full flex flex-col">
+    <div className="card shadow-lg rounded-xl overflow-hidden bg-white flex flex-col max-w-xs mx-auto">
       <figure className="overflow-hidden rounded-t-xl">
         <img
           src={image}

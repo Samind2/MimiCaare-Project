@@ -5,6 +5,7 @@ import childService from "../../../service/child.service";
 import { toast } from "react-toastify";
 import { FaPlus } from 'react-icons/fa';
 import { FaChevronDown } from "react-icons/fa";
+import VaccineTimeline from "./VaccineTimeline"
 
 const ViewVac = () => {
   //  STATE 
@@ -14,6 +15,9 @@ const ViewVac = () => {
   const [receivedVaccines, setReceivedVaccines] = useState([]);
   const [customVaccines, setCustomVaccines] = useState([]);
   const [showCustomOnly, setShowCustomOnly] = useState(false);
+  // เพิ่ม state สำหรับควบคุม step
+  const [currentStep, setCurrentStep] = useState(1);
+
 
   // Modal สำหรับวัคซีนมาตรฐาน
   const [showModal, setShowModal] = useState(false);
@@ -27,6 +31,11 @@ const ViewVac = () => {
     phoneNumber: "",
   });
   const [selectedVaccines, setSelectedVaccines] = useState([]);
+
+  // ฟังก์ชันไปขั้นถัดไป
+  const nextStep = () => setCurrentStep((prev) => Math.min(prev + 1, 3));
+  // ฟังก์ชันย้อนกลับ
+  const prevStep = () => setCurrentStep((prev) => Math.max(prev - 1, 1));
 
   // Modal สำหรับวัคซีนที่ผู้ใช้กรอกเอง (custom)
   const [showCustomModal, setShowCustomModal] = useState(false);
@@ -366,58 +375,12 @@ const ViewVac = () => {
 
       {/* ตารางวัคซีน */}
       {!showCustomOnly ? (
-        <div className="overflow-x-auto">
-          {/* ตารางวัคซีนมาตรฐาน */}
-          <table className="table table-zebra w-full">
-            <thead className="bg-gray-200 text-gray-700 text-sm">
-              <tr>
-                <th className="text-center">อายุ</th>
-                <th className="text-center">วัคซีน</th>
-                <th className="text-center">สถานะ</th>
-                <th className="text-center">การจัดการ</th>
-              </tr>
-            </thead>
-            <tbody>
-              {vaccines.map((item, index) => {
-                const ageText =
-                  item.ageRange >= 12 ? `${item.ageRange / 12} ปี` : `${item.ageRange} เดือน`;
-                const received = isVaccineReceived(item.id);
+        <VaccineTimeline
+          vaccines={vaccines}
+          receivedVaccines={receivedVaccines}
+          onSelectVaccine={openModal} // ✅ เพิ่มตรงนี้
+        />
 
-                return (
-                  <tr key={index}>
-                    <td className="text-center">{ageText}</td>
-                    <td className="text-center py-4">
-                      <ul className="space-y-2 inline-block text-left">
-                        {item.vaccines.map((vaccine, i) => (
-                          <li key={i}>{vaccine.vaccineName}</li>
-                        ))}
-                      </ul>
-                    </td>
-                    <td className="text-center py-4">
-                      <ul className="space-y-2">
-                        {item.vaccines.map((_, i) => (
-                          <li key={i}>
-                            <span className={`px-2 py-1 text-xs rounded-full text-white ${received ? "bg-green-600" : "bg-red-600"}`}>
-                              {received ? "รับแล้ว" : "ยังไม่ได้รับ"}
-                            </span>
-                          </li>
-                        ))}
-                      </ul>
-                    </td>
-                    <td className="text-center">
-                      <button
-                        className={`px-5 py-2 rounded-full text-sm font-semibold transition-transform duration-200 shadow-lg ${received ? "bg-pink-300 text-pink-900 hover:bg-pink-400" : "bg-blue-300 text-blue-900 hover:bg-blue-400"} hover:scale-110`}
-                        onClick={() => openModal(item, received)}
-                      >
-                        {received ? "แก้ไข" : "บันทึกรับวัคซีน"}
-                      </button>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
       ) : (
         <div className="overflow-x-auto">
           {/* ตารางวัคซีนที่กรอกเอง */}
@@ -429,7 +392,7 @@ const ViewVac = () => {
                 <th className="text-center">สถานที่</th>
                 <th className="text-center">เบอร์โทร</th>
                 <th className="text-center">หมายเหตุ</th>
-                <th className="text-center">การจัดการ</th> {/* เพิ่มคอลัมน์นี้ */}
+                <th className="text-center">การจัดการ</th> {/* เพิ่มคอลัมน์ฟนี้ */}
               </tr>
             </thead>
             <tbody>
@@ -484,72 +447,123 @@ const ViewVac = () => {
       {/* Modal สำหรับวัคซีนมาตรฐาน */}
       {showModal && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm z-50">
-          <div className="bg-white rounded-xl p-6 w-[90%] max-w-md shadow-lg">
+          <div className="bg-white rounded-xl p-6 w-[95%] max-w-lg shadow-lg">
             <h2 className="text-xl font-bold mb-4">
               {isEditMode ? "แก้ไขข้อมูลวัคซีน" : "บันทึกข้อมูลวัคซีน"}
             </h2>
 
-            <div className="space-y-3">
-              <p>
-                <strong>ชื่อเด็ก:</strong> {selectedChild?.firstName}{" "}
-                {selectedChild?.lastName}
-              </p>
-              <p>
-                <strong>อายุ:</strong>{" "}
-                {formData.ageRange >= 12
-                  ? `${formData.ageRange / 12} ปี`
-                  : `${formData.ageRange} เดือน`}
-              </p>
+            {/* Progress Bar */}
+            <ul className="steps w-full mb-6">
+              <li className={`step ${currentStep >= 1 ? "step-success" : ""}`}>
+                ข้อมูลเด็ก
+              </li>
+              <li className={`step ${currentStep >= 2 ? "step-success" : ""}`}>
+                รายละเอียดวัคซีน
+              </li>
+              <li className={`step ${currentStep >= 3 ? "step-success" : ""}`}>
+                สถานพยาบาล
+              </li>
+            </ul>
 
-              <ul className="list-disc list-inside">
-                {selectedVaccines.map((vac, i) => (
-                  <li key={vac.vaccineName + i}>{vac.vaccineName}</li>
-                ))}
-              </ul>
 
-              <input
-                type="date"
-                className="input input-bordered w-full"
-                value={formData.receiveDate}
-                onChange={(e) =>
-                  setFormData({ ...formData, receiveDate: e.target.value })
-                }
-              />
+            {/* Step 1 */}
+            {currentStep === 1 && (
+              <div className="space-y-3">
+                <p>
+                  <strong>ชื่อเด็ก:</strong> {selectedChild?.firstName}{" "}
+                  {selectedChild?.lastName}
+                </p>
+                <p>
+                  <strong>อายุ:</strong>{" "}
+                  {formData.ageRange >= 12
+                    ? `${formData.ageRange / 12} ปี`
+                    : `${formData.ageRange} เดือน`}
+                </p>
 
-              <input
-                id="VV-01"
-                type="text"
-                placeholder="สถานที่รับวัคซีน"
-                className="input input-bordered w-full"
-                value={formData.placeName}
-                onChange={(e) =>
-                  setFormData({ ...formData, placeName: e.target.value })
-                }
-              />
+                <ul className="list-disc list-inside">
+                  {selectedVaccines.map((vac, i) => (
+                    <li key={vac.vaccineName + i}>{vac.vaccineName}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
 
-              <input
-                id="VV-02"
-                type="text"
-                placeholder="เบอร์โทร"
-                className="input input-bordered w-full"
-                value={formData.phoneNumber}
-                onChange={(e) =>
-                  setFormData({ ...formData, phoneNumber: e.target.value })
-                }
-              />
-            </div>
+            {/* Step 2 */}
+            {currentStep === 2 && (
+              <div className="space-y-3">
+                <label className="block text-sm font-medium">วันที่รับวัคซีน</label>
+                <input
+                  type="date"
+                  className="input input-bordered w-full"
+                  value={formData.receiveDate}
+                  onChange={(e) =>
+                    setFormData({ ...formData, receiveDate: e.target.value })
+                  }
+                />
+              </div>
+            )}
 
-            <div className="mt-4 flex justify-end gap-2">
-              <button className="btn" onClick={() => setShowModal(false)}>
+            {/* Step 3 */}
+            {currentStep === 3 && (
+              <div className="space-y-3">
+                <input
+                  id="VV-01"
+                  type="text"
+                  placeholder="สถานที่รับวัคซีน"
+                  className="input input-bordered w-full"
+                  value={formData.placeName}
+                  onChange={(e) =>
+                    setFormData({ ...formData, placeName: e.target.value })
+                  }
+                />
+
+                <input
+                  id="VV-02"
+                  type="text"
+                  placeholder="เบอร์โทร"
+                  className="input input-bordered w-full"
+                  value={formData.phoneNumber}
+                  onChange={(e) =>
+                    setFormData({ ...formData, phoneNumber: e.target.value })
+                  }
+                />
+              </div>
+            )}
+
+            {/* ปุ่มควบคุม Step */}
+            <div className="mt-6 flex justify-between">
+
+              {/* ปุ่มยกเลิก */}
+              <button
+                className="px-5 py-2 bg-red-200 text-red-900 rounded-lg hover:bg-red-300"
+                onClick={() => setShowModal(false)}
+              >
                 ยกเลิก
               </button>
-              <button className="btn btn-primary" onClick={handleSaveVaccine}>
-                {isEditMode ? "บันทึกการแก้ไข" : "บันทึก"}
+
+              <button
+                className="px-5 py-2 bg-red-200 text-red-900 rounded-lg hover:bg-red-300"
+                onClick={prevStep}
+                disabled={currentStep === 1}
+              >
+                ย้อนกลับ
               </button>
+
+              {currentStep < 3 ? (
+                <button className="px-5 py-2 bg-green-200 text-green-900 rounded-lg hover:bg-green-300" onClick={nextStep}>
+                  ถัดไป
+                </button>
+              ) : (
+                <button className="btn btn-success" onClick={handleSaveVaccine}>
+                  {isEditMode ? "บันทึกการแก้ไข" : "บันทึก"}
+                </button>
+              )}
             </div>
           </div>
         </div>
       )}
+
+
 
       {/* Modal สำหรับวัคซีนกรอกเอง */}
       {showCustomModal && (
@@ -644,5 +658,6 @@ const ViewVac = () => {
     </div>
   );
 };
+
 
 export default ViewVac;

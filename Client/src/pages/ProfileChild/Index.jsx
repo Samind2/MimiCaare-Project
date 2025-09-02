@@ -25,12 +25,12 @@ const Index = () => {
     fetchChildren();
   }, []);
 
-  const handleDelete = async (idToDelete) => {
+  const handleDelete = async (child) => {
     const confirmDelete = () =>
       new Promise((resolve) => {
         const ToastContent = ({ closeToast }) => (
           <div>
-            <p>คุณต้องการลบข้อมูลเด็กหมายเลข {idToDelete} ใช่หรือไม่?</p>
+            <p>คุณต้องการลบข้อมูลเด็กชื่อ <b>{child.firstName}</b> ใช่หรือไม่?</p>
             <div className="mt-2 flex justify-end gap-2">
               <button
                 className="btn btn-sm btn-error"
@@ -66,7 +66,7 @@ const Index = () => {
     if (!confirmed) return;
 
     try {
-      await childService.deleteChild(idToDelete);
+      await childService.deleteChild(child.id);
       toast.success("ลบข้อมูลสำเร็จ");
       fetchChildren();
     } catch (error) {
@@ -97,7 +97,7 @@ const Index = () => {
         ) : (
           <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
             {children.map((child) => (
-              <ChildCard key={child.id} child={child} onDelete={handleDelete} />
+              <ChildCard key={child.id} child={child} onDelete={() => handleDelete(child, child.id)} />
             ))}
           </div>
         )}

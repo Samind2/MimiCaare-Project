@@ -1,40 +1,118 @@
 import React, { useEffect, useState } from 'react';
 import NotificationService from '../../service/notification.service';
 import { toast } from 'react-toastify';
+import { PiBellSimpleRingingFill } from "react-icons/pi";
+import { FaChild } from "react-icons/fa";
+import { useNavigate } from 'react-router-dom';
 
 const Notification = () => {
   const [notifications, setNotifications] = useState([]);
+  const [activeChild, setActiveChild] = useState(""); 
+  const navigate = useNavigate();
 
   useEffect(() => {
-    console.log('fetchNotifications เรียกครั้ง');
-
     fetchNotifications();
   }, []);
 
   const fetchNotifications = async () => {
     try {
       const response = await NotificationService.getNotificationsByUserId();
-      setNotifications(response.data); // สมมติว่า response.data เป็น array
+      const notiData = response.data.notifications || [];
+      setNotifications(notiData);
+
+      // ตั้งค่า default tab เป็นเด็กคนแรก (ที่มีชื่อ)
+      const firstChild = notiData.find(n => n.childName)?.childName;
+      if (firstChild) {
+        setActiveChild(firstChild);
+      }
     } catch (error) {
-      toast.error('เกิดข้อผิดพลาดในการดึงการแจ้งเตือน', error);
+      console.log('เกิดข้อผิดพลาดในการดึงการแจ้งเตือน');
     }
   };
+
+  const handleNotificationClick = async (notify) => {
+    try {
+      if (!notify.isRead) {
+        await NotificationService.markAsRead(notify.id);
+        fetchNotifications();
+      }
+
+      switch (notify.type) {
+        case 'vaccine':
+          navigate('/ViewVaccine');
+          break;
+        case 'development':
+          navigate('/ViewDevelopment');
+          break;
+        default:
+          console.log("ไม่มีเส้นทางสำหรับประเภทนี้");
+      }
+    } catch {
+      toast.error("ไม่สามารถอัปเดตสถานะได้");
+    }
+  };
+
+  // จัดกลุ่มตาม ชื่อเด็ก
+  const groupedNotifications = notifications.reduce((childrenGroups, notify) => {
+    if (!notify.childName) return childrenGroups; 
+    if (!childrenGroups[notify.childName]) childrenGroups[notify.childName] = [];
+    childrenGroups[notify.childName].push(notify);
+    return childrenGroups;
+  }, {});
 
   return (
     <div className="p-4">
       <h2 className="text-lg font-bold mb-4">รายการแจ้งเตือน</h2>
-      {notifications.length === 0 ? (
+
+      {Object.keys(groupedNotifications).length === 0 ? (
         <p>ไม่มีการแจ้งเตือน</p>
       ) : (
-        <ul className="space-y-2">
-          {notifications.map((notify, index) => (
-            <li key={index} className="bg-white shadow p-3 rounded border">
-              <p><strong>เรื่อง:</strong> {notify.title || 'ไม่มีชื่อเรื่อง'}</p>
-              <p><strong>ข้อความ:</strong> {notify.message || 'ไม่มีข้อความ'}</p>
-              <p className="text-sm text-gray-500">วันที่: {new Date(notify.createdAt).toLocaleString()}</p>
-            </li>
-          ))}
-        </ul>
+        <>
+          {/* Tabsแสดงชื่อเด็ก */}
+          <div role="tablist" className="tabs tabs-lift mb-4">
+            {Object.keys(groupedNotifications).map((child) => (
+              <a
+                key={child}
+                role="tab"
+                className={`tab ${activeChild === child ? "tab-active" : ""}`}
+                onClick={() => setActiveChild(child)}
+              >
+                {child}
+              </a>
+            ))}
+          </div>
+
+          {/* แสดงการแจ้งเตือนของเด็กที่เลือก */}
+          <ul className="space-y-3">
+            {groupedNotifications[activeChild]?.map((notify) => (
+              <li
+                key={notify.id}
+                onClick={() => handleNotificationClick(notify)}
+                className={`border shadow rounded p-4 cursor-pointer hover:bg-gray-50 ${
+                  notify.isRead ? "bg-white" : "bg-red-50 border-red-300"
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <PiBellSimpleRingingFill className="text-yellow-500" />
+                  <span>{notify.title || 'ไม่มีหัวข้อ'}</span>
+                </div>
+
+                <p className="text-xs text-gray-500 mt-2 flex items-center gap-1">
+                  <FaChild />
+                  ชื่อเด็ก: {notify.childName}
+                </p>
+
+                {notify.ageRange && (
+                  <p className="text-sm mt-1">ช่วงอายุ: {notify.ageRange} เดือน</p>
+                )}
+
+                {notify.type && (
+                  <p className="text-sm mt-1">ประเภท: {notify.type}</p>
+                )}
+              </li>
+            ))}
+          </ul>
+        </>
       )}
     </div>
   );

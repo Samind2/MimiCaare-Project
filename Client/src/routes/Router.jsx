@@ -5,8 +5,6 @@ import ProtectedRoute from "../components/ProtectedRoute";
 import Home from "../pages/Home/Index";
 import SignUp from "../components/SignUp";
 import Signin from "../components/Signin";
-import Vaccine from "../pages/ManageVac/AddVac.jsx";
-import Development from "../pages/ManageDevelopment/Index.jsx"; //
 import ProfileChild from "../pages/ProfileChild/Index.jsx";
 import ProfileParent from "../pages/ProfileParent/Index.jsx";
 import ProfileUpdate from "../components/Navbar/ProfileUpdate.jsx";
@@ -22,6 +20,7 @@ import ViewVaccine from '../pages/User/Vaccine/Index.jsx';
 import ViewDevelopment from '../pages/User/Development/Index.jsx';
 import ManageRights from '../pages/ManageUser/ManageRights.jsx';
 import AllUser from '../pages/ManageUser/AllUser.jsx';
+import ResetPassword from '../pages/ManagePassword/ResetPassword.jsx'; // นำเข้า ResetPassword
 
 const router = createBrowserRouter([
     {
@@ -39,6 +38,10 @@ const router = createBrowserRouter([
             {
                 path: "/signin",
                 element: <Signin />
+            },
+            {
+                path: "/reset-password",
+                element: <ResetPassword />
             },
             {
                 path: "/ViewVaccine",

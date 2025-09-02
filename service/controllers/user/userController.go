@@ -260,3 +260,75 @@ func UpdateProfile(c *gin.Context) {
 		"picture":   pictureURL,
 	})
 }
+
+func ResetPassword(c *gin.Context) {
+	jwtCookie, err := c.Cookie("jwt")
+	if err != nil {
+		c.JSON(http.StatusForbidden, gin.H{"message": "ไม่ได้รับอนุญาต - ไม่มีคุกกี้"})
+		return
+	}
+	// ยืนยันและดึงข้อมูลจาก JWT
+	userClaims, err := token.ValidateToken(jwtCookie)
+	if err != nil {
+		c.JSON(http.StatusForbidden, gin.H{"message": "ไม่พบโทเค็น"})
+		return
+	}
+	userId := userClaims.UserId // ดึง userId จาก claims
+	//log.Println("User ID:", userId)
+	// แปลง userId เป็น ObjectID
+	objectID, err := primitive.ObjectIDFromHex(userId)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "ไอดีผู้ใช้ไม่ถูกต้อง"})
+		return
+	}
+	var req struct {
+		OldPassword       string `json:"oldPassword"`
+		NewPassword       string `json:"newPassword"`
+		RepeatNewPassword string `json:"repeatNewPassword"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "ข้อมูลไม่ถูกต้อง"})
+		return
+	}
+	if req.OldPassword == "" || req.NewPassword == "" || req.RepeatNewPassword == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "กรุณากรอกข้อมูลให้ครบทุกช่อง"})
+		return
+	}
+	if req.OldPassword == req.NewPassword {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "รหัสผ่านใหม่ต้องไม่ตรงกับรหัสผ่านเก่า"})
+		return
+	}
+	if req.NewPassword != req.RepeatNewPassword {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "รหัสผ่านใหม่และการยืนยันรหัสผ่านไม่ตรงกัน"})
+		return
+	}
+	var user userModel.User
+	err = UserCollection.FindOne(context.TODO(), bson.M{"_id": objectID}).Decode(&user)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			c.JSON(http.StatusNotFound, gin.H{"message": "ไม่พบผู้ใช้งาน"})
+		} else {
+			c.JSON(http.StatusInternalServerError, gin.H{"message": "เกิดข้อผิดพลาดในการค้นหาผู้ใช้งาน"})
+		}
+		return
+	}
+	// เช็ครหัสผ่านเก่า
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.OldPassword))
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "รหัสผ่านเก่าไม่ถูกต้อง"})
+		return
+	}
+	// เข้ารหัสรหัสผ่านใหม่
+	newHashPassword, err := bcrypt.GenerateFromPassword([]byte(req.NewPassword), bcrypt.DefaultCost)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "เกิดข้อผิดพลาดในการเข้ารหัสรหัสผ่านใหม่"})
+		return
+	}
+	// อัปเดตรหัสผ่านในฐานข้อมูล
+	_, err = UserCollection.UpdateOne(context.TODO(), bson.M{"_id": objectID}, bson.M{"$set": bson.M{"password": string(newHashPassword)}})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "เกิดข้อผิดพลาดในการอัปเดตรหัสผ่าน"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "รหัสผ่านถูกอัปเดตสำเร็จ"})
+}

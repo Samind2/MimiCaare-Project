@@ -1,3 +1,14 @@
+/* Responsive Navbar */
+@media screen and (max-width: 768px) {
+  .nav-left,
+  .nav-right {
+    display: none;
+  }
+  .mobile-menu {
+    display: block;
+  }
+}
+
 /* เมนู */
 .menu-item {
     transition: all 0.3s ease;
@@ -8,7 +19,7 @@
 /* เปลี่ยนสีไอคอนและข้อความเมื่อ hover */
 .menu-item:hover {
     color: #E51317; /* เปลี่ยนสีข้อความเมื่อ hover */
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* ใส่เงาให้กับเมนู */
+    /* box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); ใส่เงาให้กับเมนู */
     transform: translateY(-5px); /* ทำให้เมนูลอยขึ้นเล็กน้อย */
 }
 

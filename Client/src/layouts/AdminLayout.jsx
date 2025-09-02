@@ -43,7 +43,7 @@ const AdminLayout = () => {
                         `}
                     >
                         <Link to="/" className="flex flex-col items-center space-y-2 mb-6">
-                            <img src="/Mimicare(1).png" alt="Logo" className={`h-24 transition-all duration-300 ${isSidebarExpanded ? "" : "w-12 h-12"}`} />
+                            <img src="/Mimicare(1).png" alt="Logo" className={`transition-transform duration-300 transform ${isSidebarExpanded ? "scale-100 h-24" : "scale-75 h-12"}`} />
                             {isSidebarExpanded && (
                                 <span className="badge badge-secondary px-4 py-2 rounded-full bg-pink-200 text-pink-800">
                                     Admin

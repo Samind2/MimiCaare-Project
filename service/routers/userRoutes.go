@@ -12,5 +12,5 @@ func UserRoutes(router *gin.RouterGroup) {
 	router.POST("/login", userController.Login)
 	router.POST("/logout", middleware.VerifyToken(), userController.Logout)
 	router.PUT("/update", middleware.VerifyToken(), userController.UpdateProfile)
-
+	router.PUT("/reset-password", middleware.VerifyToken(), userController.ResetPassword)
 }
