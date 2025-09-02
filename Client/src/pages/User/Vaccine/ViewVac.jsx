@@ -5,6 +5,7 @@ import childService from "../../../service/child.service";
 import { toast } from "react-toastify";
 import { FaPlus } from 'react-icons/fa';
 import { FaChevronDown } from "react-icons/fa";
+import VaccineTimeline from "./VaccineTimeline"
 
 const ViewVac = () => {
   //  STATE 
@@ -374,64 +375,12 @@ const ViewVac = () => {
 
       {/* ตารางวัคซีน */}
       {!showCustomOnly ? (
-        <div className="overflow-x-auto">
-          {/* ตารางวัคซีนมาตรฐาน */}
-          <table className="table table-zebra w-full">
-            <thead className="bg-gray-200 text-gray-700 text-sm">
-              <tr>
-                <th className="text-center">อายุ</th>
-                <th className="text-center">วัคซีน</th>
-                <th className="text-center">สถานะ</th>
-                <th className="text-center">การจัดการ</th>
-              </tr>
-            </thead>
-            <tbody>
-              {vaccines.map((item, index) => {
-                const ageText =
-                  item.ageRange >= 12 ? `${item.ageRange / 12} ปี` : `${item.ageRange} เดือน`;
-                const received = isVaccineReceived(item.id);
+        <VaccineTimeline
+          vaccines={vaccines}
+          receivedVaccines={receivedVaccines}
+          onSelectVaccine={openModal} // ✅ เพิ่มตรงนี้
+        />
 
-                return (
-                  <tr key={index}>
-                    <td className="text-center">{ageText}</td>
-                    <td className="text-center py-4">
-                      <ul className="space-y-2 inline-block text-left">
-                        {item.vaccines.map((vaccine, i) => (
-                          <li
-                            key={i}
-                            className="tooltip tooltip-top"
-                            data-tip={`วัคซีนนี้ต้องฉีดทั้งหมด ${item.vaccines.length} เข็ม`}
-                          >
-                            {vaccine.vaccineName}
-                          </li>
-                        ))}
-                      </ul>
-                    </td>
-                    <td className="text-center py-4">
-                      <ul className="space-y-2">
-                        {item.vaccines.map((_, i) => (
-                          <li key={i}>
-                            <span className={`px-2 py-1 text-xs rounded-full text-white ${received ? "bg-green-600" : "bg-red-600"}`}>
-                              {received ? "รับแล้ว" : "ยังไม่ได้รับ"}
-                            </span>
-                          </li>
-                        ))}
-                      </ul>
-                    </td>
-                    <td className="text-center">
-                      <button
-                        className={`px-5 py-2 rounded-full text-sm font-semibold transition-transform duration-200 shadow-lg ${received ? "bg-pink-300 text-pink-900 hover:bg-pink-400" : "bg-blue-300 text-blue-900 hover:bg-blue-400"} hover:scale-110`}
-                        onClick={() => openModal(item, received)}
-                      >
-                        {received ? "แก้ไข" : "บันทึกรับวัคซีน"}
-                      </button>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
       ) : (
         <div className="overflow-x-auto">
           {/* ตารางวัคซีนที่กรอกเอง */}
