@@ -43,6 +43,7 @@ const Index = () => {
               </button>
               <button
                 className="btn btn-sm btn-success"
+                data-testid="delete-confirm-button"
                 onClick={() => {
                   closeToast();
                   resolve(true);

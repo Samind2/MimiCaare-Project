@@ -29,12 +29,14 @@ const ChildCard = ({ child, onDelete }) => {
         <div className="card-actions justify-end mt-auto">
           <button
             className="btn-edit btn-outline btn-sm"
+            data-testid={`edit-Child-${id}`}
             onClick={() => navigate(`/profile-child-update/${id}`)}
           >
             แก้ไขข้อมูล
           </button>
           <button
             className="btn-delete btn-outline btn-sm"
+            data-testid={`delete-Child-${id}`}
             onClick={() => onDelete(id)}
           >
             ลบข้อมูล

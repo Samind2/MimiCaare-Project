@@ -40,19 +40,24 @@ const NavBar = () => {
         {/* เมนูซ้าย */}
         <div className="nav-left hidden md:flex gap-6 items-center flex-1">
           {/* เมนูไอคอน */}
-          <a href="/" className="flex flex-col items-center menu-item">
+          <a href="/" className="flex flex-col items-center menu-item"
+          data-testid="home-Page">
             <ImHome3 className="w-6 h-6" />
             <span>หน้าหลัก</span>
           </a>
-          <a href="/profile-child" className="flex flex-col items-center menu-item">
+          <a href="/profile-child" className="flex flex-col items-center menu-item"
+          data-testid="Child-Page"
+          >
             <RiInfoCardFill className="w-6 h-6" />
             <span>ข้อมูลเด็ก</span>
           </a>
-          <a href="/ViewVaccine" className="flex flex-col items-center menu-item">
+          <a href="/ViewVaccine" className="flex flex-col items-center menu-item"
+          data-testid="Vaccine-Page">
             <MdOutlineVaccines className="w-6 h-6" />
             <span>วัคซีน</span>
           </a>
-          <a href="/ViewDevelopment" className="flex flex-col items-center menu-item">
+          <a href="/ViewDevelopment" className="flex flex-col items-center menu-item"
+          data-testid="Develoment-page">
             <FaChild className="w-6 h-6" />
             <span>พัฒนาการ</span>
           </a>
