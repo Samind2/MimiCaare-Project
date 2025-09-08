@@ -7,7 +7,6 @@ import SignUp from "../components/SignUp";
 import Signin from "../components/Signin";
 import ProfileChild from "../pages/ProfileChild/Index.jsx";
 import ProfileParent from "../pages/ProfileParent/Index.jsx";
-import ProfileUpdate from "../components/Navbar/ProfileUpdate.jsx";
 import Notification from "../pages/Notifications/Index.jsx";
 import ProfileChildUpdate from '../pages/ProfileChild/ProfileChildUpdate.jsx';
 import AddChild from '../pages/ManageChild/AddChild.jsx';
@@ -76,16 +75,8 @@ const router = createBrowserRouter([
                 )
             },
             {
-                path: "/profile-update",
-                element: (
-                    <ProtectedRoute>
-                        <ProfileUpdate />
-                    </ProtectedRoute>
-                )
-            },
-            {
                 path: "/notification",
-                element: (
+                element:(
                     <ProtectedRoute>
                         <Notification />
                     </ProtectedRoute>

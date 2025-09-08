@@ -7,32 +7,16 @@ import { FaChild } from "react-icons/fa";
 import { RiInfoCardFill } from "react-icons/ri";
 import { useNavigate } from "react-router-dom";
 import Profile from "./Profile";
-import NotificationService from "../../service/notification.service";
+import { NotificationContext } from "../../context/NotificationContext";
+
 import "./Navbar.css";
 
 const NavBar = () => {
   const { user } = useContext(AuthContext);
+    const { hasUnread } = useContext(NotificationContext);
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [hasUnread, setHasUnread] = useState(false);
 
-
-  useEffect(() => {
-    if (user) {
-      fetchNotifications();
-    }
-  }, [user]);
-
-  const fetchNotifications = async () => {
-    try {
-      const response = await NotificationService.getNotificationsByUserId();
-      const notifications = response.data.notifications || [];
-      const unreadExists = notifications.some(n => !n.isRead); // เช็คว่ามีแจ้งเตือนที่ยังไม่อ่านไหม
-      setHasUnread(unreadExists);
-    } catch (error) {
-      console.error("ไม่สามารถดึงข้อมูลแจ้งเตือน", error);
-    }
-  };
 
   return (
     <div className="relative bg-white shadow-md px-4 py-4">
@@ -71,7 +55,7 @@ const NavBar = () => {
             <button className="btn btn-ghost btn-circle relative">
               <a href="/Notification" className="indicator">
                 <MdNotifications className="h-5 w-5" />
-                {hasUnread && ( // ✅ แสดงจุดแดงถ้ามีแจ้งเตือนที่ยังไม่อ่าน
+                {hasUnread && ( // แสดงจุดแดงถ้ามีแจ้งเตือนที่ยังไม่อ่าน
                   <span className="badge badge-xs badge-primary indicator-item"></span>
                 )}
               </a>

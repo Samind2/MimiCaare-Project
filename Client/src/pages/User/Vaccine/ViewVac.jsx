@@ -378,7 +378,7 @@ const ViewVac = () => {
         <VaccineTimeline
           vaccines={vaccines}
           receivedVaccines={receivedVaccines}
-          onSelectVaccine={openModal} // ✅ เพิ่มตรงนี้
+          onSelectVaccine={openModal}
         />
 
       ) : (
