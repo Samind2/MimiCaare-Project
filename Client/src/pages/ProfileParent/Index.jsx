@@ -47,8 +47,15 @@ const ProfileForm = () => {
 
   const handlePictureChange = (e) => {
     const file = e.target.files[0];
-    if (file) setFormData(prev => ({ ...prev, picture: URL.createObjectURL(file) }));
+    if (file) {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => {
+        setFormData(prev => ({ ...prev, picture: reader.result })); // อัปเดตเป็น base64 string
+      };
+    }
   };
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -108,10 +115,8 @@ const ProfileForm = () => {
       <form className="profile-form" onSubmit={handleSubmit}>
         <div className="profile-pic-section">
           <div className="profile-pic-wrapper">
-            <img src={formData.picture || '/images/UserPic/UserPic.png'} alt="Profile" className="profile-pic" />
-            {isEditing && (
+            {isEditing ? (
               <>
-                <label htmlFor="profilePicInput" className="profile-pic-upload-button">📷</label>
                 <input
                   id="profilePicInput"
                   type="file"
@@ -119,10 +124,24 @@ const ProfileForm = () => {
                   onChange={handlePictureChange}
                   style={{ display: 'none' }}
                 />
+                <label htmlFor="profilePicInput" className="cursor-pointer">
+                  <img
+                    src={formData.picture || '/images/UserPic/UserPic.png'}
+                    alt="Profile"
+                    className="profile-pic hover:opacity-80 transition"
+                  />
+                </label>
               </>
+            ) : (
+              <img
+                src={formData.picture || '/images/UserPic/UserPic.png'}
+                alt="Profile"
+                className="profile-pic"
+              />
             )}
           </div>
         </div>
+
 
         <div className="form-fields">
           <div className="form-row">
