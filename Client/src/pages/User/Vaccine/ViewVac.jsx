@@ -21,8 +21,8 @@ const ViewVac = () => {
 
   // Modal สำหรับวัคซีนมาตรฐาน
   const [showModal, setShowModal] = useState(false);
-  const [isEditMode, setIsEditMode] = useState(false);
-  const [editingRecordId, setEditingRecordId] = useState(null);
+  const [isEditMode, setIsEditMode] = useState(false); // เพิ่ม state สำหรับโหมดแก้ไข
+  const [editingRecordId, setEditingRecordId] = useState(null); // เพิ่ม state สำหรับเก็บ id ของ record ที่จะแก้ไข
   const [formData, setFormData] = useState({
     ageRange: null,
     standardVaccineId: null,
@@ -158,7 +158,7 @@ const ViewVac = () => {
 
   //  ฟังก์ชันตรวจสอบวัคซีนรับแล้ว 
   const isVaccineReceived = (standardVaccineId) => {
-    return receivedVaccines.some((rv) => rv.standardVaccineId === standardVaccineId);
+    return receivedVaccines.some((receivedVaccines) => receivedVaccines.standardVaccineId === standardVaccineId);
   };
 
   //  ฟังก์ชันบันทึกวัคซีนมาตรฐาน 
@@ -280,7 +280,7 @@ const ViewVac = () => {
       toast.success("ลบข้อมูลวัคซีนสำเร็จ");
 
       const res = await receiveVaccineService.getByChildId(selectedChild.id);
-      const receivedData = Array.isArray(res.data.vaccines) ? res.data.vaccines : [];
+      const receivedData = res.data.vaccines || [];
 
       const customData = receivedData.filter(
         (v) => v.standardVaccineId === "000000000000000000000000" && Array.isArray(v.records)
@@ -314,13 +314,13 @@ const ViewVac = () => {
             tabIndex={0}
             className="dropdown-content menu p-3 shadow-lg bg-blue-100 rounded-xl w-56"
           >
-            {filteredOptions.map((option, idx) => (
-              <li key={idx}>
+            {filteredOptions.map((item, i) => (
+              <li key={i}>
                 <a
                   className="hover:bg-blue-300 rounded-md p-2 cursor-pointer"
-                  onClick={() => setShowCustomOnly(option.value)} // เลือกวัคซีนตามมาตรฐาน
+                  onClick={() => setShowCustomOnly(item.value)} // เลือกวัคซีนตามมาตรฐาน
                 >
-                  {option.label}
+                  {item.label}
                 </a>
               </li>
             ))}
