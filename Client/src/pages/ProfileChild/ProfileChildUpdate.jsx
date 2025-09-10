@@ -87,6 +87,7 @@ const ProfileChildUpdate = () => {
               id="PC-01"
               type="text"
               value={firstName}
+              data-testid="E_firstName-Child"
               onChange={(e) => setFirstName(e.target.value)}
               className="input input-bordered w-full rounded-xl"
             />
@@ -101,6 +102,7 @@ const ProfileChildUpdate = () => {
               id="PC-02"
               type="text"
               value={lastName}
+              data-testid="E_lastName-Child"
               onChange={(e) => setLastName(e.target.value)}
               className="input input-bordered w-full rounded-xl"
             />
@@ -145,6 +147,7 @@ const ProfileChildUpdate = () => {
               id="PC-04"
               type="file"
               accept="image/*"
+              data-testid="E_image-Child"
               className="file-input file-input-bordered w-full rounded-xl"
               onChange={handleImageUpload}
             />
@@ -165,6 +168,7 @@ const ProfileChildUpdate = () => {
             id="PC-05"
             type="submit"
             disabled={isEditing}
+            data-testid="E_Submit-button"
             className="btn bg-[#84C7AE] hover:bg-[#6EB39D] text-white w-full rounded-xl font-semibold text-base"
           >
             {isEditing ? "กำลังบันทึกการแก้ไข..." : "บันทึกการแก้ไข"}
