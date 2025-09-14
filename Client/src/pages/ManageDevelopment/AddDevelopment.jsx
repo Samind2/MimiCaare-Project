@@ -448,10 +448,10 @@ const AddDevelopment = () => {
                                                 >
                                                     <option value="">เลือกพัฒนาการ</option>
                                                     {categoryOptions
-                                                        .filter(cat => !selectedCategories.includes(cat))
-                                                        .map((cat, i) => (
-                                                            <option key={i} value={cat}>
-                                                                {cat}
+                                                        .filter(category => !selectedCategories.includes(category))
+                                                        .map((category, i) => (
+                                                            <option key={i} value={category}>
+                                                                {category}
                                                             </option>
                                                         ))}
                                                 </select>
@@ -506,7 +506,7 @@ const AddDevelopment = () => {
                                             <div>
                                                 <input
                                                     type="text"
-                                                    placeholder="หมายเหตุ"
+                                                    placeholder="ข้อแนะนำ"
                                                     value={dev.note ?? ''}
                                                     onChange={(e) => handleDevelopmentChange(index, "note", e.target.value)}
                                                     className="input input-bordered w-full"

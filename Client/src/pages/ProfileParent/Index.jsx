@@ -23,7 +23,7 @@ const ProfileForm = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
 
-  // โหลดข้อมูล user ลง formData **เฉพาะตอนไม่แก้ไข**
+  // โหลดข้อมูล user ตอนไม่แก้ไข
   useEffect(() => {
     if (user && !isEditing) {
       setFormData({
@@ -71,7 +71,6 @@ const ProfileForm = () => {
     const hasPasswordChange = oldPassword && newPassword;
 
     if (!hasProfileChanged && !hasPasswordChange) {
-      toast.info("คุณยังไม่ได้แก้ไขข้อมูลใดๆ");
       return;
     }
 
@@ -220,13 +219,32 @@ const ProfileForm = () => {
 
           <div className="form-control mt-4">
             {isEditing ? (
-              <button
-                type="submit"
-                disabled={isUpdating}
-                className={`submit-button ${isUpdating ? "cursor-not-allowed bg-gray-400" : ""}`}
-              >
-                {isUpdating ? "กำลังอัปเดท..." : "บันทึก"}
-              </button>
+              <div className="flex gap-2">
+                <button
+                  type="submit"
+                  disabled={isUpdating}
+                  className={`submit-button ${isUpdating ? "cursor-not-allowed bg-gray-400" : ""}`}
+                >
+                  {isUpdating ? "กำลังอัปเดท..." : "บันทึก"}
+                </button>
+                <button
+                  type="button"
+                  className="cancel-button"
+                  onClick={() => {
+                    // รีเซ็ตค่า formData และ passwordData
+                    setFormData({
+                      firstName: user.firstName || '',
+                      lastName: user.lastName || '',
+                      email: user.email || '',
+                      picture: user.picture || '',
+                    });
+                    setPasswordData({ oldPassword: '', newPassword: '', confirmPassword: '' });
+                    setIsEditing(false);
+                  }}
+                >
+                  ยกเลิก
+                </button>
+              </div>
             ) : (
               <button
                 type="button"
@@ -237,6 +255,7 @@ const ProfileForm = () => {
               </button>
             )}
           </div>
+
         </div>
       </form>
     </div>
