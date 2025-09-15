@@ -12,12 +12,12 @@ const AddDevelopment = () => {
     const itemsPerPage = 3; // จำนวนกลุ่มช่วงอายุต่อหน้า
     const [developmentList, setDevelopmentList] = useState([ // เก็บข้อมูลพัฒนาการที่กรอก
         { category: '', detail: '', image: '', note: '' },
-        { category: '', detail: '', image: '', note: '' }, 
-        { category: '', detail: '', image: '', note: '' }, 
-        { category: '', detail: '', image: '', note: '' }, 
+        { category: '', detail: '', image: '', note: '' },
+        { category: '', detail: '', image: '', note: '' },
+        { category: '', detail: '', image: '', note: '' },
         { category: '', detail: '', image: '', note: '' },]);
     const [allDevelopments, setAllDevelopments] = useState([]); // เก็บข้อมูลพัฒนาการทั้งหมดจากฐานข้อมูล
-
+    const [isAdding, setIsAdding] = useState(false);
     // ช่วงอายุที่ใช้
     const ageOptions = [
         { value: 1 },
@@ -65,11 +65,11 @@ const AddDevelopment = () => {
 
         // สำหรับเลขเดือนอื่น แปลงเป็นปีและเดือน
         const years = Math.floor(months / 12);
-        const remainingMonths  = months % 12;
+        const remainingMonths = months % 12;
 
         let result = "";
         if (years > 0) result += `${years} ปี`;
-        if (remainingMonths > 0) result += (years > 0 ? ` ${remainingMonths } เดือน` : `${remainingMonths } เดือน`);
+        if (remainingMonths > 0) result += (years > 0 ? ` ${remainingMonths} เดือน` : `${remainingMonths} เดือน`);
         return result;
     };
 
@@ -117,7 +117,7 @@ const AddDevelopment = () => {
 
         // เช็คว่ามีช่วงอายุซ้ำในฐานข้อมูลหรือไม่
         const isDuplicate = allDevelopments.some(dev =>
-            dev.ageRange === ageRange && (editMode ? dev.id !== editId : true) 
+            dev.ageRange === ageRange && (editMode ? dev.id !== editId : true)
         );
 
         if (isDuplicate) {
@@ -142,6 +142,7 @@ const AddDevelopment = () => {
                 toast.success("แก้ไขข้อมูลสำเร็จ!", { autoClose: 1500 });
             } else {
                 // เพิ่มข้อมูลใหม่
+                setIsAdding(true);
                 await standardDevService.addStandardDev(newData);
                 toast.success("เพิ่มพัฒนาการสำเร็จ!", { autoClose: 1500 });
             }
@@ -153,13 +154,14 @@ const AddDevelopment = () => {
             setEditMode(false);
             setDevelopmentList([
                 { category: '', detail: '', image: '', note: '', },
-                { category: '', detail: '', image: '', note: '', }, 
-                { category: '', detail: '', image: '', note: '', }, 
-                { category: '', detail: '', image: '', note: '', }, 
+                { category: '', detail: '', image: '', note: '', },
+                { category: '', detail: '', image: '', note: '', },
+                { category: '', detail: '', image: '', note: '', },
                 { category: '', detail: '', image: '', note: '', },
             ]);
             fetchDevelopments();
         } catch (err) {
+            setIsAdding(false);
             toast.error("เกิดข้อผิดพลาดในการบันทึกข้อมูล");
             console.error(err);
         }
@@ -343,7 +345,7 @@ const AddDevelopment = () => {
                                                         rowSpan={dev.developments.length}
                                                         className="px-6 py-4 text-center bg-pink-100 rounded-r-xl align-middle"
                                                     >
-                                                        
+
                                                         <div className="flex flex-col gap-3 items-center">
                                                             <button
                                                                 onClick={() => handleDelete(dev.id)}
@@ -523,13 +525,19 @@ const AddDevelopment = () => {
                         <div className="mt-6 text-center space-x-2">
                             <button
                                 onClick={handleSubmit}
-                                className="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-full font-medium shadow-md hover:scale-105 transition"
+                                disabled={isAdding} // ปิดปุ่มถ้ากำลังบันทึก
+                                className={`px-6 py-2 rounded-full font-medium shadow-md transition ${isAdding
+                                        ? "bg-green-300 text-white cursor-not-allowed"
+                                        : "bg-green-500 hover:bg-green-600 text-white hover:scale-105"
+                                    }`}
                             >
-                                บันทึก
+                                {isAdding ? "กำลังเพิ่มข้อมูลพัฒนาการ..." : "บันทึก"}
                             </button>
+
                             <button
                                 onClick={() => setIsModalOpen(false)}
-                                className="bg-gray-300 hover:bg-gray-400 text-gray-800 px-6 py-2 rounded-full font-medium shadow-md hover:scale-105 transition"
+                                disabled={isAdding} // ปิดปุ่มยกเลิกตอนกำลังบันทึก
+                                className="bg-gray-300 hover:bg-gray-400 text-gray-800 px-6 py-2 rounded-full font-medium shadow-md hover:scale-105 transition disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 ยกเลิก
                             </button>

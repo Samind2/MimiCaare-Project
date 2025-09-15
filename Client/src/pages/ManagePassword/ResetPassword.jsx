@@ -22,7 +22,7 @@ const ResetPassword = () => {
             });
 
             toast.success("ส่งรหัสผ่านใหม่สำเร็จ");
-            navigate("/signin");
+            navigate("/Signin");
         } catch (error) {
             setLoading(false);
             toast.error("ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์");
