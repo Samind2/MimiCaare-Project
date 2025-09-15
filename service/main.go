@@ -53,6 +53,9 @@ func main() {
 	routes.ReceiveDevelopRoutes(api.Group("/receiveDevelop"))
 	routes.NotificationRoutes(api.Group("/notify"))
 	routes.SendMail(api.Group("/send-mail"))
+	routes.AgeRangeRoutes(api.Group("/metaAgeRange"))
+	routes.DevelopRoutes(api.Group("/metaDevelop"))
+	routes.VaccineRoutes(api.Group("/metaVaccine"))
 
 	// ใช้ PORT จาก .env
 	port := os.Getenv("PORT")

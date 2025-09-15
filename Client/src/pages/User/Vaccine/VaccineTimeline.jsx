@@ -2,10 +2,10 @@ import React from "react";
 
 const VaccineTimeline = ({ vaccines = [], receivedVaccines = [], onSelectVaccine }) => {
     const isReceived = (standardVaccineId) =>
-        receivedVaccines?.some((rv) => rv.standardVaccineId === standardVaccineId);
+        receivedVaccines?.some((receivedVaccine) => receivedVaccine.standardVaccineId === standardVaccineId);
 
-    if (!Array.isArray(vaccines) || vaccines.length === 0) {
-        return <p className="text-gray-500">ไม่มีข้อมูลวัคซีน</p>;
+    if (vaccines.length === 0) {
+        return <p>ไม่มีข้อมูลวัคซีน</p>;
     }
 
     return (
@@ -17,7 +17,7 @@ const VaccineTimeline = ({ vaccines = [], receivedVaccines = [], onSelectVaccine
 
                 return (
                     <div key={item?.id || index} className="mb-10 ml-6 relative">
-                        {/* จุด Timeline */}
+                        {/* จุด ถ้ารับแล้วสีเขียว ถ้ายังไม่รับสีแดง */}
                         <span
                             className={`absolute left-0 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center w-8 h-8 rounded-full border-4 ${received ? "border-green-500 bg-green-100" : "border-red-500 bg-red-100"
                                 }`}
@@ -59,7 +59,7 @@ const VaccineTimeline = ({ vaccines = [], receivedVaccines = [], onSelectVaccine
                                             </span>
                                             {!received && (
                                                 <button
-                                                    onClick={() => onSelectVaccine(item)} // 👉 เรียกไปเปิด Modal
+                                                    onClick={() => onSelectVaccine(item)} // เรียกเปิด Modal
                                                     className="btn btn-xs btn-primary"
                                                 >
                                                     บันทึก

@@ -1,12 +1,12 @@
-import React, { useEffect, useState } from 'react';
-import NotificationService from '../../service/notification.service';
+import React, { useEffect, useState, useContext } from 'react';
+import { NotificationContext } from '../../context/NotificationContext';
 import { toast } from 'react-toastify';
 import { PiBellSimpleRingingFill } from "react-icons/pi";
 import { FaChild } from "react-icons/fa";
 import { useNavigate } from 'react-router-dom';
 
 const Notification = () => {
-  const [notifications, setNotifications] = useState([]);
+  const { notifications, fetchNotifications, markAsRead } = useContext(NotificationContext);
   const [activeChild, setActiveChild] = useState(""); 
   const navigate = useNavigate();
 
@@ -14,26 +14,18 @@ const Notification = () => {
     fetchNotifications();
   }, []);
 
-  const fetchNotifications = async () => {
-    try {
-      const response = await NotificationService.getNotificationsByUserId();
-      const notiData = response.data.notifications || [];
-      setNotifications(notiData);
-
-      // ตั้งค่า default tab เป็นเด็กคนแรก (ที่มีชื่อ)
-      const firstChild = notiData.find(n => n.childName)?.childName;
-      if (firstChild) {
-        setActiveChild(firstChild);
-      }
-    } catch (error) {
-      console.log('เกิดข้อผิดพลาดในการดึงการแจ้งเตือน');
+  useEffect(() => {
+    // ตั้งค่า default tab เป็นเด็กคนแรก
+    const firstChild = notifications.find(n => n.childName)?.childName;
+    if (firstChild) {
+      setActiveChild(firstChild);
     }
-  };
+  }, [notifications]);
 
   const handleNotificationClick = async (notify) => {
     try {
       if (!notify.isRead) {
-        await NotificationService.markAsRead(notify.id);
+        await markAsRead(notify.id); // เรียกจาก context แทน service
         fetchNotifications();
       }
 

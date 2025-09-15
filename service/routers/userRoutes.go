@@ -13,4 +13,6 @@ func UserRoutes(router *gin.RouterGroup) {
 	router.POST("/logout", middleware.VerifyToken(), userController.Logout)
 	router.PUT("/update", middleware.VerifyToken(), userController.UpdateProfile)
 	router.PUT("/reset-password", middleware.VerifyToken(), userController.ResetPassword)
+	router.PUT("/update-role", middleware.VerifyToken(), middleware.VerifyAdmin(), userController.AssignRole)
+	router.GET("/all", middleware.VerifyToken(), middleware.VerifyAdmin(), userController.GetAllUsers)
 }

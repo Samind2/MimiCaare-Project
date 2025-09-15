@@ -2,6 +2,7 @@ package controllers
 
 import (
 	childrenControllers "github.com/Samind2/MimiCaare-Project/service/controllers/children"
+	metaDataControllers "github.com/Samind2/MimiCaare-Project/service/controllers/metaDatacontroller"
 	notificationControllers "github.com/Samind2/MimiCaare-Project/service/controllers/notification"
 	receiveDevelopControllers "github.com/Samind2/MimiCaare-Project/service/controllers/receiveDevelop"
 	receiveVaccineControllers "github.com/Samind2/MimiCaare-Project/service/controllers/receiveVaccine"
@@ -28,5 +29,8 @@ func CollectionControllers(client *mongo.Client) {
 	notificationControllers.SetChildrenReference(client)
 	notificationControllers.SetStandardVaccineReference(client)
 	notificationControllers.SetStandardDevelopReference(client)
+	metaDataControllers.SetAgeRangeCollection(client)
+	metaDataControllers.SetDevelopCollection(client)
+	metaDataControllers.SetVaccineCollection(client)
 	middlewares.SetUserCollectionForMiddleware(client)
 }
