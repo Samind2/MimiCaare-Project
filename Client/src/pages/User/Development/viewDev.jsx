@@ -157,7 +157,7 @@ const ViewDev = () => {
       };
 
       await receiveDevelopService.addReceiveDevelop(payload);
-      toast.success("บันทึกข้อมูลสำเร็จ ✅");
+      toast.success("บันทึกข้อมูลสำเร็จ", { autoClose: 1500 });
       setIsAssessmentSubmitted(true);
       await fetchStandardOrReceivedDevelopments();
     } catch (err) {

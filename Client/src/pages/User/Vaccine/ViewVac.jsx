@@ -62,7 +62,7 @@ const ViewVac = () => {
   //  ฟังก์ชันเปิด Modal มาตรฐาน 
   const openModal = (item, isEdit = false) => {
     if (isEdit) {
-      const record = receivedVaccines.find((rv) => rv.standardVaccineId === item.id);
+      const record = receivedVaccines.find((receivedVaccineRecord) => receivedVaccineRecord.standardVaccineId === item.id);
 
       if (!record) {
         toast.warning("ไม่พบข้อมูลวัคซีนที่ต้องการแก้ไข");

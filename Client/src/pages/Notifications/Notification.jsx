@@ -7,29 +7,30 @@ import { useNavigate } from 'react-router-dom';
 
 const Notification = () => {
   const { notifications, fetchNotifications, markAsRead } = useContext(NotificationContext);
-  const [activeChild, setActiveChild] = useState(""); 
+  const [selectedChild, setSelectedChild] = useState(""); 
   const navigate = useNavigate();
 
   useEffect(() => {
+    // ดึงข้อมูลแจ้งเตือนเมื่อ component โหลด
     fetchNotifications();
   }, []);
 
   useEffect(() => {
-    // ตั้งค่า default tab เป็นเด็กคนแรก
-    const firstChild = notifications.find(n => n.childName)?.childName;
-    if (firstChild) {
-      setActiveChild(firstChild);
+    // ตั้งค่า default tab เป็นเด็กคนแรกที่มีแจ้งเตือน
+    const firstChildWithNotification = notifications.find(notification => notification.childName)?.childName;
+    if (firstChildWithNotification) {
+      setSelectedChild(firstChildWithNotification);
     }
   }, [notifications]);
 
-  const handleNotificationClick = async (notify) => {
+  const handleNotificationClick = async (notification) => {
     try {
-      if (!notify.isRead) {
-        await markAsRead(notify.id); // เรียกจาก context แทน service
-        fetchNotifications();
+      if (!notification.isRead) {
+        await markAsRead(notification.id); // ทำเครื่องหมายว่าอ่านแล้ว
+        fetchNotifications(); // รีเฟรชข้อมูล
       }
 
-      switch (notify.type) {
+      switch (notification.type) {
         case 'vaccine':
           navigate('/ViewVaccine');
           break;
@@ -44,62 +45,67 @@ const Notification = () => {
     }
   };
 
-  // จัดกลุ่มตาม ชื่อเด็ก
-  const groupedNotifications = notifications.reduce((childrenGroups, notify) => {
-    if (!notify.childName) return childrenGroups; 
-    if (!childrenGroups[notify.childName]) childrenGroups[notify.childName] = [];
-    childrenGroups[notify.childName].push(notify);
-    return childrenGroups;
+  // จัดกลุ่มแจ้งเตือนตามชื่อเด็ก
+  const notificationsGroupedByChild = notifications.reduce((groupedNotifications, notification) => {
+    if (!notification.childName) return groupedNotifications; 
+
+    if (!groupedNotifications[notification.childName]) {
+      groupedNotifications[notification.childName] = [];
+    }
+
+    groupedNotifications[notification.childName].push(notification);
+
+    return groupedNotifications;
   }, {});
 
   return (
     <div className="p-4">
       <h2 className="text-lg font-bold mb-4">รายการแจ้งเตือน</h2>
 
-      {Object.keys(groupedNotifications).length === 0 ? (
+      {Object.keys(notificationsGroupedByChild).length === 0 ? (
         <p>ไม่มีการแจ้งเตือน</p>
       ) : (
         <>
-          {/* Tabsแสดงชื่อเด็ก */}
+          {/* แสดงแท็บชื่อเด็ก */}
           <div role="tablist" className="tabs tabs-lift mb-4">
-            {Object.keys(groupedNotifications).map((child) => (
+            {Object.keys(notificationsGroupedByChild).map((childName) => (
               <a
-                key={child}
+                key={childName}
                 role="tab"
-                className={`tab ${activeChild === child ? "tab-active" : ""}`}
-                onClick={() => setActiveChild(child)}
+                className={`tab ${selectedChild === childName ? "tab-active" : ""}`}
+                onClick={() => setSelectedChild(childName)}
               >
-                {child}
+                {childName}
               </a>
             ))}
           </div>
 
-          {/* แสดงการแจ้งเตือนของเด็กที่เลือก */}
+          {/* แสดงรายการแจ้งเตือนของเด็กที่เลือก */}
           <ul className="space-y-3">
-            {groupedNotifications[activeChild]?.map((notify) => (
+            {notificationsGroupedByChild[selectedChild]?.map((notification) => (
               <li
-                key={notify.id}
-                onClick={() => handleNotificationClick(notify)}
+                key={notification.id}
+                onClick={() => handleNotificationClick(notification)}
                 className={`border shadow rounded p-4 cursor-pointer hover:bg-gray-50 ${
-                  notify.isRead ? "bg-white" : "bg-red-50 border-red-300"
+                  notification.isRead ? "bg-white" : "bg-red-50 border-red-300"
                 }`}
               >
                 <div className="flex items-center gap-2">
                   <PiBellSimpleRingingFill className="text-yellow-500" />
-                  <span>{notify.title || 'ไม่มีหัวข้อ'}</span>
+                  <span>{notification.title || 'ไม่มีหัวข้อ'}</span>
                 </div>
 
                 <p className="text-xs text-gray-500 mt-2 flex items-center gap-1">
                   <FaChild />
-                  ชื่อเด็ก: {notify.childName}
+                  ชื่อเด็ก: {notification.childName}
                 </p>
 
-                {notify.ageRange && (
-                  <p className="text-sm mt-1">ช่วงอายุ: {notify.ageRange} เดือน</p>
+                {notification.ageRange && (
+                  <p className="text-sm mt-1">ช่วงอายุ: {notification.ageRange} เดือน</p>
                 )}
 
-                {notify.type && (
-                  <p className="text-sm mt-1">ประเภท: {notify.type}</p>
+                {notification.type && (
+                  <p className="text-sm mt-1">ประเภท: {notification.type}</p>
                 )}
               </li>
             ))}
