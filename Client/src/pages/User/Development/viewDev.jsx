@@ -7,7 +7,7 @@ import { FaChevronDown } from "react-icons/fa";
 import { IoMdClose, IoMdCheckmark } from "react-icons/io";
 
 const ViewDev = () => {
-  // ----------------- STATE -----------------
+  //  STATE 
   const [selectedAgeRange, setSelectedAgeRange] = useState(1);
   const [standardDevelopments, setStandardDevelopments] = useState([]);
   const [childrenList, setChildrenList] = useState([]);
@@ -35,7 +35,7 @@ const ViewDev = () => {
     }
   };
 
-  // ----------------- โหลดข้อมูลเด็ก -----------------
+  //  โหลดข้อมูลเด็ก 
   useEffect(() => {
     const fetchChildren = async () => {
       try {
@@ -50,7 +50,7 @@ const ViewDev = () => {
     fetchChildren();
   }, []);
 
-  // ----------------- โหลดข้อมูลพัฒนาการ -----------------
+  //  โหลดข้อมูลพัฒนาการ 
   useEffect(() => {
     fetchStandardOrReceivedDevelopments();
   }, [selectedChild, selectedAgeRange]);
@@ -115,7 +115,7 @@ const ViewDev = () => {
     }
   };
 
-  // ----------------- ฟังก์ชันประเมินพัฒนาการ -----------------
+  //  ฟังก์ชันประเมินพัฒนาการ 
   const handleDevelopmentAnswer = (value) => {
     setDevelopmentStatusMap(prev => ({ ...prev, [currentDevelopmentIndex]: value }));
     const updatedMap = { ...developmentStatusMap, [currentDevelopmentIndex]: value };
@@ -166,7 +166,7 @@ const ViewDev = () => {
     }
   };
 
-  // ----------------- RENDER -----------------
+
   return (
     <div className="p-6 mx-auto w-full max-w-full">
       <h1 className="text-3xl font-bold mb-6 text-center">ประเมินพัฒนาการ</h1>
