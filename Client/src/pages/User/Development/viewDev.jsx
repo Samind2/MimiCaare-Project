@@ -7,7 +7,7 @@ import { FaChevronDown } from "react-icons/fa";
 import { IoMdClose, IoMdCheckmark } from "react-icons/io";
 
 const ViewDev = () => {
-  //  STATE 
+  // STATE
   const [selectedAgeRange, setSelectedAgeRange] = useState(1);
   const [standardDevelopments, setStandardDevelopments] = useState([]);
   const [childrenList, setChildrenList] = useState([]);
@@ -15,6 +15,7 @@ const ViewDev = () => {
   const [developmentStatusMap, setDevelopmentStatusMap] = useState({});
   const [isAssessmentSubmitted, setIsAssessmentSubmitted] = useState(false);
   const [currentDevelopmentIndex, setCurrentDevelopmentIndex] = useState(0);
+  const [lastAssessmentMap, setLastAssessmentMap] = useState(null);
 
   const ageRanges = [1, 2, 4, 6, 8, 9, 12, 15, 17, 18, 24, 29, 30, 39, 41, 42, 48, 54, 59, 60, 66, 72, 78];
 
@@ -35,7 +36,7 @@ const ViewDev = () => {
     }
   };
 
-  //  โหลดข้อมูลเด็ก 
+  // โหลดข้อมูลเด็ก
   useEffect(() => {
     const fetchChildren = async () => {
       try {
@@ -50,7 +51,7 @@ const ViewDev = () => {
     fetchChildren();
   }, []);
 
-  //  โหลดข้อมูลพัฒนาการ 
+  // โหลดข้อมูลพัฒนาการ
   useEffect(() => {
     fetchStandardOrReceivedDevelopments();
   }, [selectedChild, selectedAgeRange]);
@@ -115,7 +116,7 @@ const ViewDev = () => {
     }
   };
 
-  //  ฟังก์ชันประเมินพัฒนาการ 
+  // ฟังก์ชันประเมินพัฒนาการ
   const handleDevelopmentAnswer = (value) => {
     setDevelopmentStatusMap(prev => ({ ...prev, [currentDevelopmentIndex]: value }));
     const updatedMap = { ...developmentStatusMap, [currentDevelopmentIndex]: value };
@@ -159,13 +160,13 @@ const ViewDev = () => {
       await receiveDevelopService.addReceiveDevelop(payload);
       toast.success("บันทึกข้อมูลสำเร็จ", { autoClose: 1500 });
       setIsAssessmentSubmitted(true);
+      setLastAssessmentMap(finalStatusMap);
       await fetchStandardOrReceivedDevelopments();
     } catch (err) {
       toast.error("เกิดข้อผิดพลาดในการบันทึก");
       console.error(err);
     }
   };
-
 
   return (
     <div className="p-6 mx-auto w-full max-w-full">
@@ -254,15 +255,34 @@ const ViewDev = () => {
             <p className="text-sm text-gray-500 mb-6">{standardDevelopments[currentDevelopmentIndex].note}</p>
 
             <div className="flex justify-center gap-6">
+              {/* ปุ่มย้อนกลับ */}
+              {currentDevelopmentIndex > 0 && (
+                <button
+                  onClick={() => setCurrentDevelopmentIndex(currentDevelopmentIndex - 1)}
+                  className="px-5 py-2 bg-yellow-200 text-yellow-900 rounded-lg hover:bg-yellow-300"
+                >
+                  ย้อนกลับ
+                </button>
+              )}
+
+              {/* ปุ่มทำได้ */}
               <button
                 onClick={() => handleDevelopmentAnswer('done')}
-                className="px-5 py-2 bg-green-200 text-green-900 rounded-lg hover:bg-green-300"
+                className={`px-5 py-2 rounded-lg 
+                  ${developmentStatusMap[currentDevelopmentIndex] === 'done'
+                    ? "bg-green-500 text-white"
+                    : "bg-green-200 text-green-900 hover:bg-green-300"}`}
               >
                 ทำได้
               </button>
+
+              {/* ปุ่มทำไม่ได้ */}
               <button
                 onClick={() => handleDevelopmentAnswer('not-done')}
-                className="px-5 py-2 bg-red-200 text-red-900 rounded-lg hover:bg-red-300"
+                className={`px-5 py-2 rounded-lg 
+                  ${developmentStatusMap[currentDevelopmentIndex] === 'not-done'
+                    ? "bg-red-500 text-white"
+                    : "bg-red-200 text-red-900 hover:bg-red-300"}`}
               >
                 ทำไม่ได้
               </button>
@@ -314,6 +334,20 @@ const ViewDev = () => {
               </tbody>
             </table>
           </div>
+
+          {/* ปุ่มประเมินใหม่
+          <div className="text-center">
+            <button
+              onClick={() => {
+                setIsAssessmentSubmitted(false);
+                setCurrentDevelopmentIndex(0);
+                setDevelopmentStatusMap(lastAssessmentMap || {});
+              }}
+              className="px-6 py-2 bg-yellow-300 text-yellow-900 font-semibold rounded-lg hover:bg-yellow-400"
+            >
+              🔄 ประเมินใหม่
+            </button>
+          </div> */}
         </div>
       )}
     </div>

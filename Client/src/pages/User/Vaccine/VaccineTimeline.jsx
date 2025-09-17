@@ -8,7 +8,7 @@ const VaccineTimeline = ({
   isCustom = false,         // เช็คว่าเป็นรายการวัคซีนที่ผู้ใช้เพิ่มเองหรือไม่
   onDeleteVaccine,          // ฟังก์ชันลบวัคซีน 
 }) => {
-  
+
   // ตรวจสอบว่าวัคซีนตัวนี้ได้รับแล้วหรือยัง
   const hasReceived = (vaccineId) =>
     receivedVaccines?.some((v) => v.standardVaccineId === vaccineId);
@@ -19,7 +19,7 @@ const VaccineTimeline = ({
   return (
     <div className="relative border-l-4 border-gray-300 ml-6">
       {vaccines.map((vaccineItem, index) => {
-        // แปลงอายุวัคซีนจากเดือนเป็นปี ถ้าอายุ >= 12 เดือน
+        // แปลงอายุวัคซีนจากเดือนเป็นปี ถ้าอายุมากกว่าหรือเท่า 12 เดือน
         const ageText =
           vaccineItem?.ageRange >= 12
             ? `${vaccineItem.ageRange / 12} ปี`
@@ -38,30 +38,27 @@ const VaccineTimeline = ({
 
         return (
           <div key={vaccineItem?.id || index} className="mb-10 ml-6 relative">
-            
+
             {/* จุดแสดงสถานะรับวัคซีน */}
             <span
-              className={`absolute left-0 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center w-8 h-8 rounded-full border-4 ${
-                received ? "border-green-500 bg-green-100" : "border-red-500 bg-red-100"
-              }`}
+              className={`absolute left-0 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center w-8 h-8 rounded-full border-4 ${received ? "border-green-500 bg-green-100" : "border-red-500 bg-red-100"
+                }`}
             >
               <span
-                className={`w-3 h-3 rounded-full ${
-                  received ? "bg-green-500" : "bg-red-500"
-                }`}
+                className={`w-3 h-3 rounded-full ${received ? "bg-green-500" : "bg-red-500"
+                  }`}
               />
             </span>
 
             {/* Card แสดงรายละเอียดวัคซีน */}
             <div className={`p-5 rounded-2xl shadow-md ${received ? "bg-green-50" : "bg-red-50"}`}>
-              
+
               {/* แถวอายุและสถานะรับวัคซีน */}
               <div className="flex justify-between items-center mb-3">
                 <h3 className="font-bold text-lg">{ageText}</h3>
                 <span
-                  className={`px-3 py-1 rounded-full text-xs font-semibold text-white ${
-                    received ? "bg-green-600" : "bg-red-600"
-                  }`}
+                  className={`px-3 py-1 rounded-full text-xs font-semibold text-white ${received ? "bg-green-600" : "bg-red-600"
+                    }`}
                 >
                   {received ? "รับแล้ว" : "ยังไม่ได้รับ"}
                 </span>
@@ -76,7 +73,7 @@ const VaccineTimeline = ({
 
                   return (
                     <li key={i} className="flex justify-between items-center border-b border-gray-200 pb-1">
-                      
+
                       {/* ข้อมูลวัคซีน ชื่อ วันที่ และสถานที่ */}
                       <div>
                         <span>{vaccineName}</span>
@@ -115,7 +112,7 @@ const VaccineTimeline = ({
                               </button>
                             )}
                           </div>
-                        ) : !dose ? (
+                        ) : !receivedDoseRecords[i] ? (   // ✅ แก้จาก !dose เป็น !receivedDoseRecords[i]
                           <button onClick={() => onSelectVaccine(vaccineItem)} className="btn btn-xs btn-primary">
                             บันทึก
                           </button>
@@ -124,6 +121,7 @@ const VaccineTimeline = ({
                             แก้ไข
                           </button>
                         )}
+
                       </div>
                     </li>
                   );
