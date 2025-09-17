@@ -20,11 +20,13 @@ const VaccineTimeline = ({
     <div className="relative border-l-4 border-gray-300 ml-6">
       {vaccines.map((vaccineItem, index) => {
         // แปลงอายุวัคซีนจากเดือนเป็นปี ถ้าอายุมากกว่าหรือเท่า 12 เดือน
-        const ageText = vaccineItem?.ageRange !== undefined && vaccineItem?.ageRange !== null // ตรวจสอบว่า ageRange มีค่าไหม 
-          ? vaccineItem.ageRange === 0 // ถ้าอายุเป็น 0 ให้ขึ้นเป็นแรกเกิด
+        const ageText = vaccineItem?.ageRange != null // เช็คว่า ageRange มีค่าไหม ถ้าไม่มีให้แสดง "-"
+          ? vaccineItem.ageRange === 0 //ถ้า ageRange เท่ากับ 0 ให้แสดงเป็น แรกเกิด
             ? "แรกเกิด"
             : vaccineItem.ageRange >= 12
-              ? `${Math.floor(vaccineItem.ageRange / 12)} ปี`
+             // Math.floor ใช้ตัดเศษเดือนออก
+              ? `${Math.floor(vaccineItem.ageRange / 12)} ปี` // ถ้า ageRange มากกว่าหรือเท่ากับ 12 เดือน ให้แสดงเป็น ปี
+              // ถ้าไม่ใช่ทั้งสองกรณี ให้แสดงเป็นเดือน
               : `${vaccineItem.ageRange} เดือน`
           : "-";
 
