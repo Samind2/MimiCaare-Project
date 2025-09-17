@@ -172,7 +172,7 @@ const ViewDev = () => {
 
   return (
     <div className="p-6 mx-auto w-full max-w-full">
-      <h1 className="text-3xl font-bold mb-6 text-center">ประเมินพัฒนาการ</h1>
+      <h1 className="text-3xl font-bold mb-6 text-center ">ประเมินพัฒนาการ</h1>
 
       <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
         <h2 className="text-xl font-semibold">พัฒนาการของเด็กช่วงอายุ {ageRangeToText(selectedAgeRange)}</h2>
