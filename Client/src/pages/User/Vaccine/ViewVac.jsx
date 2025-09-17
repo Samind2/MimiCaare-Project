@@ -73,8 +73,8 @@ const ViewVac = () => {
         ageRange: item.ageRange,
         standardVaccineId: item.id,
         receiveDate: new Date().toISOString().substring(0, 10),
-        placeName: record.placeName || lastPlaceName || "",
-        phoneNumber: record.phoneNumber || lastPhoneNumber || "",
+        placeName: lastPlaceName || "",
+        phoneNumber: lastPhoneNumber || "",
       });
       setEditingRecordId(record.id || null);
       setIsEditMode(true);
@@ -113,7 +113,8 @@ const ViewVac = () => {
     const fetchVaccines = async () => {
       try {
         const res = await vaccineService.getvaccine();
-        setVaccines(res.data.vaccines || []);
+        const sortedVaccines = (res.data.vaccines || []).sort((a, b) => a.ageRange - b.ageRange);
+        setVaccines(sortedVaccines);
       } catch (err) {
         console.error("Error fetching vaccines", err);
       }
@@ -286,7 +287,40 @@ const ViewVac = () => {
   };
 
   const handleDeleteCustomVaccine = async (id) => {
-    if (!window.confirm("คุณต้องการลบข้อมูลวัคซีนนี้ใช่หรือไม่?")) return;
+     const confirm = await new Promise((resolve) => {
+    toast.info(
+      <div>
+        <p>คุณต้องการลบข้อมูลวัคซีนนี้ใช่หรือไม่?</p>
+        <div className="mt-2 flex justify-end space-x-2">
+          <button
+            className="btn btn-sm btn-error"
+            onClick={() => {
+              resolve(true);
+              toast.dismiss();
+            }}
+          >
+            ยืนยัน
+          </button>
+          <button
+            className="btn btn-sm btn-secondary"
+            onClick={() => {
+              resolve(false);
+              toast.dismiss();
+            }}
+          >
+            ยกเลิก
+          </button>
+        </div>
+      </div>,
+      {
+        autoClose: false,
+        closeButton: false,
+        closeOnClick: false,
+      }
+    );
+  });
+
+  if (!confirm) return;
 
 
     try {
@@ -435,9 +469,11 @@ const ViewVac = () => {
                 </p>
                 <p>
                   <strong>อายุ:</strong>{" "}
-                  {formData.ageRange >= 12
-                    ? `${formData.ageRange / 12} ปี`
-                    : `${formData.ageRange} เดือน`}
+                  {Number(formData.ageRange) === 0
+                    ? "แรกเกิด"
+                    : Number(formData.ageRange) >= 12
+                      ? `${Math.floor(Number(formData.ageRange) / 12)} ปี`
+                      : `${Number(formData.ageRange)} เดือน`}
                 </p>
 
                 <ul className="list-disc list-inside">

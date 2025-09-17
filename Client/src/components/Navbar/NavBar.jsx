@@ -15,7 +15,7 @@ const NavBar = () => {
   const { user } = useContext(AuthContext);
   const { hasUnread } = useContext(NotificationContext);
   const navigate = useNavigate();
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
 
 
   return (
@@ -62,8 +62,8 @@ const NavBar = () => {
         <div className="nav-right hidden md:flex gap-6 items-center justify-end flex-1">
           {user && (
             <button className="btn btn-ghost btn-circle relative">
-              <a href="/Notification" className="indicator">
-                <MdNotifications className={`h-5 w-5 ${hasUnread ? 'shake' : ''}`} />
+              <a href="/Notification" className="indicator" data-testid="notification-button">
+                <MdNotifications className={`h-7 w-7 ${hasUnread ? 'shake' : ''}`} />
                 {hasUnread && (
                   <span className="badge badge-xs badge-primary indicator-item"></span>
                 )}
@@ -71,8 +71,9 @@ const NavBar = () => {
             </button>
           )}
           {!user ? (
-            <button
-              className="btn bg-[#E51317] text-white px-4 py-2 font-semibold rounded-full"
+            <button 
+              data-testid="signin-button"
+              className="btn bg-[#E51317] text-white px-4 py-2 font-semibold rounded-full"   
               onClick={() => navigate("/Signin")}
             >
               เข้าสู่ระบบ
@@ -81,30 +82,7 @@ const NavBar = () => {
             <Profile />
           )}
         </div>
-
-        {/* Hamburger (mobile) แต่ละ <div> แทนจำนวนขีดของ hamburger menu */}
-        <GiHamburgerMenu
-          className="text-2xl cursor-pointer md:hidden"
-          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-        />
       </div>
-
-      {/* Mobile menu */}
-      {isMobileMenuOpen && (
-        <div className="mobile-menu mt-4 md:hidden">
-          <a href="/" className="block py-2 menu-item">หน้าหลัก</a>
-          <a href="/profile-child" className="block py-2 menu-item">ข้อมูลเด็ก</a>
-          <a href="/ViewVaccine" className="block py-2 menu-item">วัคซีน</a>
-          <a href="/ViewDevelopment" className="block py-2 menu-item">พัฒนาการ</a>
-          {!user ? (
-            <button className="btn w-full mt-2" onClick={() => navigate("/Signin")}>
-              เข้าสู่ระบบ
-            </button>
-          ) : (
-            <a href="/profile-parent" className="block py-2 menu-item">โปรไฟล์</a>
-          )}
-        </div>
-      )}
     </div>
   );
 };
