@@ -4,18 +4,20 @@ import childService from '../../../service/child.service';
 import receiveDevelopService from '../../../service/receiveDev.service';
 import { toast } from 'react-toastify';
 import { FaChevronDown } from "react-icons/fa";
-import { IoMdClose, IoMdCheckmark } from "react-icons/io";
+import { IoMdClose, IoMdCheckmark, IoMdCheckmarkCircleOutline, IoMdCloseCircleOutline } from "react-icons/io";
+
+
 
 const ViewDev = () => {
   // STATE
-  const [selectedAgeRange, setSelectedAgeRange] = useState(1);
-  const [standardDevelopments, setStandardDevelopments] = useState([]);
-  const [childrenList, setChildrenList] = useState([]);
-  const [selectedChild, setSelectedChild] = useState(null);
-  const [developmentStatusMap, setDevelopmentStatusMap] = useState({});
-  const [isAssessmentSubmitted, setIsAssessmentSubmitted] = useState(false);
-  const [currentDevelopmentIndex, setCurrentDevelopmentIndex] = useState(0);
-  const [lastAssessmentMap, setLastAssessmentMap] = useState(null);
+  const [selectedAgeRange, setSelectedAgeRange] = useState(1); // ค่าเริ่มต้นเป็น 1 เดือน
+  const [standardDevelopments, setStandardDevelopments] = useState([]); // ข้อมูลพัฒนาการมาตรฐาน
+  const [childrenList, setChildrenList] = useState([]); // ข้อมูลเด็กทั้งหมด
+  const [selectedChild, setSelectedChild] = useState(null); // เด็กที่เลือก
+  const [developmentStatusMap, setDevelopmentStatusMap] = useState({}); // เก็บสถานะ“ทำได้”หรือ“ทำไม่ได้”ของแต่ละข้อ
+  const [isAssessmentSubmitted, setIsAssessmentSubmitted] = useState(false); // เช็คว่าประเมินแล้วหรือยัง
+  const [currentDevelopmentIndex, setCurrentDevelopmentIndex] = useState(0); // ดึงข้อมูลที่บันทึกข้อปัจจุบันมาแสดง
+  //const [lastAssessmentMap, setLastAssessmentMap] = useState(null); // เก็บสถานะการประเมินครั้งล่าสุดสำหรับปุ่มประเมินใหม่
 
   const ageRanges = [1, 2, 4, 6, 8, 9, 12, 15, 17, 18, 24, 29, 30, 39, 41, 42, 48, 54, 59, 60, 66, 72, 78];
 
@@ -160,7 +162,7 @@ const ViewDev = () => {
       await receiveDevelopService.addReceiveDevelop(payload);
       toast.success("บันทึกข้อมูลสำเร็จ", { autoClose: 1500 });
       setIsAssessmentSubmitted(true);
-      setLastAssessmentMap(finalStatusMap);
+      //setLastAssessmentMap(finalStatusMap);
       await fetchStandardOrReceivedDevelopments();
     } catch (err) {
       toast.error("เกิดข้อผิดพลาดในการบันทึก");
@@ -268,23 +270,29 @@ const ViewDev = () => {
               {/* ปุ่มทำได้ */}
               <button
                 onClick={() => handleDevelopmentAnswer('done')}
-                className={`px-5 py-2 rounded-lg 
-                  ${developmentStatusMap[currentDevelopmentIndex] === 'done'
-                    ? "bg-green-500 text-white"
-                    : "bg-green-200 text-green-900 hover:bg-green-300"}`}
+                className={`px-5 py-2 rounded-lg flex items-center justify-center gap-2
+    ${developmentStatusMap[currentDevelopmentIndex] === 'done'
+                    ? "bg-green-600 text-white"
+                    : "bg-green-200 text-green-900 hover:bg-green-400"}`}
               >
                 ทำได้
+                {developmentStatusMap[currentDevelopmentIndex] === 'done' && (
+                  <IoMdCheckmarkCircleOutline className="text-white text-xl" />
+                )}
               </button>
 
               {/* ปุ่มทำไม่ได้ */}
               <button
                 onClick={() => handleDevelopmentAnswer('not-done')}
-                className={`px-5 py-2 rounded-lg 
-                  ${developmentStatusMap[currentDevelopmentIndex] === 'not-done'
-                    ? "bg-red-500 text-white"
-                    : "bg-red-200 text-red-900 hover:bg-red-300"}`}
+                className={`px-5 py-2 rounded-lg flex items-center justify-center gap-2
+    ${developmentStatusMap[currentDevelopmentIndex] === 'not-done'
+                    ? "bg-red-600 text-white"
+                    : "bg-red-200 text-red-900 hover:bg-red-400"}`}
               >
                 ทำไม่ได้
+                {developmentStatusMap[currentDevelopmentIndex] === 'not-done' && (
+                  <IoMdCloseCircleOutline className="text-white text-xl" />
+                )}
               </button>
             </div>
           </div>
