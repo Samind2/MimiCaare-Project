@@ -25,23 +25,19 @@ func SetStandardDevelopCollection(client *mongo.Client) {
 // AddStandardDevelop เพิ่มข้อมูลพัฒนาการมาตรฐานใหม่
 func AddStandardDevelop(c *gin.Context) {
 	var developData standardDevelopModel.StandardDevelop
-
 	// ดึงข้อมูล JSON เดียวรอบเดียว
 	if err := c.ShouldBindJSON(&developData); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "ข้อมูลไม่ถูกต้อง", "error": err.Error()})
 		return
 	}
-
 	if developData.AgeRange <= 0 {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "ไม่ควรมีช่วงอายุน้อยกว่าหรือเท่ากับ 0"})
 		return
 	}
-
 	if len(developData.Developments) == 0 {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "ไม่พบรายการพัฒนาการ"})
 		return
 	}
-
 	// วนตรวจสอบแต่ละรายการ
 	for i := range developData.Developments {
 		record := &developData.Developments[i]
@@ -116,7 +112,6 @@ func GetStandardDevelopByID(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "รหัสไม่ถูกต้อง", "error": err.Error()})
 		return
 	}
-
 	var result standardDevelopModel.StandardDevelop
 	err = StandardDevelopCollection.FindOne(context.TODO(), bson.M{"_id": objectID}).Decode(&result)
 	if err != nil {
@@ -253,14 +248,12 @@ func DeleteStandardDevelopByID(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "รหัสไม่ถูกต้อง", "error": err.Error()})
 		return
 	}
-
 	// ลบข้อมูลจากฐานข้อมูล
 	result, err := StandardDevelopCollection.DeleteOne(context.TODO(), bson.M{"_id": objectID})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "ลบข้อมูลล้มเหลว", "error": err.Error()})
 		return
 	}
-
 	if result.DeletedCount == 0 {
 		c.JSON(http.StatusNotFound, gin.H{"message": "ไม่พบข้อมูลที่จะลบ"})
 		return
