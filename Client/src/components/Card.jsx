@@ -1,49 +1,44 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 
-
 const ChildCard = ({ child, onDelete }) => {
   const { firstName, lastName, gender, birthDate, image, id } = child;
   const navigate = useNavigate();
-
+``
   return (
-    <div className="card shadow-lg rounded-xl overflow-hidden bg-white flex flex-col max-w-xs mx-auto">
-      <figure className="overflow-hidden rounded-t-xl">
+    <div className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300 flex flex-col">
+      <figure className="overflow-hidden rounded-t-2xl">
         <img
-          src={image}
+          src={image || "https://via.placeholder.com/300x200?text=No+Image"}
           alt={`${firstName} ${lastName}`}
-          className="hover:scale-105 transition-transform duration-300 h-60 w-full object-cover rounded-t-xl"
-          onError={(e) =>
-            (e.target.src = "https://via.placeholder.com/300x200?text=No+Image")
-          }
+          className="w-full h-56 object-cover hover:scale-105 transition-transform duration-300"
         />
       </figure>
-      <div className="card-body flex flex-col flex-grow p-6">
-        <h2 className="card-title text-lg font-semibold mb-2">
-          {firstName} {lastName}
-        </h2>
-        <p className="text-gray-600 mb-1">เพศ: {gender}</p>
-        <p className="text-gray-600 mb-4">
-          วันเกิด: {birthDate ? new Date(birthDate).toLocaleDateString("th-TH") : "-"}
+
+      <div className="flex flex-col flex-grow p-5 space-y-2">
+        <h2 className="text-xl font-bold text-pink-600">{firstName} {lastName}</h2>
+        <p className="text-gray-700">เพศ: <span className="font-medium">{gender}</span></p>
+        <p className="text-gray-700">
+          วันเกิด: <span className="font-medium">{birthDate ? new Date(birthDate).toLocaleDateString("th-TH") : "-"}</span>
         </p>
-        <div className="card-actions justify-end mt-auto">
+
+        <div className="mt-auto flex justify-between gap-2">
           <button
-            className="btn-edit btn-outline btn-sm"
             onClick={() => navigate(`/profile-child-update/${id}`)}
+            className="bg-green-400 hover:bg-green-500 text-white px-3 py-1 rounded-xl text-sm font-medium transition-all duration-300 shadow-sm"
           >
-            แก้ไขข้อมูล
+            แก้ไข
           </button>
           <button
-            className="btn-delete btn-outline btn-sm"
             onClick={() => onDelete(id)}
+            className="bg-red-400 hover:bg-red-500 text-white px-3 py-1 rounded-xl text-sm font-medium transition-all duration-300 shadow-sm"
           >
-            ลบข้อมูล
+            ลบ
           </button>
         </div>
       </div>
     </div>
   );
 };
-
 
 export default ChildCard;

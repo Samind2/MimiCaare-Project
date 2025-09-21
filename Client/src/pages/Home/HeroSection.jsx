@@ -9,7 +9,7 @@ const HeroSection = () => {
     <div className="section-container bg-gradient-to-r from-[#fcfcfc] to-[#ffffff]">
       <div className="py-24 flex flex-col md:flex-row-reverse justify-between items-center">
         <div className="md:w-1/2 flex justify-end">
-          <img src="/images/Home/Baby (2).png" alt="Baby" />
+          <img src="/images/Home/Baby (2).png" alt="Baby" className=" animate-bounce" />
         </div>
         <div className="md:w-1/2 space-y-7 px-4">
           <h3 className="md:text-3xl font-bold md:leading-snug leading-snug">

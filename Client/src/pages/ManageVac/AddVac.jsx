@@ -14,7 +14,7 @@ const VaccinePage = () => {
 
 
   // กำหนดตัวเลือกอายุสำหรับ select
-  const ageOptions = ['1 เดือน', '2 เดือน', '4 เดือน', '6 เดือน', '9 เดือน', '1 ปี', '1 ปี 6 เดือน', '2 ปี', '2 ปี 6 เดือน', '11 ปี', '12 ปี'];
+  const ageOptions = ['0 เดือน', '1 เดือน', '2 เดือน', '4 เดือน', '6 เดือน', '9 เดือน', '1 ปี', '1 ปี 6 เดือน', '2 ปี', '2 ปี 6 เดือน', '11 ปี', '12 ปี'];
 
   // ดึงข้อมูลวัคซีนเ
   useEffect(() => {
@@ -49,17 +49,18 @@ const VaccinePage = () => {
 
   // แปลงอายุเป็นข้อความ
   const mapAgeToText = (age) => {
+    if (age === 0) return "แรกเกิด"; // แก้ตรงนี้
     if (age >= 12) {
       const years = age / 12;
-      return years % 1 === 0 ? `${years} ปี` : `${Math.floor(years)} ปี ${(age % 12) * 1} เดือน`;
+      return years % 1 === 0 ? `${years} ปี` : `${Math.floor(years)} ปี ${(age % 12)} เดือน`;
     }
     return `${age} เดือน`;
   };
 
-    // แปลงข้อความอายุเป็นตัวเลข
+  // แปลงข้อความอายุเป็นตัวเลข
   const mapAgeTextToNumber = (ageText) => {
     const map = {
-      '1 เดือน': 1, '2 เดือน': 2, '4 เดือน': 4, '6 เดือน': 6, '9 เดือน': 9,
+      '0 เดือน': 0, '1 เดือน': 1, '2 เดือน': 2, '4 เดือน': 4, '6 เดือน': 6, '9 เดือน': 9,
       '1 ปี': 12, '1 ปี 6 เดือน': 18, '2 ปี': 24, '2 ปี 6 เดือน': 30, '11 ปี': 132, '12 ปี': 144,
     };
     return map[ageText] || 0;
@@ -84,13 +85,22 @@ const VaccinePage = () => {
   };
 
   // บันทึกข้อมูลวัคซีน
-  const handleSave = async () => {
+  const handleSubmit = async () => {
     try {
+
+      for (let row of formRows) {
+        const ageNum = mapAgeTextToNumber(row.age);
+        if (groupedByAge[ageNum]) {
+          toast.error(`มีข้อมูลวัคซีนสำหรับอายุ ${row.age} แล้ว`, { autoClose: 2000 });
+          return; // ออกจากฟังก์ชัน ไม่ให้เพิ่มซ้ำ
+        }
+      }
+
       const grouped = {};
       formRows.forEach((row) => { // ตรวจสอบว่ามีข้อมูลอายุและวัคซีนหรือไม่
-        const age = mapAgeTextToNumber(row.age); 
+        const age = mapAgeTextToNumber(row.age);
         if (!grouped[age]) grouped[age] = [];
-        grouped[age].push({ vaccineName: row.vaccine, note: "" }); 
+        grouped[age].push({ vaccineName: row.vaccine, note: "" });
       });
 
       for (const age in grouped) {
@@ -98,7 +108,7 @@ const VaccinePage = () => {
         await vaccineService.addvaccine(payload);
       }
 
-      const newVaccineNames = formRows.map(r => r.vaccine).filter(v => !vaccineOptions.includes(v));
+      const newVaccineNames = formRows.map(row => row.vaccine).filter(vac => !vaccineOptions.includes(vac));
       if (newVaccineNames.length > 0) {
         setVaccineOptions(prev => [...new Set([...prev, ...newVaccineNames])]);
       }
@@ -123,21 +133,21 @@ const VaccinePage = () => {
 
   // ฟังก์ชันสำหรับการแก้ไขข้อมูลวัคซีน
   const handleUpdate = async () => {
-  try {
-    const payload = {
-      ageRange: parseInt(editAge),
-      vaccines: editVaccines.map(v => ({ vaccineName: v, note: "" }))
-    };
-    await vaccineService.UpdateStandardVaccine(groupedByAge[editAge].id, payload); // <-- แก้ตรงนี้
-    toast.success("แก้ไขข้อมูลสำเร็จ");
-    setIsModalOpen(false);
-    setEditAge(null);
-    setEditVaccines([]);
-    fetchVaccines();
-  } catch (error) {
-    toast.error("เกิดข้อผิดพลาดในการแก้ไข");
-  }
-};
+    try {
+      const payload = {
+        ageRange: parseInt(editAge),
+        vaccines: editVaccines.map(v => ({ vaccineName: v, note: "" }))
+      };
+      await vaccineService.UpdateStandardVaccine(groupedByAge[editAge].id, payload); // <-- แก้ตรงนี้
+      toast.success("แก้ไขข้อมูลสำเร็จ");
+      setIsModalOpen(false);
+      setEditAge(null);
+      setEditVaccines([]);
+      fetchVaccines();
+    } catch (error) {
+      toast.error("เกิดข้อผิดพลาดในการแก้ไข");
+    }
+  };
 
 
   // ลบข้อมูลวัคซีน
@@ -268,7 +278,9 @@ const VaccinePage = () => {
                   >
                     <option value="">เลือกอายุ</option>
                     {ageOptions.map((age, i) => (
-                      <option key={i} value={age}>{age}</option>
+                      <option key={i} value={age === '0 เดือน' ? '0' : age}>
+                        {age === '0 เดือน' ? 'แรกเกิด' : age}
+                      </option>
                     ))}
                   </select>
 
@@ -302,7 +314,7 @@ const VaccinePage = () => {
             <div className="mt-6 text-center space-x-2">
               <button
                 className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg shadow transition"
-                onClick={handleSave}
+                onClick={handleSubmit}
               >
                 บันทึก
               </button>
@@ -329,7 +341,7 @@ const VaccinePage = () => {
               {editVaccines.map((vaccine, index) => (
                 <div key={index} className="flex gap-2 items-center">
                   <input
-                  id='"VC-03'
+                    id='"VC-03'
                     type="text"
                     className="border border-gray-300 rounded-lg px-3 py-2 text-sm w-full focus:outline-none focus:ring-2 focus:ring-blue-300"
                     value={vaccine}

@@ -12,9 +12,7 @@ const Index = () => {
   const fetchChildren = async () => {
     try {
       const response = await childService.getChildren();
-      const childrenArray = Array.isArray(response.data.children)
-        ? response.data.children
-        : [];
+      const childrenArray = Array.isArray(response.data.children) ? response.data.children : [];
       setChildren(childrenArray);
     } catch (error) {
       console.error("เกิดข้อผิดพลาดในการโหลดข้อมูลเด็ก:", error);
@@ -34,19 +32,13 @@ const Index = () => {
             <div className="mt-2 flex justify-end gap-2">
               <button
                 className="btn btn-sm btn-error"
-                onClick={() => {
-                  closeToast();
-                  resolve(false);
-                }}
+                onClick={() => { closeToast(); resolve(false); }}
               >
                 ยกเลิก
               </button>
               <button
                 className="btn btn-sm btn-success"
-                onClick={() => {
-                  closeToast();
-                  resolve(true);
-                }}
+                onClick={() => { closeToast(); resolve(true); }}
               >
                 ตกลง
               </button>
@@ -54,12 +46,7 @@ const Index = () => {
           </div>
         );
 
-        toast.info(<ToastContent />, {
-          autoClose: false,
-          closeOnClick: false,
-          closeButton: false,
-          draggable: false,
-        });
+        toast.info(<ToastContent />, { autoClose: false, closeOnClick: false, closeButton: false, draggable: false });
       });
 
     const confirmed = await confirmDelete();
@@ -76,28 +63,26 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8E8EE] py-10 px-4">
+    <div className="min-h-screen bg-gradient-to-b from-pink-50 via-pink-100 to-pink-50 py-10 px-4">
       <div className="max-w-6xl mx-auto">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-bold text-[#444]">รายการเด็กในระบบ</h1>
+        <div className="flex flex-col md:flex-row items-center justify-between mb-6 gap-4">
+          <h1 className="text-2xl md:text-3xl font-bold text-pink-600">รายการเด็กในระบบ</h1>
           <button
-            data-testid="B-AddChild"
-            className="btn bg-[#FA5453] hover:bg-[#ff7676] text-white px-6 py-2 rounded-full shadow-md transition duration-300"
+            className="bg-pink-500 hover:bg-pink-600 text-white px-4 py-2 rounded-full shadow-md flex items-center gap-1 text-sm md:text-base transition-all duration-300"
             onClick={() => navigate("/addChild")}
           >
-            <FaPlus className="inline mr-2" />
-            เพิ่มเด็ก
+            <FaPlus className="text-sm md:text-base" /> เพิ่มเด็ก
           </button>
         </div>
 
         {children.length === 0 ? (
-          <div className="text-center text-gray-600 mt-10">
-            <p>ยังไม่มีข้อมูลเด็กในระบบ</p>
+          <div className="text-center text-gray-500 mt-20 text-lg">
+            ยังไม่มีข้อมูลเด็กในระบบ
           </div>
         ) : (
-          <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+          <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
             {children.map((child) => (
-              <ChildCard key={child.id} child={child} onDelete={() => handleDelete(child, child.id)} />
+              <ChildCard key={child.id} child={child} onDelete={() => handleDelete(child)} small />
             ))}
           </div>
         )}

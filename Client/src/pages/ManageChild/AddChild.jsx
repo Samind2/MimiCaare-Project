@@ -155,6 +155,7 @@ const AddChild = () => {
               name="birthDate"
               value={formData.birthDate}
               onChange={handleChange}
+               max={new Date().toISOString().split("T")[0]}
               className={`input input-bordered w-full rounded-xl ${errors.birthDate ? "input-error" : ""}`}
             // required
             />
