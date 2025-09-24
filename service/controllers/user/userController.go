@@ -27,6 +27,24 @@ func SetUserCollection(client *mongo.Client) {
 	UserCollection = client.Database(dbName).Collection("users") // ตั้งค่าชื่อ Collection สำหรับผู้ใช้
 }
 
+type registerRequest struct {
+	Email     string `json:"email" example:"example@mail.com"`
+	FirstName string `json:"firstName" example:"John"`
+	LastName  string `json:"lastName" example:"Doe"`
+	Password  string `json:"password" example:"strongpassword123"`
+}
+
+// Signup godoc
+// @Summary สมัครสมาชิก
+// @Description สร้างบัญชีผู้ใช้ใหม่
+// @Tags Auth
+// @Accept  json
+// @Produce  json
+// @Param   user body registerRequest true "User signup data"
+// @Success 201 {object} map[string]interface{} "สมัครสมาชิกสำเร็จ"
+// @Failure 400 {object} map[string]interface{} "ข้อมูลไม่ถูกต้อง"
+// @Failure 500 {object} map[string]interface{} "เกิดข้อผิดพลาดจากเซิร์ฟเวอร์"
+// @Router /user/signup [post]
 func Signup(c *gin.Context) {
 	var user userModel.User
 	//เช็คข้อมูลก่อนว่ามาป่าว
@@ -90,6 +108,24 @@ func Signup(c *gin.Context) {
 	})
 }
 
+type loginRequest struct {
+	Email    string `json:"email" example:"example@mail.com"`
+	Password string `json:"password" example:"strongpassword123"`
+}
+
+// Login godoc
+// @Summary เข้าสู่ระบบ
+// @Description ผู้ใช้เข้าสู่ระบบด้วยอีเมลและรหัสผ่าน จากนั้นระบบจะส่ง JWT token กลับมา
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Param request body loginRequest true "ข้อมูลเข้าสู่ระบบ"
+// @Success 200 {object} map[string]interface{} "เข้าสู่ระบบสำเร็จ"
+// @Failure 400 {object} map[string]interface{} "ข้อมูลไม่ถูกต้อง"
+// @Failure 401 {object} map[string]interface{} "รหัสผ่านไม่ถูกต้อง"
+// @Failure 404 {object} map[string]interface{} "ไม่พบผู้ใช้งาน"
+// @Failure 500 {object} map[string]interface{} "ข้อผิดพลาดจากเซิร์ฟเวอร์"
+// @Router /user/login [post]
 func Login(c *gin.Context) {
 	var req struct {
 		Email    string `json:"email"`
@@ -137,6 +173,14 @@ func Login(c *gin.Context) {
 	})
 }
 
+// Logout godoc
+// @Summary ออกจากระบบ
+// @Description ลบ JWT cookie ออกจากระบบ
+// @Tags Auth
+// @Produce  json
+// @Success 200 {object} map[string]interface{} "ออกจากระบบสำเร็จ"
+// @Failure 500 {object} map[string]interface{} "ข้อผิดพลาดจากเซิร์ฟเวอร์"
+// @Router /user/logout [post]
 func Logout(c *gin.Context) {
 	sameSite, secure := token.GetCookieConfig()
 	//  ตรวจสอบค่าที่ได้จาก GetCookieConfig()
@@ -159,6 +203,24 @@ func Logout(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "ออกจากระบบสำเร็จ"})
 }
 
+type updateRequest struct {
+	FirstName string `json:"firstName,omitempty" example:"John"`
+	LastName  string `json:"lastName,omitempty" example:"Doe"`
+	Email     string `json:"email,omitempty" example:"newemail@mail.com"`
+	Image     string `json:"picture,omitempty" example:"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA..."`
+}
+
+// UpdateProfile godoc
+// @Summary อัปเดตโปรไฟล์
+// @Description อัปเดตข้อมูลผู้ใช้ (ชื่อ, นามสกุล, อีเมล, รูปภาพ)
+// @Tags Auth
+// @Accept  json
+// @Produce  json
+// @Param   profile body updateRequest true "ข้อมูลที่ต้องการอัปเดต"
+// @Success 200 {object} map[string]interface{} "โปรไฟล์อัปเดตสำเร็จ"
+// @Failure 400 {object} map[string]interface{} "ข้อมูลไม่ถูกต้อง"
+// @Failure 403 {object} map[string]interface{} "ไม่ได้รับอนุญาต"
+// @Router /user/update [put]
 func UpdateProfile(c *gin.Context) {
 	// ดึง JWT จากคุกกี้
 	jwtCookie, err := c.Cookie("jwt")
@@ -262,6 +324,23 @@ func UpdateProfile(c *gin.Context) {
 	})
 }
 
+type resetPasswordRequest struct {
+	OldPassword       string `json:"oldPassword" example:"strongpassword123"`
+	NewPassword       string `json:"newPassword" example:"newstrongpassword123"`
+	RepeatNewPassword string `json:"repeatNewPassword" example:"newstrongpassword123"`
+}
+
+// ResetPassword godoc
+// @Summary เปลี่ยนรหัสผ่าน
+// @Description รีเซ็ตรหัสผ่านใหม่ โดยตรวจสอบรหัสผ่านเก่า
+// @Tags Auth
+// @Accept  json
+// @Produce  json
+// @Param   passwords body resetPasswordRequest true "รหัสผ่านเก่าและรหัสผ่านใหม่"
+// @Success 200 {object} map[string]interface{} "รหัสผ่านถูกอัปเดตสำเร็จ"
+// @Failure 400 {object} map[string]interface{} "ข้อมูลไม่ถูกต้อง"
+// @Failure 401 {object} map[string]interface{} "รหัสผ่านเก่าไม่ถูกต้อง"
+// @Router /user/reset-password [put]
 func ResetPassword(c *gin.Context) {
 	jwtCookie, err := c.Cookie("jwt")
 	if err != nil {
@@ -334,6 +413,14 @@ func ResetPassword(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "รหัสผ่านถูกอัปเดตสำเร็จ"})
 }
 
+// GetAllUsers godoc
+// @Summary ดึงข้อมูลผู้ใช้ทั้งหมด
+// @Description ดึงข้อมูลผู้ใช้ทั้งหมด (เฉพาะ admin เท่านั้น)
+// @Tags Auth
+// @Produce  json
+// @Success 200 {object} map[string]interface{} "ดึงข้อมูลผู้ใช้สำเร็จ"
+// @Failure 403 {object} map[string]interface{} "ไม่ได้รับอนุญาต"
+// @Router /user/all [get]
 func GetAllUsers(c *gin.Context) {
 	jwtCookie, err := c.Cookie("jwt")
 	if err != nil {
@@ -394,6 +481,22 @@ func GetAllUsers(c *gin.Context) {
 	})
 }
 
+type assignRoleRequest struct {
+	TargetId string `bson:"targetId" json:"targetId"`
+	Role     string `bson:"role,omitempty" json:"role" enums:"user,admin" example:"user"`
+}
+
+// AssignRole godoc
+// @Summary กำหนดสิทธิ์ผู้ใช้
+// @Description เปลี่ยน role ของผู้ใช้ (admin เท่านั้น)
+// @Tags Auth
+// @Accept  json
+// @Produce  json
+// @Param   role body assignRoleRequest true "Target user ID และ Role ใหม่"
+// @Success 200 {object} map[string]interface{} "อัปเดต role สำเร็จ"
+// @Failure 400 {object} map[string]interface{} "ข้อมูลไม่ถูกต้อง"
+// @Failure 403 {object} map[string]interface{} "ไม่ได้รับอนุญาต"
+// @Router /user/assign-role [put]
 func AssignRole(c *gin.Context) {
 	jwtCookie, err := c.Cookie("jwt")
 	if err != nil {

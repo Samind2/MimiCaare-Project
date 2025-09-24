@@ -1,3 +1,10 @@
+// @title MimiCare API
+// @version 1.0
+// @description Backend API for MimiCare Project (Gin + MongoDB)
+// @host localhost:5000
+// @BasePath /api/v1
+// @schemes http
+
 package main
 
 import (
@@ -7,10 +14,13 @@ import (
 
 	database "github.com/Samind2/MimiCaare-Project/service/config/database"
 	controllers "github.com/Samind2/MimiCaare-Project/service/controllers"
+	_ "github.com/Samind2/MimiCaare-Project/service/docs"
 	corsMiddleware "github.com/Samind2/MimiCaare-Project/service/middlewares/cors"
 	routes "github.com/Samind2/MimiCaare-Project/service/routers"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 func main() {
@@ -42,6 +52,7 @@ func main() {
 	r.GET("/", func(c *gin.Context) {
 		c.Data(http.StatusOK, "text/html; charset=utf-8", []byte("<h1>welcome to Project restful api</h1>"))
 	})
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	// API Routes
 	api := r.Group("/api/v1")

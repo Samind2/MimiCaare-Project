@@ -1,0 +1,421 @@
+{
+    "schemes": [
+        "http"
+    ],
+    "swagger": "2.0",
+    "info": {
+        "description": "Backend API for MimiCare Project (Gin + MongoDB)",
+        "title": "MimiCare API",
+        "contact": {},
+        "version": "1.0"
+    },
+    "host": "localhost:5000",
+    "basePath": "/api/v1",
+    "paths": {
+        "/user/all": {
+            "get": {
+                "description": "ดึงข้อมูลผู้ใช้ทั้งหมด (เฉพาะ admin เท่านั้น)",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "ดึงข้อมูลผู้ใช้ทั้งหมด",
+                "responses": {
+                    "200": {
+                        "description": "ดึงข้อมูลผู้ใช้สำเร็จ",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "403": {
+                        "description": "ไม่ได้รับอนุญาต",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/user/assign-role": {
+            "put": {
+                "description": "เปลี่ยน role ของผู้ใช้ (admin เท่านั้น)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "กำหนดสิทธิ์ผู้ใช้",
+                "parameters": [
+                    {
+                        "description": "Target user ID และ Role ใหม่",
+                        "name": "role",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/userController.assignRoleRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "อัปเดต role สำเร็จ",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "ข้อมูลไม่ถูกต้อง",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "403": {
+                        "description": "ไม่ได้รับอนุญาต",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/user/login": {
+            "post": {
+                "description": "ผู้ใช้เข้าสู่ระบบด้วยอีเมลและรหัสผ่าน จากนั้นระบบจะส่ง JWT token กลับมา",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "เข้าสู่ระบบ",
+                "parameters": [
+                    {
+                        "description": "ข้อมูลเข้าสู่ระบบ",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/userController.loginRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "เข้าสู่ระบบสำเร็จ",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "ข้อมูลไม่ถูกต้อง",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "รหัสผ่านไม่ถูกต้อง",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "ไม่พบผู้ใช้งาน",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "ข้อผิดพลาดจากเซิร์ฟเวอร์",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/user/logout": {
+            "post": {
+                "description": "ลบ JWT cookie ออกจากระบบ",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "ออกจากระบบ",
+                "responses": {
+                    "200": {
+                        "description": "ออกจากระบบสำเร็จ",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "ข้อผิดพลาดจากเซิร์ฟเวอร์",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/user/reset-password": {
+            "put": {
+                "description": "รีเซ็ตรหัสผ่านใหม่ โดยตรวจสอบรหัสผ่านเก่า",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "เปลี่ยนรหัสผ่าน",
+                "parameters": [
+                    {
+                        "description": "รหัสผ่านเก่าและรหัสผ่านใหม่",
+                        "name": "passwords",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/userController.resetPasswordRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "รหัสผ่านถูกอัปเดตสำเร็จ",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "ข้อมูลไม่ถูกต้อง",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "รหัสผ่านเก่าไม่ถูกต้อง",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/user/signup": {
+            "post": {
+                "description": "สร้างบัญชีผู้ใช้ใหม่",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "สมัครสมาชิก",
+                "parameters": [
+                    {
+                        "description": "User signup data",
+                        "name": "user",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/userController.registerRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "สมัครสมาชิกสำเร็จ",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "ข้อมูลไม่ถูกต้อง",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "เกิดข้อผิดพลาดจากเซิร์ฟเวอร์",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/user/update": {
+            "put": {
+                "description": "อัปเดตข้อมูลผู้ใช้ (ชื่อ, นามสกุล, อีเมล, รูปภาพ)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "อัปเดตโปรไฟล์",
+                "parameters": [
+                    {
+                        "description": "ข้อมูลที่ต้องการอัปเดต",
+                        "name": "profile",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/userController.updateRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "โปรไฟล์อัปเดตสำเร็จ",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "ข้อมูลไม่ถูกต้อง",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "403": {
+                        "description": "ไม่ได้รับอนุญาต",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "userController.assignRoleRequest": {
+            "type": "object",
+            "properties": {
+                "role": {
+                    "type": "string",
+                    "enum": [
+                        "user",
+                        "admin"
+                    ],
+                    "example": "user"
+                },
+                "targetId": {
+                    "type": "string"
+                }
+            }
+        },
+        "userController.loginRequest": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string",
+                    "example": "example@mail.com"
+                },
+                "password": {
+                    "type": "string",
+                    "example": "strongpassword123"
+                }
+            }
+        },
+        "userController.registerRequest": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string",
+                    "example": "example@mail.com"
+                },
+                "firstName": {
+                    "type": "string",
+                    "example": "John"
+                },
+                "lastName": {
+                    "type": "string",
+                    "example": "Doe"
+                },
+                "password": {
+                    "type": "string",
+                    "example": "strongpassword123"
+                }
+            }
+        },
+        "userController.resetPasswordRequest": {
+            "type": "object",
+            "properties": {
+                "newPassword": {
+                    "type": "string",
+                    "example": "newstrongpassword123"
+                },
+                "oldPassword": {
+                    "type": "string",
+                    "example": "strongpassword123"
+                },
+                "repeatNewPassword": {
+                    "type": "string",
+                    "example": "newstrongpassword123"
+                }
+            }
+        },
+        "userController.updateRequest": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string",
+                    "example": "newemail@mail.com"
+                },
+                "firstName": {
+                    "type": "string",
+                    "example": "John"
+                },
+                "lastName": {
+                    "type": "string",
+                    "example": "Doe"
+                },
+                "picture": {
+                    "type": "string",
+                    "example": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA..."
+                }
+            }
+        }
+    }
+}
