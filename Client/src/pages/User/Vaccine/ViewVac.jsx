@@ -7,6 +7,7 @@ import { FaPlus } from 'react-icons/fa';
 import { FaChevronDown } from "react-icons/fa";
 import VaccineTimeline from "./VaccineTimeline"
 
+
 const ViewVac = () => {
   //  STATE 
   const [vaccines, setVaccines] = useState([]);
@@ -17,6 +18,13 @@ const ViewVac = () => {
   const [showCustomOnly, setShowCustomOnly] = useState(false);
   // เพิ่ม state สำหรับควบคุม step
   const [currentStep, setCurrentStep] = useState(1);
+  const [lastPlaceName, setLastPlaceName] = useState("");
+  const [lastPhoneNumber, setLastPhoneNumber] = useState("");
+  const [currentCustomStep, setCurrentCustomStep] = useState(1);
+
+
+  const nextCustomStep = () => setCurrentCustomStep((prev) => Math.min(prev + 1, 3));
+  const prevCustomStep = () => setCurrentCustomStep((prev) => Math.max(prev - 1, 1));
 
 
   // Modal สำหรับวัคซีนมาตรฐาน
@@ -54,7 +62,7 @@ const ViewVac = () => {
   //  ฟังก์ชันเปิด Modal มาตรฐาน 
   const openModal = (item, isEdit = false) => {
     if (isEdit) {
-      const record = receivedVaccines.find((rv) => rv.standardVaccineId === item.id);
+      const record = receivedVaccines.find((receivedVaccineRecord) => receivedVaccineRecord.standardVaccineId === item.id);
 
       if (!record) {
         toast.warning("ไม่พบข้อมูลวัคซีนที่ต้องการแก้ไข");
@@ -64,12 +72,10 @@ const ViewVac = () => {
       setFormData({
         ageRange: item.ageRange,
         standardVaccineId: item.id,
-        receiveDate:
-          record.receiveDate?.substring(0, 10) || new Date().toISOString().substring(0, 10),
-        placeName: record.placeName || "",
-        phoneNumber: record.phoneNumber || "",
+        receiveDate: new Date().toISOString().substring(0, 10),
+        placeName: lastPlaceName || "",
+        phoneNumber: lastPhoneNumber || "",
       });
-
       setEditingRecordId(record.id || null);
       setIsEditMode(true);
     } else {
@@ -77,8 +83,8 @@ const ViewVac = () => {
         ageRange: item.ageRange,
         standardVaccineId: item.id,
         receiveDate: new Date().toISOString().substring(0, 10),
-        placeName: "",
-        phoneNumber: "",
+        placeName: lastPlaceName || "",
+        phoneNumber: lastPhoneNumber || "",
       });
 
       setEditingRecordId(null);
@@ -86,6 +92,7 @@ const ViewVac = () => {
     }
 
     setSelectedVaccines(item.vaccines);
+    setCurrentStep(1);
     setShowModal(true);
   };
 
@@ -93,10 +100,11 @@ const ViewVac = () => {
   const openCustomModal = () => {
     setCustomFormData({
       receiveDate: new Date().toISOString().substring(0, 10),
-      placeName: "",
-      phoneNumber: "",
+      placeName: lastPlaceName || "",
+      phoneNumber: lastPhoneNumber || "",
     });
     setCustomRecords([{ vaccineName: "", note: "" }]);
+    setCurrentStep(1);
     setShowCustomModal(true);
   };
 
@@ -105,7 +113,8 @@ const ViewVac = () => {
     const fetchVaccines = async () => {
       try {
         const res = await vaccineService.getvaccine();
-        setVaccines(res.data.vaccines || []);
+        const sortedVaccines = (res.data.vaccines || []).sort((a, b) => a.ageRange - b.ageRange);
+        setVaccines(sortedVaccines);
       } catch (err) {
         console.error("Error fetching vaccines", err);
       }
@@ -146,6 +155,11 @@ const ViewVac = () => {
 
         setReceivedVaccines(standardData);
         setCustomVaccines(customData);
+        if (receivedData.length > 0) {
+          const last = receivedData[receivedData.length - 1];
+          setLastPlaceName(last.placeName || "");
+          setLastPhoneNumber(last.phoneNumber || "");
+        }
       } catch (error) {
         console.error("Error fetching received vaccines", error);
         setReceivedVaccines([]);
@@ -155,11 +169,6 @@ const ViewVac = () => {
 
     fetchReceivedVaccines();
   }, [selectedChild]);
-
-  //  ฟังก์ชันตรวจสอบวัคซีนรับแล้ว 
-  const isVaccineReceived = (standardVaccineId) => {
-    return receivedVaccines.some((receivedVaccines) => receivedVaccines.standardVaccineId === standardVaccineId);
-  };
 
   //  ฟังก์ชันบันทึกวัคซีนมาตรฐาน 
   const handleSaveVaccine = async () => {
@@ -195,6 +204,9 @@ const ViewVac = () => {
         await receiveVaccineService.addFromStandard(payload);
         toast.success("บันทึกข้อมูลสำเร็จ");
       }
+
+      setLastPlaceName(formData.placeName);
+      setLastPhoneNumber(formData.phoneNumber);
 
       setShowModal(false);
 
@@ -236,6 +248,9 @@ const ViewVac = () => {
         toast.success("บันทึกข้อมูลวัคซีนแบบกรอกเองสำเร็จ");
       }
 
+      setLastPlaceName(customFormData.placeName);
+      setLastPhoneNumber(customFormData.phoneNumber);
+
       setShowCustomModal(false);
       setIsEditMode(false);
       setEditingRecordId(null);
@@ -272,7 +287,40 @@ const ViewVac = () => {
   };
 
   const handleDeleteCustomVaccine = async (id) => {
-    if (!window.confirm("คุณต้องการลบข้อมูลวัคซีนนี้ใช่หรือไม่?")) return;
+     const confirm = await new Promise((resolve) => {
+    toast.info(
+      <div>
+        <p>คุณต้องการลบข้อมูลวัคซีนนี้ใช่หรือไม่?</p>
+        <div className="mt-2 flex justify-end space-x-2">
+          <button
+            className="btn btn-sm btn-error"
+            onClick={() => {
+              resolve(true);
+              toast.dismiss();
+            }}
+          >
+            ยืนยัน
+          </button>
+          <button
+            className="btn btn-sm btn-secondary"
+            onClick={() => {
+              resolve(false);
+              toast.dismiss();
+            }}
+          >
+            ยกเลิก
+          </button>
+        </div>
+      </div>,
+      {
+        autoClose: false,
+        closeButton: false,
+        closeOnClick: false,
+      }
+    );
+  });
+
+  if (!confirm) return;
 
 
     try {
@@ -374,76 +422,22 @@ const ViewVac = () => {
       </div>
 
       {/* ตารางวัคซีน */}
-      {!showCustomOnly ? (
+      {/* แทนที่ table ของ customVaccines ด้วย Timeline */}
+      {showCustomOnly ? (
+        <VaccineTimeline
+          vaccines={customVaccines}       // แทนที่ receivedVaccines
+          receivedVaccines={customVaccines} // ให้ Timeline ใช้ข้อมูล custom
+          onSelectVaccine={openEditCustomModal} // ใช้ฟังก์ชันแก้ไข
+          isCustom={true}                 // เพิ่ม prop เพื่อบอกว่าเป็น custom
+          onDeleteVaccine={handleDeleteCustomVaccine} // เพิ่ม prop สำหรับลบ
+        />
+      ) : (
         <VaccineTimeline
           vaccines={vaccines}
           receivedVaccines={receivedVaccines}
           onSelectVaccine={openModal}
         />
-
-      ) : (
-        <div className="overflow-x-auto">
-          {/* ตารางวัคซีนที่กรอกเอง */}
-          <table className="table table-zebra w-full">
-            <thead className="bg-yellow-200 text-gray-700 text-sm">
-              <tr>
-                <th className="text-center">วันที่รับ</th>
-                <th className="text-center">ชื่อวัคซีน</th>
-                <th className="text-center">สถานที่</th>
-                <th className="text-center">เบอร์โทร</th>
-                <th className="text-center">หมายเหตุ</th>
-                <th className="text-center">การจัดการ</th> {/* เพิ่มคอลัมน์ฟนี้ */}
-              </tr>
-            </thead>
-            <tbody>
-              {customVaccines.map((item) => {
-                return (
-                  <tr key={item.id}>
-                    <td className="text-center">
-                      {new Date(item.receiveDate).toLocaleDateString("th-TH")}
-                    </td>
-                    <td className="text-center">
-                      <ul className="text-center">
-                        {item.records.map((rec, i) => (
-                          <li key={i}>{rec.vaccineName}</li>
-                        ))}
-                      </ul>
-                    </td>
-                    <td className="text-center">{item.placeName}</td>
-                    <td className="text-center">{item.phoneNumber}</td>
-                    <td className="text-center">
-                      <ul className="text-center">
-                        {item.records.map((rec, i) => (
-                          <li key={i}>{rec.note || "-"}</li>
-                        ))}
-                      </ul>
-                    </td>
-                    <td className="text-center">
-                      <div className="flex justify-center gap-2">
-                        <button
-                          className="btn btn-sm btn-warning"
-                          onClick={() => openEditCustomModal(item)}
-                        >
-                          แก้ไข
-                        </button>
-                        <button
-                          className="btn btn-sm btn-error"
-                          onClick={() => {
-                            handleDeleteCustomVaccine(item.id);
-                          }}
-                        >
-                          ลบ
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
       )}
-
       {/* Modal สำหรับวัคซีนมาตรฐาน */}
       {showModal && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm z-50">
@@ -475,9 +469,11 @@ const ViewVac = () => {
                 </p>
                 <p>
                   <strong>อายุ:</strong>{" "}
-                  {formData.ageRange >= 12
-                    ? `${formData.ageRange / 12} ปี`
-                    : `${formData.ageRange} เดือน`}
+                  {Number(formData.ageRange) === 0
+                    ? "แรกเกิด"
+                    : Number(formData.ageRange) >= 12
+                      ? `${Math.floor(Number(formData.ageRange) / 12)} ปี`
+                      : `${Number(formData.ageRange)} เดือน`}
                 </p>
 
                 <ul className="list-disc list-inside">
@@ -569,92 +565,113 @@ const ViewVac = () => {
       {showCustomModal && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm z-50">
           <div className="bg-white rounded-xl p-6 w-[90%] max-w-lg shadow-lg max-h-[90vh] overflow-auto">
-            <h2 className="text-xl font-bold mb-4">บันทึกวัคซีนแบบกรอกเอง</h2>
+            <h2 className="text-xl font-bold mb-4">
+              {isEditMode ? "แก้ไขวัคซีนแบบกรอกเอง" : "บันทึกวัคซีนแบบกรอกเอง"}
+            </h2>
 
-            <p>
-              <strong>ชื่อเด็ก:</strong> {selectedChild?.firstName}{" "}
-              {selectedChild?.lastName}
-            </p>
+            {/* Progress Bar */}
+            <ul className="steps w-full mb-6">
+              <li className={`step ${currentCustomStep >= 1 ? "step-success" : ""}`}>ข้อมูลเด็ก</li>
+              <li className={`step ${currentCustomStep >= 2 ? "step-success" : ""}`}>รายละเอียดวัคซีน</li>
+              <li className={`step ${currentCustomStep >= 3 ? "step-success" : ""}`}>สถานพยาบาล</li>
+            </ul>
 
-            <input
-              type="date"
-              className="input input-bordered w-full my-2"
-              value={customFormData.receiveDate}
-              onChange={(e) =>
-                setCustomFormData({ ...customFormData, receiveDate: e.target.value })
-              }
-            />
+            {/* Step 1: ข้อมูลเด็ก */}
+            {currentCustomStep === 1 && (
+              <div>
+                <p><strong>ชื่อเด็ก:</strong> {selectedChild?.firstName} {selectedChild?.lastName}</p>
+              </div>
+            )}
 
-            <input
-              id="VVC-01"
-              type="text"
-              placeholder="สถานที่รับวัคซีน"
-              className="input input-bordered w-full my-2"
-              value={customFormData.placeName}
-              onChange={(e) =>
-                setCustomFormData({ ...customFormData, placeName: e.target.value })
-              }
-            />
+            {/* Step 2: รายละเอียดวัคซีน */}
+            {currentCustomStep === 2 && (
+              <div>
+                {customRecords.map((rec, idx) => (
+                  <div key={idx} className="border p-3 rounded-lg mb-3">
+                    <input
+                      type="text"
+                      placeholder="ชื่อวัคซีน"
+                      className="input input-bordered w-full mb-2"
+                      value={rec.vaccineName}
+                      onChange={(e) => {
+                        const newRecords = [...customRecords];
+                        newRecords[idx].vaccineName = e.target.value;
+                        setCustomRecords(newRecords);
+                      }}
+                    />
+                    <input
+                      type="text"
+                      placeholder="หมายเหตุ"
+                      className="input input-bordered w-full"
+                      value={rec.note}
+                      onChange={(e) => {
+                        const newRecords = [...customRecords];
+                        newRecords[idx].note = e.target.value;
+                        setCustomRecords(newRecords);
+                      }}
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
 
-            <input
-              id="VVC-02"
-              type="text"
-              placeholder="เบอร์โทร"
-              className="input input-bordered w-full my-2"
-              value={customFormData.phoneNumber}
-              onChange={(e) =>
-                setCustomFormData({ ...customFormData, phoneNumber: e.target.value })
-              }
-            />
-
-            {/* กรอกข้อมูลวัคซีนแต่ละเข็ม */}
-            {customRecords.map((rec, idx) => (
-              <div key={idx} className="border p-3 rounded-lg mb-3">
+            {/* Step 3: สถานพยาบาล */}
+            {currentCustomStep === 3 && (
+              <div>
                 <input
-                  id="VVC-03"
-                  type="text"
-                  placeholder="ชื่อวัคซีน"
-                  className="input input-bordered w-full mb-2"
-                  value={rec.vaccineName}
-                  onChange={(e) => {
-                    const newRecords = [...customRecords];
-                    newRecords[idx].vaccineName = e.target.value;
-                    setCustomRecords(newRecords);
-                  }}
+                  type="date"
+                  className="input input-bordered w-full my-2"
+                  value={customFormData.receiveDate}
+                  onChange={(e) =>
+                    setCustomFormData({ ...customFormData, receiveDate: e.target.value })
+                  }
                 />
                 <input
-                  id="VVC-04"
                   type="text"
-                  placeholder="หมายเหตุ"
-                  className="input input-bordered w-full"
-                  value={rec.note}
-                  onChange={(e) => {
-                    const newRecords = [...customRecords];
-                    newRecords[idx].note = e.target.value;
-                    setCustomRecords(newRecords);
-                  }}
+                  placeholder="สถานที่รับวัคซีน"
+                  className="input input-bordered w-full my-2"
+                  value={customFormData.placeName}
+                  onChange={(e) =>
+                    setCustomFormData({ ...customFormData, placeName: e.target.value })
+                  }
+                />
+                <input
+                  type="text"
+                  placeholder="เบอร์โทร"
+                  className="input input-bordered w-full my-2"
+                  value={customFormData.phoneNumber}
+                  onChange={(e) =>
+                    setCustomFormData({ ...customFormData, phoneNumber: e.target.value })
+                  }
                 />
               </div>
-            ))}
+            )}
 
-            <button
-              className="btn btn-outline btn-sm mb-4"
-              onClick={() => setCustomRecords([...customRecords, { vaccineName: "", note: "" }])}
-            >
-              + เพิ่มวัคซีน
-            </button>
+            {/* ปุ่มควบคุม Step */}
+            <div className="flex justify-between mt-4">
+              <button className="btn" onClick={() => setShowCustomModal(false)}>ยกเลิก</button>
+              <button
+                className="btn btn-warning"
+                onClick={prevCustomStep}
+                disabled={currentCustomStep === 1}
+              >
+                ย้อนกลับ
+              </button>
 
-            <div className="flex justify-end gap-2">
-              <button className="btn" onClick={() => setShowCustomModal(false)}>
-                ยกเลิก
-              </button>
-              <button className="btn btn-primary" onClick={handleSaveCustomVaccine}>
-                บันทึก
-              </button>
+              {currentCustomStep < 3 ? (
+                <button className="btn btn-success" onClick={nextCustomStep}>
+                  ถัดไป
+                </button>
+              ) : (
+                <button className="btn btn-primary" onClick={handleSaveCustomVaccine}>
+                  บันทึก
+                </button>
+              )}
             </div>
           </div>
         </div>
       )}
+
     </div>
   );
 };

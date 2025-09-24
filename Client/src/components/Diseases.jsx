@@ -31,24 +31,39 @@ const diseases = [
 const Diseases = () => {
   return (
     <div className="container mx-auto p-8 text-center">
-      <motion.h3 
-            className="md:text-3xl text-3xl font-bold md:leading-snug leading-snug"
+      <motion.h3
+        className="md:text-3xl text-3xl font-bold md:leading-snug leading-snug"
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        viewport={{ once: false }} // ให้แสดงแค่ครั้งเดียว
+      >
+        โรคยอดฮิตในเด็กที่พ่อแม่ควรรู้
+      </motion.h3>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
+        {diseases.map((disease, index) => (
+          <motion.div
+            key={index}
+            className="p-6 bg-white rounded-lg shadow-md flex flex-col items-center"
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            viewport={{ once: false }} // ให้แสดงแค่ครั้งเดียว
+            viewport={{ once: false }}
           >
-            โรคยอดฮิตในเด็กที่พ่อแม่ควรรู้
-          </motion.h3>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        {diseases.map((disease, index) => (
-          <motion.div key={index} 
-          className="p-6 bg-white rounded-lg shadow-md flex flex-col items-center"initial={{ opacity: 0, y: 30 }}  // เริ่มต้นที่โปร่งใสและเลื่อนขึ้น
-          whileInView={{ opacity: 1, y: 0 }}  // เมื่อมองเห็นให้ปรากฏและเลื่อนกลับ
-          transition={{ duration: 0.6 }}  // ระยะเวลาแอนิเมชัน
-          viewport={{ once: false }}  // ให้แอนิเมชันแสดงครั้งเดียว
-        >
-            <img src={disease.image} alt={disease.title} className="w-40 h-40 object-cover rounded-lg mb-4" />
+            <motion.img
+              src={disease.image}
+              alt={disease.title}
+              className="w-40 h-40 object-cover rounded-lg mb-4"
+              animate={{
+                x: [0, -5, 5, -5, 5, 0],
+                rotate: [0, -2, 2, -2, 2, 0],
+              }}
+              transition={{
+                duration: 0.6,
+                repeat: Infinity,
+                repeatType: "loop",
+              }}
+            />
             <h2 className="text-xl font-bold text-gray-700">{disease.title}</h2>
             <p className="text-gray-600 mt-2"><strong>อาการของโรค:</strong> {disease.description}</p>
             <p className="text-gray-600 mt-2"><strong>การป้องกัน:</strong> {disease.prevention}</p>
