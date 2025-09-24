@@ -55,6 +55,7 @@ const AuthProvider = ({ children }) => {
 
   const logout = () => {
     TokenService.removeUser();
+    userService.logout(); // เรียก API logout ด้วยไอสัส By E'Pashon
     setUser(null);
   };
 
@@ -65,7 +66,7 @@ const AuthProvider = ({ children }) => {
 
       console.log("Updated User Data:", updatedUser);
 
-      const newUserData = { ...user, ...updatedUser };
+      const newUserData = { ...user, ...updatedUser }; // Spread Operator 
 
       TokenService.setUser(newUserData);
       setUser({ ...newUserData });

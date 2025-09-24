@@ -271,3 +271,52 @@ func UpdateChildrenByID(c *gin.Context) {
 		"children": updateFields,
 	})
 }
+
+func DeleteChildrenByID(c *gin.Context) {
+	// ดึง JWT จากคุกกี้
+	jwtCookie, err := c.Cookie("jwt")
+	if err != nil {
+		c.JSON(http.StatusForbidden, gin.H{"message": "ไม่ได้รับอนุญาต - ไม่มีคุกกี้"})
+		return
+	}
+
+	// ยืนยันและดึงข้อมูลจาก JWT
+	userClaims, err := token.ValidateToken(jwtCookie)
+	if err != nil {
+		c.JSON(http.StatusForbidden, gin.H{"message": "ไม่พบโทเค็น"})
+		return
+	}
+	userId := userClaims.UserId // ดึง userId จาก claims
+	parentId, err := primitive.ObjectIDFromHex(userId)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Token ผิดพลาด กรุณาเข้าสู่ระบบใหม่"})
+		return
+	}
+
+	// ดึงไอดีเด็กจากพารามิเตอร์
+	childID := c.Param("id")
+	childObjectID, err := primitive.ObjectIDFromHex(childID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "ไอดีเด็กไม่ถูกต้อง"})
+		return
+	}
+
+	// ตรวจสอบว่าเด็กคนนี้เป็นลูกของผู้ใช้หรือไม่
+	var existingChild childrenModel.Children
+	err = ChildrenCollection.FindOne(context.TODO(), bson.M{"_id": childObjectID, "parentId": parentId}).Decode(&existingChild)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"message": "ไม่พบข้อมูลเด็ก"})
+		return
+	}
+
+	// ลบข้อมูลเด็กจากฐานข้อมูล
+	_, err = ChildrenCollection.DeleteOne(context.TODO(), bson.M{"_id": childObjectID, "parentId": parentId})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "ระบบขัดข้อง - ลบข้อมูลเด็กไม่สำเร็จ"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "ลบข้อมูลเด็กสำเร็จ",
+	})
+}

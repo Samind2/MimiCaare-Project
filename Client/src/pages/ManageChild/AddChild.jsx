@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router';
 import childService from '../../service/child.service.js';
-import { ToastContainer, toast } from "react-toastify";
+import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 const AddChild = () => {
@@ -13,6 +13,7 @@ const AddChild = () => {
     gender: '',
     image: '',
   });
+  const [isAddingChild, setIsAddingChild] = useState(false);
   const [errors, setErrors] = useState({});
   const [previewImage, setPreviewImage] = useState(null);
 
@@ -37,32 +38,41 @@ const AddChild = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     const newErrors = {};
     if (!formData.firstName.trim()) newErrors.firstName = "กรุณากรอกชื่อ";
     if (!formData.lastName.trim()) newErrors.lastName = "กรุณากรอกนามสกุล";
     if (!formData.birthDate.trim()) newErrors.birthDate = "กรุณาเลือกวันเกิด";
     if (!formData.gender.trim()) newErrors.gender = "กรุณาเลือกเพศ";
+    if (!formData.image.trim()) newErrors.image = "กรุณาอัพโหลดรูปภาพ";
 
     if (Object.keys(newErrors).length) {
       setErrors(newErrors);
       return;
     }
 
-     // ดึงข้อมูลเด็กทั้งหมดเพื่อตรวจสอบชื่อซ้ำ
-    const res = await childService.getChildren();
-    const existingChildren = res.data.children || res.data || [];
+    let existingChildren = [];
+    try {
+      const res = await childService.getChildren();
+      existingChildren = res.data.children || res.data || [];
+    } catch (err) {
+      console.warn("ไม่มีข้อมูลเด็ก หรือไม่สามารถโหลดได้", err);
+    }
 
-    // เช็คนามสกุลซ้ำ
-    const isDuplicate = existingChildren.some(child =>
-      child.lastName.trim().toLowerCase() === formData.lastName.trim().toLowerCase()
+      const isDuplicateName = existingChildren.some(child =>
+      child.firstName.trim().toLowerCase() === formData.firstName.trim().toLowerCase()
     );
-
-    if (isDuplicate) {
+    if (isDuplicateName) {
       toast.error("ชื่อนี้ถูกเพิ่มแล้วในระบบ");
       return;
     }
 
+    const isDuplicate = existingChildren.some(child =>
+      child.lastName.trim().toLowerCase() === formData.lastName.trim().toLowerCase()
+    );
+    if (isDuplicate) {
+      toast.error("นามสกุลนี้ถูกเพิ่มแล้วในระบบ");
+      return;
+    }
 
     const cleanedData = {
       ...formData,
@@ -70,14 +80,15 @@ const AddChild = () => {
     };
 
     try {
+      setIsAddingChild(true);
       await childService.addChild(cleanedData);
-
       toast.success("เพิ่มข้อมูลเด็กสำเร็จ!", {
         autoClose: 1500,
       });
 
       setTimeout(() => navigate("/profile-child"), 1500);
     } catch (err) {
+      setIsAddingChild(false);
       toast.error("เกิดข้อผิดพลาดในการเพิ่มข้อมูล", {
         autoClose: 1500,
       });
@@ -99,14 +110,14 @@ const AddChild = () => {
               ชื่อ <span className="text-red-500">*</span>
             </label>
             <input
-              data-testid="firstName-Chihd"
+              data-testid="firstName-Child"
               type="text"
               name="firstName"
               value={formData.firstName}
               onChange={handleChange}
               placeholder="กรอกชื่อ"
               className={`input input-bordered w-full rounded-xl pr-10 ${errors.firstName ? "input-error" : ""}`}
-              // required
+            // required
             />
             {errors.firstName && (
               <p className="text-red-500 text-xs mt-1">{errors.firstName}</p>
@@ -119,14 +130,14 @@ const AddChild = () => {
               นามสกุล <span className="text-red-500">*</span>
             </label>
             <input
-              data-testid="lastName-Chihd"
+              data-testid="lastName-Child"
               type="text"
               name="lastName"
               value={formData.lastName}
               onChange={handleChange}
               placeholder="กรอกนามสกุล"
               className={`input input-bordered w-full rounded-xl ${errors.lastName ? "input-error" : ""}`}
-              // required
+            // required
             />
             {errors.lastName && (
               <p className="text-red-500 text-xs mt-1">{errors.lastName}</p>
@@ -139,13 +150,14 @@ const AddChild = () => {
               วันเกิด <span className="text-red-500">*</span>
             </label>
             <input
-              data-testid="birthDate-Chihd"
+              data-testid="birthDate-Child"
               type="date"
               name="birthDate"
               value={formData.birthDate}
               onChange={handleChange}
+               max={new Date().toISOString().split("T")[0]}
               className={`input input-bordered w-full rounded-xl ${errors.birthDate ? "input-error" : ""}`}
-              // required
+            // required
             />
             {errors.birthDate && (
               <p className="text-red-500 text-xs mt-1">{errors.birthDate}</p>
@@ -159,12 +171,12 @@ const AddChild = () => {
               เพศ <span className="text-red-500">*</span>
             </label>
             <select
-              data-testid="gender-Chihd"
+              data-testid="gender-Child"
               name="gender"
               value={formData.gender}
               onChange={handleChange}
               className={`select select-bordered w-full rounded-xl bg-gray-50 ${errors.gender ? "select-error" : ""}`}
-              // required
+            // required
             >
               <option value="">เลือกเพศ</option>
               <option value="ชาย">ชาย</option>
@@ -182,11 +194,11 @@ const AddChild = () => {
               รูปภาพเด็ก
             </label>
             <input
-              data-testid="image-Chihd"
+              data-testid="image-Child"
               type="file"
-              accept="image/*"
+              accept="image/png, image/jpeg"
               onChange={handleImageUpload}
-              className="file-input file-input-bordered w-full rounded-xl"
+              className={`file-input file-input-bordered w-full rounded-xl ${errors.image ? "file-input-error" : ""}`}
             />
           </div>
 
@@ -205,9 +217,11 @@ const AddChild = () => {
           <button
             data-testid="submit-button"
             type="submit"
+            disabled={isAddingChild}
             className="btn bg-[#84C7AE] hover:bg-[#6EB39D] text-white w-full rounded-xl font-semibold text-base"
           >
-            บันทึกข้อมูล
+            {isAddingChild ? "กำลังเพิ่มข้อมูล..." : "บันทึกข้อมูล"}
+
           </button>
         </form>
 

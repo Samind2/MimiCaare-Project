@@ -11,46 +11,52 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
+func GetCookieConfig() (http.SameSite, bool) {
+	env := os.Getenv("NODE_ENV")
+
+	if env == "production" {
+		// production ต้องใช้ HTTPS + SameSite=None สำหรับ cross-site cookie
+		return http.SameSiteNoneMode, true
+	}
+
+	// dev หรือไม่มีค่า  ใช้ Strict mode และไม่บังคับ Secure
+	return http.SameSiteStrictMode, false
+}
+
 // ฟังก์ชันสำหรับสร้าง Token และตั้งค่า Cookie
 func GenerateToken(userId string, c *gin.Context) (string, error) {
-	// ดึง Secret Key จาก ENV
 	secret := os.Getenv("SECRET_KEY")
 	if secret == "" {
-		return "", fmt.Errorf("นำเข้าข้อมูลล้มเหลว - ระบบขัดข้องระหว่างการดึง SECRET_KEY")
-	}
-	node_mode := os.Getenv("NODE_ENV")
-	if node_mode == "" {
-		return "", fmt.Errorf("นำเข้าข้อมูลล้มเหลว - ระบบขัดข้องระหว่างการดึ NODE_ENV")
+		return "", fmt.Errorf("SECRET_KEY not found")
 	}
 
-	// สร้าง Claims สำหรับ JWT เอาไว้ใช้ตอนสร้างโทเค่นใช้บอกว่าโทเค่นมีอะไร
+	// Create JWT claims
 	claims := jwt.MapClaims{
 		"userId": userId,
-		"exp":    time.Now().Add(24 * time.Hour).Unix(), // ตั้งเวลาให้หมดอายุใน 1 วัน
+		"exp":    time.Now().Add(24 * time.Hour).Unix(),
 	}
 
-	// สร้าง Token
+	// Create JWT token
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	tokenString, err := token.SignedString([]byte(secret))
 	if err != nil {
-		return "", fmt.Errorf("สร้างTokenเหลว - ระบบขัดข้องระหว่างการสร้าง Token")
+		return "", fmt.Errorf("failed to sign token")
 	}
+	//ดึงค่า SameSite และ Secure แบบอัตโนมัติ
+	sameSite, secure := GetCookieConfig()
 
-	// ตั้งค่า Cookie
+	// Set cookie
 	cookie := &http.Cookie{
 		Name:     "jwt",
 		Value:    tokenString,
 		Path:     "/",
 		MaxAge:   24 * 60 * 60,
 		HttpOnly: true,
-		Secure:   node_mode != "development",
-		//SameSite: http.SameSiteStrictMode, // ป้องกัน CSRF
-		SameSite: http.SameSiteNoneMode,
+		Secure:   secure,
+		SameSite: sameSite,
 	}
-
 	http.SetCookie(c.Writer, cookie)
 
-	fmt.Println("Token generated and cookie set")
 	return tokenString, nil
 }
 

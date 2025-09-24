@@ -2,8 +2,10 @@ package userController
 
 import (
 	"context"
+	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/Samind2/MimiCaare-Project/service/config/token"
 	userModel "github.com/Samind2/MimiCaare-Project/service/models/user"
@@ -13,6 +15,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -135,18 +138,24 @@ func Login(c *gin.Context) {
 }
 
 func Logout(c *gin.Context) {
-	// ลบ token ออกจาก coockie
+	sameSite, secure := token.GetCookieConfig()
+	//  ตรวจสอบค่าที่ได้จาก GetCookieConfig()
+	log.Println("SameSite:", sameSite)
+	log.Println("Secure:", secure)
+
+	//  ต้องตั้ง Path ให้ตรงกับตอน set
 	cookie := &http.Cookie{
 		Name:     "jwt",
 		Value:    "",
 		Path:     "/",
 		MaxAge:   -1,
+		Expires:  time.Unix(0, 0),
 		HttpOnly: true,
-		Secure:   false,                 //ก่อนขึ้นโฮสต้องเปลี่ยนเป็น true
-		SameSite: http.SameSiteNoneMode, // ต้องใช้ None ถ้าเป็น cross-origin
+		Secure:   secure,
+		SameSite: sameSite,
 	}
 	http.SetCookie(c.Writer, cookie)
-
+	log.Println("Set-Cookie:", cookie)
 	c.JSON(http.StatusOK, gin.H{"message": "ออกจากระบบสำเร็จ"})
 }
 
@@ -250,5 +259,216 @@ func UpdateProfile(c *gin.Context) {
 		"lastName":  update["lastName"],
 		"email":     update["email"],
 		"picture":   pictureURL,
+	})
+}
+
+func ResetPassword(c *gin.Context) {
+	jwtCookie, err := c.Cookie("jwt")
+	if err != nil {
+		c.JSON(http.StatusForbidden, gin.H{"message": "ไม่ได้รับอนุญาต - ไม่มีคุกกี้"})
+		return
+	}
+	// ยืนยันและดึงข้อมูลจาก JWT
+	userClaims, err := token.ValidateToken(jwtCookie)
+	if err != nil {
+		c.JSON(http.StatusForbidden, gin.H{"message": "ไม่พบโทเค็น"})
+		return
+	}
+	userId := userClaims.UserId // ดึง userId จาก claims
+	//log.Println("User ID:", userId)
+	// แปลง userId เป็น ObjectID
+	objectID, err := primitive.ObjectIDFromHex(userId)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "ไอดีผู้ใช้ไม่ถูกต้อง"})
+		return
+	}
+	var req struct {
+		OldPassword       string `json:"oldPassword"`
+		NewPassword       string `json:"newPassword"`
+		RepeatNewPassword string `json:"repeatNewPassword"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "ข้อมูลไม่ถูกต้อง"})
+		return
+	}
+	if req.OldPassword == "" || req.NewPassword == "" || req.RepeatNewPassword == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "กรุณากรอกข้อมูลให้ครบทุกช่อง"})
+		return
+	}
+	if req.OldPassword == req.NewPassword {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "รหัสผ่านใหม่ต้องไม่ตรงกับรหัสผ่านเก่า"})
+		return
+	}
+	if req.NewPassword != req.RepeatNewPassword {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "รหัสผ่านใหม่และการยืนยันรหัสผ่านไม่ตรงกัน"})
+		return
+	}
+	var user userModel.User
+	err = UserCollection.FindOne(context.TODO(), bson.M{"_id": objectID}).Decode(&user)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			c.JSON(http.StatusNotFound, gin.H{"message": "ไม่พบผู้ใช้งาน"})
+		} else {
+			c.JSON(http.StatusInternalServerError, gin.H{"message": "เกิดข้อผิดพลาดในการค้นหาผู้ใช้งาน"})
+		}
+		return
+	}
+	// เช็ครหัสผ่านเก่า
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.OldPassword))
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "รหัสผ่านเก่าไม่ถูกต้อง"})
+		return
+	}
+	// เข้ารหัสรหัสผ่านใหม่
+	newHashPassword, err := bcrypt.GenerateFromPassword([]byte(req.NewPassword), bcrypt.DefaultCost)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "เกิดข้อผิดพลาดในการเข้ารหัสรหัสผ่านใหม่"})
+		return
+	}
+	// อัปเดตรหัสผ่านในฐานข้อมูล
+	_, err = UserCollection.UpdateOne(context.TODO(), bson.M{"_id": objectID}, bson.M{"$set": bson.M{"password": string(newHashPassword)}})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "เกิดข้อผิดพลาดในการอัปเดตรหัสผ่าน"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "รหัสผ่านถูกอัปเดตสำเร็จ"})
+}
+
+func GetAllUsers(c *gin.Context) {
+	jwtCookie, err := c.Cookie("jwt")
+	if err != nil {
+		c.JSON(http.StatusForbidden, gin.H{"message": "ไม่ได้รับอนุญาต - ไม่มีคุกกี้"})
+		return
+	}
+
+	userClaims, err := token.ValidateToken(jwtCookie)
+	if err != nil {
+		c.JSON(http.StatusForbidden, gin.H{"message": "ไม่พบโทเค็น"})
+		return
+	}
+
+	adminID, err := primitive.ObjectIDFromHex(userClaims.UserId)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "ไอดีผู้ใช้ไม่ถูกต้อง"})
+		return
+	}
+
+	//  check role
+	var admin userModel.User
+	ctx := c.Request.Context()
+	err = UserCollection.FindOne(ctx, bson.M{"_id": adminID}).Decode(&admin)
+	if err != nil || admin.Role != "admin" {
+		c.JSON(http.StatusForbidden, gin.H{"message": "คุณไม่มีสิทธิ์เข้าถึงข้อมูลนี้"})
+		return
+	}
+	//  ดึงข้อมูลผู้ใช้ทั้งหมด โดยไม่ดึงรหัสผ่าน โดยการสร้าง options ขึ้นมา
+	opts := options.Find().SetProjection(bson.M{
+		"password": 0,
+	})
+
+	cursor, err := UserCollection.Find(ctx, bson.M{}, opts)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "เกิดข้อผิดพลาดในการดึงข้อมูลผู้ใช้"})
+		return
+	}
+	defer cursor.Close(ctx)
+
+	var users []userModel.User
+	for cursor.Next(ctx) {
+		var u userModel.User
+		if err := cursor.Decode(&u); err != nil {
+			log.Printf("Decode user error: %v", err)
+			continue
+		}
+		users = append(users, u)
+	}
+
+	if err := cursor.Err(); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "เกิดข้อผิดพลาดในการอ่านข้อมูลผู้ใช้"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "ดึงข้อมูลผู้ใช้สำเร็จ",
+		"users":   users,
+	})
+}
+
+func AssignRole(c *gin.Context) {
+	jwtCookie, err := c.Cookie("jwt")
+	if err != nil {
+		c.JSON(http.StatusForbidden, gin.H{"message": "ไม่ได้รับอนุญาต - ไม่มีคุกกี้"})
+		return
+	}
+	// ยืนยันและดึงข้อมูลจาก JWT
+	userClaims, err := token.ValidateToken(jwtCookie)
+	if err != nil {
+		c.JSON(http.StatusForbidden, gin.H{"message": "ไม่พบโทเค็น"})
+		return
+	}
+	userId := userClaims.UserId // ดึง userId จาก claims
+	//log.Println("User ID:", userId)
+	// แปลง userId เป็น ObjectID
+	objectID, err := primitive.ObjectIDFromHex(userId)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "ไอดีผู้ใช้ไม่ถูกต้อง"})
+		return
+	}
+	var user userModel.User
+	err = UserCollection.FindOne(context.Background(), bson.M{"_id": objectID}).Decode(&user)
+	if err != nil {
+		c.JSON(http.StatusForbidden, gin.H{"message": "ไม่พบข้อมูลผู้ใช้"})
+		return
+	}
+	// เช็ค role
+	if user.Role != "admin" {
+		c.JSON(http.StatusForbidden, gin.H{"message": "คุณไม่มีสิทธิ์เข้าถึงข้อมูลนี้"})
+		return
+	}
+	var req struct {
+		TargetId string `bson:"targetId" json:"targetId"`
+		Role     string `bson:"role,omitempty" json:"role"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "ข้อมูลไม่ถูกต้อง"})
+		return
+	}
+	if req.TargetId == "" || req.Role == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "กรุณากรอกข้อมูลให้ครบทุกช่อง"})
+		return
+	}
+	targetObjectID, err := primitive.ObjectIDFromHex(req.TargetId)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "ID ผู้ใช้ไม่ถูกต้อง"})
+		return
+	}
+	if objectID == targetObjectID {
+		c.JSON(http.StatusForbidden, gin.H{"message": "ไม่สามารถเปลี่ยน role ของตัวเองได้"})
+		return
+	}
+	if req.Role != "user" && req.Role != "admin" {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "ข้อมูล role ไม่ถูกต้อง"})
+		return
+	}
+	var targetUser userModel.User
+	err = UserCollection.FindOne(context.Background(), bson.M{"_id": targetObjectID}).Decode(&targetUser)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			c.JSON(http.StatusNotFound, gin.H{"message": "ไม่พบผู้ใช้งาน"})
+		} else {
+			c.JSON(http.StatusInternalServerError, gin.H{"message": "เกิดข้อผิดพลาดในการค้นหาผู้ใช้งาน"})
+		}
+		return
+	}
+	// อัปเดต role
+	_, err = UserCollection.UpdateOne(context.TODO(), bson.M{"_id": targetObjectID}, bson.M{"$set": bson.M{"role": req.Role}})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "เกิดข้อผิดพลาดขณะอัปเดต role"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"message": "อัปเดต role สำเร็จ",
+		"userId":  targetObjectID,
+		"newRole": req.Role,
 	})
 }
