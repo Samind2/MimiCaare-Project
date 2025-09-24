@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import ageRangeService from "../../service/dataAge.service"; 
+import ageRangeService from "../../service/dataAge.service";
 import { toast } from "react-toastify";
 
 const AgeData = () => {
@@ -8,7 +8,8 @@ const AgeData = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await ageRangeService.addNewAgeRange({ range: ageRange });
+      // 👇 ต้องใช้ ageRange ไม่ใช่ range
+      await ageRangeService.addNewAgeRange({ ageRange: Number(ageRange) });
       toast.success("เพิ่มช่วงอายุสำเร็จ");
       setAgeRange("");
     } catch (err) {
@@ -21,10 +22,10 @@ const AgeData = () => {
       <h2 className="text-lg font-bold mb-2">เพิ่มช่วงอายุ</h2>
       <form onSubmit={handleSubmit} className="flex flex-col gap-2">
         <input
-          type="text"
+          type="number"
           value={ageRange}
           onChange={(e) => setAgeRange(e.target.value)}
-          placeholder="ช่วงอายุ เช่น แรกเกิด - 1 เดือน"
+          placeholder="กรอกตัวเลขเดือน เช่น 12"
           className="border p-2 rounded"
           required
         />
