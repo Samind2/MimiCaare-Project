@@ -19,6 +19,21 @@ func SetAgeRangeCollection(client *mongo.Client) {
 	ageRangeCollection = client.Database(dbName).Collection("metaAgeRange")
 }
 
+type AddAgeRangeRequest struct {
+	AgeRange int `json:"ageRange" binding:"required" example:"24"`
+}
+
+// @Summary เพิ่มช่วงอายุใหม่
+// @Description ใช้สำหรับเพิ่มข้อมูลช่วงอายุ (admin เท่านั้น)
+// @Tags MetaAgeRange
+// @Accept json
+// @Produce json
+// @Param request body AddAgeRangeRequest true "ข้อมูลช่วงอายุ"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]interface{}
+// @Failure 401 {object} map[string]interface{}
+// @Failure 409 {object} map[string]interface{}
+// @Router /metaAgeRange/add [post]
 func AddNewAgeRange(c *gin.Context) {
 	var newAgeRange ageRangeModel.MetaAgeRange
 	if err := c.ShouldBindJSON(&newAgeRange); err != nil {
@@ -45,6 +60,13 @@ func AddNewAgeRange(c *gin.Context) {
 	})
 }
 
+// @Summary ดึงข้อมูลช่วงอายุทั้งหมด
+// @Description คืนค่าข้อมูลช่วงอายุทั้งหมด (admin เท่านั้น)
+// @Tags MetaAgeRange
+// @Produce json
+// @Success 200 {array} ageRangeModel.MetaAgeRange
+// @Failure 401 {object} map[string]interface{}
+// @Router /metaAgeRange/get-all [get]
 func GetAllAgeRanges(c *gin.Context) {
 	var ageRanges []ageRangeModel.MetaAgeRange
 	cursor, err := ageRangeCollection.Find(context.TODO(), bson.M{})
@@ -62,6 +84,15 @@ func GetAllAgeRanges(c *gin.Context) {
 	})
 }
 
+// @Summary ดึงข้อมูลช่วงอายุตาม ID
+// @Description คืนค่าข้อมูลช่วงอายุตาม ObjectID (admin เท่านั้น)
+// @Tags MetaAgeRange
+// @Produce json
+// @Param id path string true "ObjectID ของช่วงอายุ"
+// @Success 200 {object} ageRangeModel.MetaAgeRange
+// @Failure 400 {object} map[string]interface{}
+// @Failure 404 {object} map[string]interface{}
+// @Router /metaAgeRange/get/{id} [get]
 func GetAgeRangeByID(c *gin.Context) {
 	idParam := c.Param("id")
 	ageRangeId, err := primitive.ObjectIDFromHex(idParam)
@@ -81,6 +112,22 @@ func GetAgeRangeByID(c *gin.Context) {
 	})
 }
 
+type UpdateAgeRangeRequest struct {
+	ID       primitive.ObjectID `json:"id" example:"ObjectID ของช่วงอายุ"`
+	AgeRange int                `json:"ageRange" binding:"required" example:"18"`
+}
+
+// @Summary อัปเดตช่วงอายุตาม ID
+// @Description ใช้สำหรับอัปเดตข้อมูลช่วงอายุ (admin เท่านั้น)
+// @Tags MetaAgeRange
+// @Accept json
+// @Produce json
+// @Param id path string true "ObjectID ของช่วงอายุ"
+// @Param request body ageRangeModel.MetaAgeRange true "ข้อมูลใหม่"
+// @Success 200 {object} ageRangeModel.MetaAgeRange
+// @Failure 400 {object} map[string]interface{}
+// @Failure 404 {object} map[string]interface{}
+// @Router /metaAgeRange/update/{id} [put]
 func UpdateAgeRangeByID(c *gin.Context) {
 	idParam := c.Param("id")
 	ageRangeId, err := primitive.ObjectIDFromHex(idParam)
@@ -136,6 +183,15 @@ func UpdateAgeRangeByID(c *gin.Context) {
 	})
 }
 
+// @Summary ลบช่วงอายุตาม ID
+// @Description ลบข้อมูลช่วงอายุ (admin เท่านั้น)
+// @Tags MetaAgeRange
+// @Produce json
+// @Param id path string true "ObjectID ของช่วงอายุ"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]interface{}
+// @Failure 404 {object} map[string]interface{}
+// @Router /metaAgeRange/delete/{id} [delete]
 func DeleteAgeRangeByID(c *gin.Context) {
 	idParam := c.Param("id")
 	ageRangeId, err := primitive.ObjectIDFromHex(idParam)

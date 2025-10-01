@@ -23,6 +23,25 @@ func SetChildrenCollection(client *mongo.Client) {
 	ChildrenCollection = client.Database(dbName).Collection("children")
 }
 
+type AddChildrenRequest struct {
+	FirstName string `json:"firstName" example:"สมชาย"`
+	LastName  string `json:"lastName" example:"ใจดี"`
+	BirthDate string `json:"birthDate" example:"2020-05-01T00:00:00Z"`
+	Gender    string `json:"gender" example:"male"`
+	Image     string `json:"image" example:"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA..."`
+}
+
+// @Summary เพิ่มข้อมูลเด็กใหม่
+// @Description ผู้ปกครองเพิ่มข้อมูลเด็กใหม่ (ต้องล็อกอินก่อน)
+// @Tags Children
+// @Accept json
+// @Produce json
+// @Param request body AddChildrenRequest true "ข้อมูลเด็กใหม่"
+// @Success 201 {object} map[string]interface{} "เพิ่มข้อมูลเด็กสำเร็จ"
+// @Failure 400 {object} map[string]string "ข้อมูลไม่ถูกต้อง"
+// @Failure 403 {object} map[string]string "ไม่ได้รับอนุญาต"
+// @Failure 500 {object} map[string]string "ระบบขัดข้อง"
+// @Router /children/add [post]
 func AddNewChildren(c *gin.Context) {
 	// ดึง JWT จากคุกกี้
 	jwtCookie, err := c.Cookie("jwt")
@@ -92,6 +111,16 @@ func AddNewChildren(c *gin.Context) {
 	})
 }
 
+// GetChildrenByParentID godoc
+// @Summary ดึงข้อมูลเด็กทั้งหมดของผู้ใช้
+// @Description ดึงข้อมูลเด็กทั้งหมดที่เป็นลูกของผู้ปกครอง (ต้องล็อกอินก่อน)
+// @Tags Children
+// @Produce json
+// @Success 200 {object} map[string]interface{} "รายการเด็ก"
+// @Failure 403 {object} map[string]string "ไม่ได้รับอนุญาต"
+// @Failure 404 {object} map[string]string "ไม่พบข้อมูลเด็ก"
+// @Failure 500 {object} map[string]string "ระบบขัดข้อง"
+// @Router /children/get [get]
 func GetChildrenByParentID(c *gin.Context) {
 	// ดึง JWT จากคุกกี้
 	jwtCookie, err := c.Cookie("jwt")
@@ -139,6 +168,17 @@ func GetChildrenByParentID(c *gin.Context) {
 	})
 }
 
+// GetChildrenByID godoc
+// @Summary ดึงข้อมูลเด็กตาม ID
+// @Description ดึงข้อมูลเด็กคนเดียว โดยตรวจสอบว่าเป็นลูกของผู้ใช้ (ต้องล็อกอินก่อน)
+// @Tags Children
+// @Produce json
+// @Param id path string true "Child ID"
+// @Success 200 {object} map[string]interface{} "ข้อมูลเด็ก"
+// @Failure 400 {object} map[string]string "ไอดีเด็กไม่ถูกต้อง"
+// @Failure 403 {object} map[string]string "ไม่ได้รับอนุญาต"
+// @Failure 404 {object} map[string]string "ไม่พบข้อมูลเด็ก"
+// @Router /children/get/{id} [get]
 func GetChildrenByID(c *gin.Context) {
 	// ดึง JWT จากคุกกี้
 	jwtCookie, err := c.Cookie("jwt")
@@ -178,6 +218,27 @@ func GetChildrenByID(c *gin.Context) {
 	})
 }
 
+type UpdateChildrenRequest struct {
+	FirstName string `json:"firstName,omitempty" example:"สมหมาย"`
+	LastName  string `json:"lastName,omitempty" example:"ใจดี"`
+	BirthDate string `json:"birthDate,omitempty" example:"2020-05-01T00:00:00Z"`
+	Gender    string `json:"gender,omitempty" example:"female"`
+	Image     string `json:"image" example:"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA..."`
+}
+
+// UpdateChildrenByID godoc
+// @Summary อัปเดตข้อมูลเด็ก
+// @Description อัปเดตข้อมูลเด็กตาม ID (ต้องเป็น parent ของเด็กคนนั้น)
+// @Tags Children
+// @Accept json
+// @Produce json
+// @Param id path string true "Child ID"
+// @Param request body UpdateChildrenRequest true "ข้อมูลเด็กที่จะอัปเดต"
+// @Success 200 {object} map[string]interface{} "อัปเดตข้อมูลเด็กสำเร็จ"
+// @Failure 400 {object} map[string]string "ข้อมูลไม่ถูกต้อง"
+// @Failure 403 {object} map[string]string "ไม่ได้รับอนุญาต"
+// @Failure 404 {object} map[string]string "ไม่พบข้อมูลเด็ก"
+// @Router /children/update/{id} [put]
 func UpdateChildrenByID(c *gin.Context) {
 	// ดึง JWT จากคุกกี้
 	jwtCookie, err := c.Cookie("jwt")
@@ -272,6 +333,18 @@ func UpdateChildrenByID(c *gin.Context) {
 	})
 }
 
+// DeleteChildrenByID godoc
+// @Summary ลบข้อมูลเด็ก
+// @Description ลบข้อมูลเด็กตาม ID (ต้องเป็น parent ของเด็กคนนั้น)
+// @Tags Children
+// @Produce json
+// @Param id path string true "Child ID"
+// @Success 200 {object} map[string]string "ลบข้อมูลเด็กสำเร็จ"
+// @Failure 400 {object} map[string]string "ไอดีเด็กไม่ถูกต้อง"
+// @Failure 403 {object} map[string]string "ไม่ได้รับอนุญาต"
+// @Failure 404 {object} map[string]string "ไม่พบข้อมูลเด็ก"
+// @Failure 500 {object} map[string]string "ระบบขัดข้อง"
+// @Router /children/delete/{id} [delete]
 func DeleteChildrenByID(c *gin.Context) {
 	// ดึง JWT จากคุกกี้
 	jwtCookie, err := c.Cookie("jwt")

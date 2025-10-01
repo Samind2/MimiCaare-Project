@@ -15,6 +15,538 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/children/add": {
+            "post": {
+                "description": "ผู้ปกครองเพิ่มข้อมูลเด็กใหม่ (ต้องล็อกอินก่อน)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Children"
+                ],
+                "summary": "เพิ่มข้อมูลเด็กใหม่",
+                "parameters": [
+                    {
+                        "description": "ข้อมูลเด็กใหม่",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/childrenController.AddChildrenRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "เพิ่มข้อมูลเด็กสำเร็จ",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "ข้อมูลไม่ถูกต้อง",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "ไม่ได้รับอนุญาต",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "ระบบขัดข้อง",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/children/delete/{id}": {
+            "delete": {
+                "description": "ลบข้อมูลเด็กตาม ID (ต้องเป็น parent ของเด็กคนนั้น)",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Children"
+                ],
+                "summary": "ลบข้อมูลเด็ก",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Child ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "ลบข้อมูลเด็กสำเร็จ",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "ไอดีเด็กไม่ถูกต้อง",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "ไม่ได้รับอนุญาต",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "ไม่พบข้อมูลเด็ก",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "ระบบขัดข้อง",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/children/get": {
+            "get": {
+                "description": "ดึงข้อมูลเด็กทั้งหมดที่เป็นลูกของผู้ปกครอง (ต้องล็อกอินก่อน)",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Children"
+                ],
+                "summary": "ดึงข้อมูลเด็กทั้งหมดของผู้ใช้",
+                "responses": {
+                    "200": {
+                        "description": "รายการเด็ก",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "403": {
+                        "description": "ไม่ได้รับอนุญาต",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "ไม่พบข้อมูลเด็ก",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "ระบบขัดข้อง",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/children/get/{id}": {
+            "get": {
+                "description": "ดึงข้อมูลเด็กคนเดียว โดยตรวจสอบว่าเป็นลูกของผู้ใช้ (ต้องล็อกอินก่อน)",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Children"
+                ],
+                "summary": "ดึงข้อมูลเด็กตาม ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Child ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "ข้อมูลเด็ก",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "ไอดีเด็กไม่ถูกต้อง",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "ไม่ได้รับอนุญาต",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "ไม่พบข้อมูลเด็ก",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/children/update/{id}": {
+            "put": {
+                "description": "อัปเดตข้อมูลเด็กตาม ID (ต้องเป็น parent ของเด็กคนนั้น)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Children"
+                ],
+                "summary": "อัปเดตข้อมูลเด็ก",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Child ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "ข้อมูลเด็กที่จะอัปเดต",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/childrenController.UpdateChildrenRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "อัปเดตข้อมูลเด็กสำเร็จ",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "ข้อมูลไม่ถูกต้อง",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "ไม่ได้รับอนุญาต",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "ไม่พบข้อมูลเด็ก",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/metaAgeRange/add": {
+            "post": {
+                "description": "ใช้สำหรับเพิ่มข้อมูลช่วงอายุ (admin เท่านั้น)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "MetaAgeRange"
+                ],
+                "summary": "เพิ่มช่วงอายุใหม่",
+                "parameters": [
+                    {
+                        "description": "ข้อมูลช่วงอายุ",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/metadataController.AddAgeRangeRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/metaAgeRange/delete/{id}": {
+            "delete": {
+                "description": "ลบข้อมูลช่วงอายุ (admin เท่านั้น)",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "MetaAgeRange"
+                ],
+                "summary": "ลบช่วงอายุตาม ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ObjectID ของช่วงอายุ",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/metaAgeRange/get-all": {
+            "get": {
+                "description": "คืนค่าข้อมูลช่วงอายุทั้งหมด (admin เท่านั้น)",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "MetaAgeRange"
+                ],
+                "summary": "ดึงข้อมูลช่วงอายุทั้งหมด",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/metadataModel.MetaAgeRange"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/metaAgeRange/get/{id}": {
+            "get": {
+                "description": "คืนค่าข้อมูลช่วงอายุตาม ObjectID (admin เท่านั้น)",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "MetaAgeRange"
+                ],
+                "summary": "ดึงข้อมูลช่วงอายุตาม ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ObjectID ของช่วงอายุ",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/metadataModel.MetaAgeRange"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/metaAgeRange/update/{id}": {
+            "put": {
+                "description": "ใช้สำหรับอัปเดตข้อมูลช่วงอายุ (admin เท่านั้น)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "MetaAgeRange"
+                ],
+                "summary": "อัปเดตช่วงอายุตาม ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ObjectID ของช่วงอายุ",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "ข้อมูลใหม่",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/metadataModel.MetaAgeRange"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/metadataModel.MetaAgeRange"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/user/all": {
             "get": {
                 "description": "ดึงข้อมูลผู้ใช้ทั้งหมด (เฉพาะ admin เท่านั้น)",
@@ -332,6 +864,79 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "childrenController.AddChildrenRequest": {
+            "type": "object",
+            "properties": {
+                "birthDate": {
+                    "type": "string",
+                    "example": "2020-05-01T00:00:00Z"
+                },
+                "firstName": {
+                    "type": "string",
+                    "example": "สมชาย"
+                },
+                "gender": {
+                    "type": "string",
+                    "example": "male"
+                },
+                "image": {
+                    "type": "string",
+                    "example": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA..."
+                },
+                "lastName": {
+                    "type": "string",
+                    "example": "ใจดี"
+                }
+            }
+        },
+        "childrenController.UpdateChildrenRequest": {
+            "type": "object",
+            "properties": {
+                "birthDate": {
+                    "type": "string",
+                    "example": "2020-05-01T00:00:00Z"
+                },
+                "firstName": {
+                    "type": "string",
+                    "example": "สมหมาย"
+                },
+                "gender": {
+                    "type": "string",
+                    "example": "female"
+                },
+                "image": {
+                    "type": "string",
+                    "example": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA..."
+                },
+                "lastName": {
+                    "type": "string",
+                    "example": "ใจดี"
+                }
+            }
+        },
+        "metadataController.AddAgeRangeRequest": {
+            "type": "object",
+            "required": [
+                "ageRange"
+            ],
+            "properties": {
+                "ageRange": {
+                    "type": "integer",
+                    "example": 24
+                }
+            }
+        },
+        "metadataModel.MetaAgeRange": {
+            "type": "object",
+            "properties": {
+                "ageRange": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "string"
+                }
+            }
+        },
         "userController.assignRoleRequest": {
             "type": "object",
             "properties": {

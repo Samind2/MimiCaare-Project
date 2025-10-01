@@ -3,9 +3,9 @@ import vaccineService from "../../../service/standardVaccine.service";
 import receiveVaccineService from "../../../service/receiveVac.service";
 import childService from "../../../service/child.service";
 import { toast } from "react-toastify";
-import { FaPlus } from 'react-icons/fa';
-import { FaChevronDown } from "react-icons/fa";
+import { FaPlus, FaChevronDown, } from 'react-icons/fa';
 import VaccineTimeline from "./VaccineTimeline"
+
 
 
 const ViewVac = () => {

@@ -13,7 +13,7 @@ const Profile = () => {
     logout();
     toast.success("ออกจากระบบสำเร็จ!", { autoClose: 1500 });
     navigate('/');
-    }
+  }
   return (
     <div>
 
@@ -26,10 +26,11 @@ const Profile = () => {
         >
           <div className="w-10 rounded-full">
             <img
-              src={user?.picture || "/images/UserPic/UserPic.png"}
-              alt="User Photo Profile"
-              className="w-10 h-10 rounded-full object-cover"
+              src={user?.profilePic || "/images/UserPic/UserPic.png"}
+              alt="Profile"
+              className="profile-img"
             />
+
           </div>
         </div>
         <ul
@@ -49,7 +50,7 @@ const Profile = () => {
           </li>
           <li>
             <button data-testid="logout-button"
-            onClick={handleLogout} className='justify-center text-[#E51317] w-full'>
+              onClick={handleLogout} className='justify-center text-[#E51317] w-full'>
               Logout
             </button>
           </li>
