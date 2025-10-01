@@ -19,7 +19,7 @@ const ViewDev = () => {
   const [currentDevelopmentIndex, setCurrentDevelopmentIndex] = useState(0); // ดึงข้อมูลที่บันทึกข้อปัจจุบันมาแสดง
   //const [lastAssessmentMap, setLastAssessmentMap] = useState(null); // เก็บสถานะการประเมินครั้งล่าสุดสำหรับปุ่มประเมินใหม่
 
-  const ageRanges = [1, 2, 4, 6, 8, 9, 12, 15, 17, 18, 24, 29, 30, 39, 41, 42, 48, 54, 59, 60, 66, 72, 78];
+  const ageRanges = [1, 2, 4, 6, 8, 9, 12, 15, 17, 18, 24, 29, 30, 36, 41, 42, 48, 54, 59, 60, 66, 72, 78];
 
   const ageRangeToText = (age) => {
     switch (age) {

@@ -10,13 +10,15 @@ const getDevelopById = async (id) => {
   return await api.get(`${API_URL}/get/${id}`);
 };
 
+
 const getDevelopByCategory = async (category) => {
-  return await api.post(`${API_URL}/get-by-category`, { category });
+  return await api.get(`${API_URL}/get-by-category`, { params: { category } });
 };
 
 const getDevelopByCategoryAndDetail = async (category, detail) => {
-  return await api.post(`${API_URL}/get-by-category-detail`, { category, detail });
+  return await api.get(`${API_URL}/get-by-category-detail`, { params: { category, detail } });
 };
+
 
 const addNewDevelop = async (developData) => {
   return await api.post(`${API_URL}/add`, developData);
