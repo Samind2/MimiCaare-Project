@@ -198,7 +198,7 @@ const AddDevelopment = () => {
             new Promise((resolve) => {
                 const ToastContent = ({ closeToast }) => ( // ฟังก์ชันที่ใช้แสดงเนื้อหาใน Toast
                     <div>
-                        <p>คุณต้องการลบข้อมูลช่วงอายุ {idToDelete} ใช่หรือไม่?</p>
+                        <p>คุณต้องการลบข้อมูลช่วงอายุ {{idToDelete}} ใช่หรือไม่?</p>
                         <div className="mt-2 flex justify-end gap-2">
                             <button
                                 className="btn btn-sm btn-error"
