@@ -86,9 +86,19 @@ func AddReceiveVaccineCustom(c *gin.Context) {
 		return
 	}
 
+	var existingVaccine receiveVaccineModel.ReceiveVaccine
+	err := receiveVaccineCollection.FindOne(context.TODO(), bson.M{
+		"childId": receiveData.ChildID,
+		"records": receiveData.Records,
+	}).Decode(&existingVaccine)
+	if err == nil {
+		c.JSON(http.StatusConflict, gin.H{"message": "มีข้อมูลวัคซีนนี้ในระบบแล้ว"})
+		return
+	}
+
 	receiveData.ID = primitive.NewObjectID() // สร้าง ObjectID ใหม่
 	// บันทึกข้อมูลลง MongoDB
-	_, err := receiveVaccineCollection.InsertOne(context.TODO(), receiveData)
+	_, err = receiveVaccineCollection.InsertOne(context.TODO(), receiveData)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "ไม่สามารถบันทึกข้อมูลได้", "error": err.Error()})
 		return
