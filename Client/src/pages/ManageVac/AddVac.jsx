@@ -23,7 +23,8 @@ const VaccinePage = () => {
   const fetchDataVaccines = async () => {
     try {
       const res = await vacineData.getAllVaccines();
-      const data = res.data.data || [];
+      const data = res.data || [];
+      console.log(res.data)
       setDataVaccines(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error("Error fetching meta vaccines:", error);
@@ -89,25 +90,23 @@ const VaccinePage = () => {
 
   const handleSubmit = async () => {
     try {
-      for (let row of formRows) {
-        const ageNum = mapAgeTextToNumber(row.age);
-        if (groupedByAge[ageNum]) {
-          toast.error(`มีข้อมูลวัคซีนสำหรับอายุ ${row.age} แล้ว`, { autoClose: 2000 });
-          return;
-        }
+      if (!formRows[0].age) {
+        toast.error("กรุณาเลือกอายุ", { autoClose: 2000 });
+        return;
       }
 
-      const grouped = {};
-      formRows.forEach((row) => {
-        const age = mapAgeTextToNumber(row.age);
-        if (!grouped[age]) grouped[age] = [];
-        grouped[age].push({ vaccineName: row.vaccine, note: "" });
-      });
+      const ageNum = mapAgeTextToNumber(formRows[0].age);
 
-      for (const age in grouped) {
-        const payload = { ageRange: parseInt(age), vaccines: grouped[age] };
-        await vaccineService.addvaccine(payload);
+      if (groupedByAge[ageNum]) {
+        toast.error(`มีข้อมูลวัคซีนสำหรับอายุ ${formRows[0].age} แล้ว`, { autoClose: 2000 });
+        return;
       }
+
+      const vaccines = formRows.map(row => ({ vaccineName: row.vaccine, note: "" }));
+
+      const payload = { ageRange: ageNum, vaccines };
+
+      await vaccineService.addvaccine(payload);
 
       const newVaccineNames = formRows.map(row => row.vaccine).filter(vac => !vaccineOptions.includes(vac));
       if (newVaccineNames.length > 0) {
@@ -123,6 +122,7 @@ const VaccinePage = () => {
       toast.error("เกิดข้อผิดพลาด", { autoClose: 1500 });
     }
   };
+
 
   //  แก้ไขข้อมูล 
   const handleEdit = (age) => {
@@ -212,7 +212,7 @@ const VaccinePage = () => {
 
       {/* ตารางวัคซีน */}
       {Object.keys(groupedByAge).length > 0 ? (
-        <div className="overflow-x-auto">
+        <div className="w-full">
           <table className="w-full border-separate border-spacing-y-2 text-sm">
             <thead className="bg-blue-100 text-blue-800">
               <tr>
@@ -262,33 +262,50 @@ const VaccinePage = () => {
             <div className="space-y-4 max-h-[400px] overflow-y-auto pr-1">
               {formRows.map((row, index) => (
                 <div key={index} className="flex gap-2 items-center">
-                  <select
-                    className="border border-gray-300 rounded-lg px-3 py-2 text-sm w-1/3 focus:outline-none focus:ring-2 focus:ring-blue-300"
-                    value={row.age}
-                    onChange={(e) => handleChange(index, 'age', e.target.value)}
-                  >
-                    <option value="">เลือกอายุ</option>
-                    {ageOptions.map((age, i) => (
-                      <option key={i} value={age === '0 เดือน' ? '0' : age}>{age === '0 เดือน' ? 'แรกเกิด' : age}</option>
-                    ))}
-                  </select>
+                  {/* ให้แสดง Dropdown อายุแค่แถวแรก */}
+                  {index === 0 && (
+                    <select
+                      className="border border-gray-300 rounded-lg px-3 py-2 text-sm w-1/3 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                      value={row.age}
+                      onChange={(e) => handleChange(index, 'age', e.target.value)}
+                    >
+                      <option value="">เลือกอายุ</option>
+                      {ageOptions.map((age, i) => (
+                        <option key={i} value={age === '0 เดือน' ? '0' : age}>
+                          {age === '0 เดือน' ? 'แรกเกิด' : age}
+                        </option>
+                      ))}
+                    </select>
+                  )}
 
+                  {/* Dropdown วัคซีน */}
                   <select
-                    className="border border-gray-300 rounded-lg px-3 py-2 text-sm w-2/3 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                    className={`border border-gray-300 rounded-lg px-3 py-2 text-sm ${index === 0 ? 'w-2/3' : 'w-full'} focus:outline-none focus:ring-2 focus:ring-blue-300`}
                     value={row.vaccine}
                     onChange={(e) => handleChange(index, 'vaccine', e.target.value)}
                   >
-                    {dataVaccines.map((v, i) => <option key={i} value={v.vaccineName}>{v.vaccineName}</option>)}
+                    <option value="">เลือกวัคซีน</option>
+                    {dataVaccines
+                      .filter(v => !formRows.some(r => r.vaccine === v.vaccineName && r !== row))
+                      .map((v, i) => (
+                        <option key={i} value={v.vaccineName}>{v.vaccineName}</option>
+                      ))
+                    }
                   </select>
 
+                  {/* ปุ่ม + เพิ่มแถว */}
                   {index === formRows.length - 1 && (
-                    <button className="bg-green-100 text-green-800 hover:bg-green-200 hover:scale-105 transition p-2 rounded-full" onClick={handleAddRow}>
+                    <button
+                      className="bg-green-100 text-green-800 hover:bg-green-200 hover:scale-105 transition p-2 rounded-full"
+                      onClick={handleAddRow}
+                    >
                       <FaPlus size={12} />
                     </button>
                   )}
                 </div>
               ))}
             </div>
+
 
             <div className="mt-6 text-center space-x-2">
               <button className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg shadow transition" onClick={handleSubmit}>บันทึก</button>
@@ -309,8 +326,7 @@ const VaccinePage = () => {
             <div className="space-y-4 max-h-[400px] overflow-y-auto pr-1">
               {editVaccines.map((vaccine, index) => (
                 <div key={index} className="flex gap-2 items-center">
-                  <input
-                    type="text"
+                  <select
                     className="border border-gray-300 rounded-lg px-3 py-2 text-sm w-full focus:outline-none focus:ring-2 focus:ring-blue-300"
                     value={vaccine}
                     onChange={(e) => {
@@ -318,16 +334,33 @@ const VaccinePage = () => {
                       newVaccines[index] = e.target.value;
                       setEditVaccines(newVaccines);
                     }}
-                  />
-                  <button className="bg-red-100 text-red-700 hover:bg-red-200 p-2 rounded-full" onClick={() => {
-                    const newVaccines = editVaccines.filter((_, i) => i !== index);
-                    setEditVaccines(newVaccines);
-                  }}>ลบ</button>
+                  >
+                    <option value="">เลือกวัคซีน</option>
+                    {dataVaccines.map((v, i) => (
+                      <option key={i} value={v.vaccineName}>{v.vaccineName}</option>
+                    ))}
+                  </select>
+
+                  <button
+                    className="bg-red-100 text-red-700 hover:bg-red-200 p-2 rounded-full"
+                    onClick={() => {
+                      const newVaccines = editVaccines.filter((_, i) => i !== index);
+                      setEditVaccines(newVaccines);
+                    }}
+                  >
+                    ลบ
+                  </button>
                 </div>
               ))}
 
-              <button className="bg-green-100 text-green-800 hover:bg-green-200 px-4 py-2 rounded" onClick={() => setEditVaccines([...editVaccines, ''])}>เพิ่มวัคซีน</button>
+              <button
+                className="bg-green-100 text-green-800 hover:bg-green-200 px-4 py-2 rounded"
+                onClick={() => setEditVaccines([...editVaccines, ''])}
+              >
+                เพิ่มวัคซีน
+              </button>
             </div>
+
 
             <div className="mt-6 text-center space-x-2">
               <button className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg shadow transition" onClick={handleUpdate}>บันทึกการแก้ไข</button>
