@@ -315,6 +315,7 @@ const ViewVac = () => {
   };
 
   const handleDeleteCustomVaccine = async (id) => {
+
     const confirm = await new Promise((resolve) => {
       toast.info(
         <div>
@@ -378,10 +379,12 @@ const ViewVac = () => {
 
       {/* Dropdown สำหรับเลือกเด็ก */}
       <div className="flex space-x-4 mb-6">
-        <div className="dropdown dropdown-hover">
+        <div className="dropdown dropdown-hover" data-testid="vaccine-dropdown">
+          
           <label
             tabIndex={0}
             className="btn bg-blue-200 text-blue-800 hover:bg-blue-300 rounded-xl text-lg cursor-pointer"
+            data-testid="vaccine-dropdown-label"
           >
             {showCustomOnly ? "วัคซีนเพิ่มเติม" : "วัคซีนตามมาตรฐาน"}
             <FaChevronDown className="inline ml-2" />
@@ -389,12 +392,14 @@ const ViewVac = () => {
           <ul
             tabIndex={0}
             className="dropdown-content menu p-3 shadow-lg bg-blue-100 rounded-xl w-56"
+            data-testid="vaccine-dropdown-list"
           >
             {filteredOptions.map((item, i) => (
-              <li key={i}>
+              <li key={i} data-testid={`vaccine-option-${i}`}>
                 <a
                   className="hover:bg-blue-300 rounded-md p-2 cursor-pointer"
                   onClick={() => setShowCustomOnly(item.value)} // เลือกวัคซีนตามมาตรฐาน
+                  data-testid={`vaccine-option-link-${i}`}
                 >
                   {item.label}
                 </a>
@@ -403,12 +408,12 @@ const ViewVac = () => {
           </ul>
         </div>
 
-        <div className="dropdown dropdown-hover">
+        <div className="dropdown dropdown-hover" data-testid="child-dropdown">
           <div
             tabIndex={0}
             className="btn bg-pink-100 text-pink-800 hover:bg-pink-200 rounded-xl text-lg w-48 text-left truncate"
           >
-            <span className="truncate inline-block max-w-[85%]">
+            <span className="truncate inline-block max-w-[85%]" data-testid="child-dropdown-text">
               {selectedChild
                 ? `${selectedChild.firstName} ${selectedChild.lastName}`
                 : "เลือกเด็ก"}
@@ -418,17 +423,19 @@ const ViewVac = () => {
           <ul
             tabIndex={0}
             className="dropdown-content menu p-3 shadow-lg bg-pink-50 rounded-xl w-56 max-h-60 overflow-auto"
+            data-testid="child-dropdown-list"
           >
             {children
               .filter((child) => child.id !== selectedChild?.id) // กรองเด็กที่เลือกอยู่ออก
               .map((child) => (
-                <li key={child._id}>
+                <li key={child._id} data-testid={`child-option-${child.id}`}>
                   <a
                     className="hover:bg-pink-200 rounded-md p-2"
                     onClick={() => {
                       setSelectedChild(child);
                       setReceivedVaccines([]);
                     }}
+                    data-testid={`child-option-link-${child.id}`} 
                   >
                     {child.firstName} {child.lastName}
                   </a>
@@ -441,6 +448,7 @@ const ViewVac = () => {
         {showCustomOnly && (
           <button
             className="bg-pink-500 hover:bg-pink-600 text-white text-sm px-4 py-2 rounded"
+            data-testid="add-custom-vaccine"
             onClick={openCustomModal}
           >
             <FaPlus className="inline mr-2" />
@@ -468,9 +476,9 @@ const ViewVac = () => {
       )}
       {/* Modal สำหรับวัคซีนมาตรฐาน */}
       {showModal && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm z-50">
+        <div className="fixed inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm z-50" >
           <div className="bg-white rounded-xl p-6 w-[95%] max-w-lg shadow-lg">
-            <h2 className="text-xl font-bold mb-4">
+            <h2 className="text-xl font-bold mb-4" data-testid="modal-title">
               {isEditMode ? "แก้ไขข้อมูลวัคซีน" : "บันทึกข้อมูลวัคซีน"}
             </h2>
 
@@ -483,8 +491,10 @@ const ViewVac = () => {
 
             {/* Step 1 */}
             {currentStep === 1 && (
+
               <div className="space-y-3">
                 <p><strong>ชื่อเด็ก:</strong> {selectedChild?.firstName} {selectedChild?.lastName}</p>
+
                 <p>
                   <strong>อายุ:</strong>{" "}
                   {Number(formData.ageRange) === 0
@@ -504,10 +514,11 @@ const ViewVac = () => {
 
             {/* Step 2 */}
             {currentStep === 2 && (
-              <div className="space-y-3">
+              <div className="space-y-3" data-testid="step-2">
                 <label className="block text-sm font-medium">วันที่รับวัคซีน</label>
                 <input
                   type="date"
+                  data-testid="E_date"
                   className="input input-bordered w-full"
                   value={formData.receiveDate}
                   onChange={(e) => setFormData({ ...formData, receiveDate: e.target.value })}
@@ -517,18 +528,22 @@ const ViewVac = () => {
 
             {/* Step 3 */}
             {currentStep === 3 && (
-              <div className="space-y-3">
+              <div className="space-y-3" data-testid="step-3">
                 <input
                   type="text"
                   placeholder="สถานที่รับวัคซีน"
+
                   className={`input input-bordered w-full ${!formData.placeName && isStep3Attempted ? "input-error" : ""}`}
+
                   value={formData.placeName}
                   onChange={(e) => setFormData({ ...formData, placeName: e.target.value })}
                 />
                 <input
                   type="text"
                   placeholder="เบอร์โทร"
+
                   className={`input input-bordered w-full ${!formData.phoneNumber && isStep3Attempted ? "input-error" : ""}`}
+
                   value={formData.phoneNumber}
                   onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
                 />
@@ -539,6 +554,7 @@ const ViewVac = () => {
             <div className="mt-6 flex justify-between">
               <button
                 className="px-5 py-2 bg-red-200 text-red-900 rounded-lg hover:bg-red-300"
+                data-testid="btn-cancel"
                 onClick={() => setShowModal(false)}
               >
                 ยกเลิก
@@ -546,6 +562,7 @@ const ViewVac = () => {
 
               <button
                 className="px-5 py-2 bg-red-200 text-red-900 rounded-lg hover:bg-red-300"
+                data-testid="btn-prev"
                 onClick={prevStep}
                 disabled={currentStep === 1}
               >
@@ -553,6 +570,7 @@ const ViewVac = () => {
               </button>
 
               {currentStep < 3 ? (
+
                 <button
                   className="px-5 py-2 bg-green-200 text-green-900 rounded-lg hover:bg-green-300"
                   onClick={nextStep}
@@ -586,7 +604,7 @@ const ViewVac = () => {
       {showCustomModal && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm z-50">
           <div className="bg-white rounded-xl p-6 w-[90%] max-w-lg shadow-lg max-h-[90vh] overflow-auto">
-            <h2 className="text-xl font-bold mb-4">
+            <h2 className="text-xl font-bold mb-4" data-testid="modal-title"  >
               {isEditMode ? "แก้ไขวัคซีนแบบกรอกเอง" : "บันทึกวัคซีนแบบกรอกเอง"}
             </h2>
 
@@ -612,7 +630,9 @@ const ViewVac = () => {
                     <input
                       type="text"
                       placeholder="ชื่อวัคซีน"
+
                       className={`input input-bordered w-full mb-2 ${!rec.vaccineName && isCustomStep3Attempted ? "input-error" : ""}`}
+
                       value={rec.vaccineName}
                       onChange={(e) => {
                         const newRecords = [...customRecords];
@@ -624,6 +644,7 @@ const ViewVac = () => {
                       type="text"
                       placeholder="หมายเหตุ"
                       className="input input-bordered w-full"
+                      data-testid={`custom-vaccine-note`}
                       value={rec.note}
                       onChange={(e) => {
                         const newRecords = [...customRecords];
@@ -642,20 +663,25 @@ const ViewVac = () => {
                 <input
                   type="date"
                   className="input input-bordered w-full my-2"
+                  data-testid="E_date"
                   value={customFormData.receiveDate}
                   onChange={(e) => setCustomFormData({ ...customFormData, receiveDate: e.target.value })}
                 />
                 <input
                   type="text"
                   placeholder="สถานที่รับวัคซีน"
+
                   className={`input input-bordered w-full my-2 ${!customFormData.placeName && isCustomStep3Attempted ? "input-error" : ""}`}
+
                   value={customFormData.placeName}
                   onChange={(e) => setCustomFormData({ ...customFormData, placeName: e.target.value })}
                 />
                 <input
                   type="text"
                   placeholder="เบอร์โทร"
+
                   className={`input input-bordered w-full my-2 ${!customFormData.phoneNumber && isCustomStep3Attempted ? "input-error" : ""}`}
+
                   value={customFormData.phoneNumber}
                   onChange={(e) => setCustomFormData({ ...customFormData, phoneNumber: e.target.value })}
                 />
@@ -664,16 +690,18 @@ const ViewVac = () => {
 
             {/* ปุ่มควบคุม Step */}
             <div className="flex justify-between mt-4">
-              <button className="btn" onClick={() => setShowCustomModal(false)}>ยกเลิก</button>
+              <button className="btn" onClick={() => setShowCustomModal(false)} data-testid="prev-button">ยกเลิก</button>
               <button
                 className="btn btn-warning"
                 onClick={prevCustomStep}
                 disabled={currentCustomStep === 1}
+                data-testid="prev-button"
               >
                 ย้อนกลับ
               </button>
 
               {currentCustomStep < 3 ? (
+
                 <button className="btn btn-success" onClick={nextCustomStep}>ถัดไป</button>
               ) : (
                 <button
@@ -688,6 +716,7 @@ const ViewVac = () => {
                     setIsCustomStep3Attempted(false);
                   }}
                 >
+
                   บันทึก
                 </button>
               )}
