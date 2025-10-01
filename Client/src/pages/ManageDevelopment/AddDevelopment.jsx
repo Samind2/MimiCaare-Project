@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import standardDevService from "../../service/standardDev.service";
 import developDataService from "../../service/dataDev.service";
-import { FaPlus } from 'react-icons/fa';
+import { FaPlus, FaPlusCircle, FaPencilAlt } from 'react-icons/fa';
 import { toast } from "react-toastify";
 
 const AddDevelopment = () => {
@@ -10,13 +10,12 @@ const AddDevelopment = () => {
     const [ageRange, setAgeRange] = useState('');
     const [editMode, setEditMode] = useState(false);
     const [editId, setEditId] = useState(null);
-    const [currentPage, setCurrentPage] = useState(1); // หน้าปัจจุบัน
+    const [currentPage, setCurrentPage] = useState(1); 
     const [allDevelopments, setAllDevelopments] = useState([]);
     const [isAdding, setIsAdding] = useState(false);
 
-    const [developmentList, setDevelopmentList] = useState(
-        Array.from({ length: 5 }, () => ({ ...emptyDev }))
-    );
+    const [developmentList, setDevelopmentList] = useState([{ ...emptyDev }]);
+
 
     // Meta develop
     const [metaDevelop, setMetaDevelop] = useState([]);
@@ -31,7 +30,7 @@ const AddDevelopment = () => {
     const ageOptions = [
         { value: 1 }, { value: 2 }, { value: 4 }, { value: 6 }, { value: 8 },
         { value: 9 }, { value: 12 }, { value: 15 }, { value: 17 }, { value: 18 },
-        { value: 24 }, { value: 29 }, { value: 30 }, { value: 39 }, { value: 41 },
+        { value: 24 }, { value: 29 }, { value: 30 }, { value: 36 }, { value: 41 },
         { value: 42 }, { value: 48 }, { value: 54 }, { value: 59 }, { value: 60 },
         { value: 66 }, { value: 72 }, { value: 78 },
     ];
@@ -98,6 +97,12 @@ const AddDevelopment = () => {
 
 
     const handleSubmit = async () => {
+        // เช็คจำนวนพัฒนาการ
+        if (developmentList.length < 5) {
+            toast.warning(`กรุณาเพิ่มพัฒนาการอย่างน้อย 5 รายการ`);
+            return;
+        }
+
         const validDevelopments = developmentList.filter(d => d.category && d.detail);
 
         if (!ageRange) {
@@ -130,7 +135,6 @@ const AddDevelopment = () => {
                 await standardDevService.updateStandardDev(editId, newData);
                 toast.success("แก้ไขข้อมูลสำเร็จ!", { autoClose: 1500 });
             } else {
-                setIsAdding(true);
                 await standardDevService.addStandardDev(newData);
                 toast.success("เพิ่มพัฒนาการสำเร็จ!", { autoClose: 1500 });
             }
@@ -139,7 +143,7 @@ const AddDevelopment = () => {
             setAgeRange('');
             setEditId(null);
             setEditMode(false);
-            setDevelopmentList(Array.from({ length: 5 }, () => ({ ...emptyDev })));
+            setDevelopmentList([{ ...emptyDev }]);
             fetchDevelopments();
         } catch (err) {
             setIsAdding(false);
@@ -148,6 +152,17 @@ const AddDevelopment = () => {
         } finally {
             setIsAdding(false);
         }
+    };
+
+
+    const handleAddDevelopment = () => {
+        setDevelopmentList([...developmentList, { ...emptyDev }]);
+    };
+
+
+    const handleRemoveDevelopment = (index) => {
+        const updated = developmentList.filter((_, i) => i !== index);
+        setDevelopmentList(updated.length > 0 ? updated : [{ ...emptyDev }]);
     };
 
     // แก้ไขพัฒนาการ
@@ -197,7 +212,7 @@ const AddDevelopment = () => {
         // สร้างtoast เพื่อยืนยันการลบ
         const confirmDelete = () =>
             new Promise((resolve) => {
-                const ToastContent = ({ closeToast }) => ( 
+                const ToastContent = ({ closeToast }) => (
                     <div>
                         <p>คุณต้องการลบข้อมูลช่วงอายุ {idToDelete} ใช่หรือไม่?</p>
                         <div className="mt-2 flex justify-end gap-2">
@@ -394,17 +409,30 @@ const AddDevelopment = () => {
 
             {/* Modal */}
             {isModalOpen && (
-                <div className="fixed inset-0 flex items-center justify-center bg-black/30 backdrop-blur-md z-50">
-                    <div className="bg-white rounded-xl shadow-xl p-6 w-[90%] max-w-lg transition-all scale-100">
-                        <h2 className="text-xl font-bold text-center text-blue-800 mb-4">
-                            {editMode ? "แก้ไขเกณฑ์พัฒนาการ" : "เพิ่มเกณฑ์พัฒนาการ"}
-                        </h2>
+                <div className="fixed inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm z-[9999] transition">
+                    <div className="bg-white rounded-2xl shadow-2xl p-6 w-[95%] md:w-[700px] max-h-[90vh] overflow-y-auto animate-fadeIn">
 
-                        <div className="space-y-4">
+                        {/* Header */}
+                        <div className="flex justify-between items-center border-b pb-3 mb-4">
+                            <h2 className="text-2xl font-bold text-pink-700 flex items-center gap-2">
+                                {editMode ? <><FaPencilAlt /> แก้ไขเกณฑ์พัฒนาการ</> : <><FaPlusCircle /> เพิ่มเกณฑ์พัฒนาการ</>}
+
+                            </h2>
+                            <button
+                                onClick={() => setIsModalOpen(false)}
+                                className="text-gray-400 hover:text-red-500 transition"
+                            >
+                                < FaPlus className="transform rotate-45 text-2xl" />
+                            </button>
+                        </div>
+
+                        {/* Body */}
+                        <div className="space-y-5">
+                            {/* เลือกช่วงอายุ */}
                             <div>
-                                <label className="block mb-1">ช่วงอายุ</label>
+                                <label className="block mb-1 font-medium text-gray-700">ช่วงอายุ</label>
                                 <select
-                                    className="w-full border rounded px-3 py-2"
+                                    className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-pink-400 focus:outline-none"
                                     value={ageRange}
                                     onChange={(e) => setAgeRange(Number(e.target.value))}
                                 >
@@ -417,9 +445,25 @@ const AddDevelopment = () => {
                                 </select>
                             </div>
 
-                            <div className="max-h-[400px] overflow-y-auto space-y-4 pr-1">
+                            {/* รายการพัฒนาการ */}
+                            <div className="space-y-4">
                                 {developmentList.map((dev, index) => (
-                                    <div key={index} className="border rounded p-2 space-y-2 bg-gray-50">
+                                    <div
+                                        key={index}
+                                        className="border border-pink-200 rounded-xl p-4 bg-pink-50 relative shadow-sm "
+                                    >
+
+                                        {developmentList.length > 1 && index > 0 && (
+                                            <button
+                                                type="button"
+                                                onClick={() => handleRemoveDevelopment(index)}
+                                                className="absolute top-2 right-2 text-red-500 hover:text-red-700 text-lg font-bold"
+                                            >
+                                                <FaPlus className="transform rotate-45" />
+                                            </button>
+                                        )}
+
+
                                         <div className="flex gap-2">
                                             <select
                                                 className="w-1/2 border rounded px-3 py-2"
@@ -442,23 +486,14 @@ const AddDevelopment = () => {
                                                     .filter(m => m.category.trim() === dev.category.trim())
                                                     .map((m, i) => (
                                                         <option key={i} value={m.detail}>{m.detail}</option>
-                                                    ))
-                                                }
-
-
+                                                    ))}
                                             </select>
                                         </div>
 
                                         {dev.image && (
-                                            <img src={dev.image} alt="รูปพัฒนาการ" className="w-20 h-20 object-cover rounded-md border border-gray-300 shadow-sm" />
+                                            <img src={dev.image} alt="รูปพัฒนาการ"
+                                                className="w-20 h-20 object-cover rounded-md border border-gray-300 shadow-sm" />
                                         )}
-                                        {/* <input
-                                            type="file"
-                                            accept="image/*"
-                                            onChange={(e) => handleImageChange(index, e)}
-                                            className="mt-1"
-                                        /> */}
-
 
                                         <input
                                             type="text"
@@ -466,11 +501,21 @@ const AddDevelopment = () => {
                                             value={dev.note ?? ''}
                                             className="input input-bordered w-full"
                                             onChange={(e) => handleDevelopmentChange(index, 'note', e.target.value)}
-
-                                        // readOnly
                                         />
                                     </div>
                                 ))}
+                            </div>
+
+                            {/* ปุ่มเพิ่มช่อง */}
+                            <div className="flex justify-center">
+                                <button
+                                    type="button"
+                                    onClick={handleAddDevelopment}
+                                    className="px-4 py-2 bg-blue-100 text-blue-700 rounded-lg"
+                                >
+                                    < FaPlusCircle className="inline mr-2" />
+                                    เพิ่มพัฒนาการ
+                                </button>
                             </div>
 
                             <div className="mt-6 text-center space-x-2">

@@ -13,7 +13,7 @@ const VaccinePage = () => {
   const [editAge, setEditAge] = useState(null); // modal แก้ไข
   const [editVaccines, setEditVaccines] = useState([]);
 
-  const ageOptions = ['0 เดือน', '1 เดือน', '2 เดือน', '4 เดือน', '6 เดือน', '9 เดือน', '1 ปี', '1 ปี 6 เดือน', '2 ปี', '2 ปี 6 เดือน', '11 ปี', '12 ปี'];
+  const ageOptions = ['0 เดือน', '1 เดือน', '2 เดือน', '4 เดือน', '6 เดือน', '9 เดือน', '1 ปี', '1 ปี 6 เดือน', '2 ปี 6 เดือน', '4 ปี', '11 ปี', '12 ปี'];
 
   useEffect(() => {
     fetchVaccines();
@@ -23,7 +23,7 @@ const VaccinePage = () => {
   const fetchDataVaccines = async () => {
     try {
       const res = await vacineData.getAllVaccines();
-      const data = res.data || [];
+      const data = res.data.data || [];
       console.log(res.data)
       setDataVaccines(Array.isArray(data) ? data : []);
     } catch (error) {
@@ -67,7 +67,7 @@ const VaccinePage = () => {
   const mapAgeTextToNumber = (ageText) => {
     const map = {
       '0 เดือน': 0, '1 เดือน': 1, '2 เดือน': 2, '4 เดือน': 4, '6 เดือน': 6, '9 เดือน': 9,
-      '1 ปี': 12, '1 ปี 6 เดือน': 18, '2 ปี': 24, '2 ปี 6 เดือน': 30, '11 ปี': 132, '12 ปี': 144,
+      '1 ปี': 12, '1 ปี 6 เดือน': 18, '2 ปี 6 เดือน': 30, '4 ปี': 48, '11 ปี': 132, '12 ปี': 144,
     };
     return map[ageText] || 0;
   };
