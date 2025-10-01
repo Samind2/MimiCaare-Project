@@ -4,13 +4,21 @@ import { FaPlus, FaTrash } from "react-icons/fa";
 import { toast } from "react-toastify";
 
 const DevData = () => {
+  const categoryOptions = [
+    "ด้านการเคลื่อนไหวพื้นฐาน",
+    "ด้านการใช้กล้ามเนื้อมัดเล็กและสติปัญญา",
+    "ด้านการเข้าใจภาษา",
+    "ด้านการใช้ภาษา",
+    "ด้านการช่วยเหลือตัวเองและสังคม",
+  ];
+
   const [devMeta, setDevMeta] = useState([]);
   const [ageRange, setAgeRange] = useState("");
   const [developments, setDevelopments] = useState([
     { category: "", detail: "", image: "", note: "" },
   ]);
 
-  // โหลดข้อมูล metadata
+  // โหลด metadata
   const fetchDevMeta = async () => {
     try {
       const res = await developDataService.getAllDevelop();
@@ -25,7 +33,7 @@ const DevData = () => {
     fetchDevMeta();
   }, []);
 
-  // เพิ่ม/ลบ field
+  // เพิ่ม / ลบ field
   const addDevelopmentField = () => {
     setDevelopments([
       ...developments,
@@ -42,6 +50,13 @@ const DevData = () => {
   const handleDevChange = (index, field, value) => {
     const updated = [...developments];
     updated[index][field] = value;
+
+    // ถ้าเปลี่ยน category ให้ reset image, note
+    if (field === "category") {
+      updated[index].image = "";
+      updated[index].note = "";
+    }
+
     setDevelopments(updated);
   };
 
@@ -54,7 +69,7 @@ const DevData = () => {
     if (file) reader.readAsDataURL(file);
   };
 
-  // บันทึก metadata (ส่งทีละ development)
+  // บันทึก metadata
   const handleAdd = async () => {
     if (!ageRange) {
       toast.warning("กรุณากรอกช่วงอายุ");
@@ -113,13 +128,21 @@ const DevData = () => {
 
         {developments.map((dev, index) => (
           <div key={index} className="border p-3 rounded space-y-2">
-            <input
-              type="text"
-              placeholder="หมวดหมู่ (category)"
+            {/* Category Dropdown */}
+            <select
               value={dev.category}
               onChange={(e) => handleDevChange(index, "category", e.target.value)}
               className="w-full border px-3 py-2 rounded"
-            />
+            >
+              <option value="">เลือกหมวดหมู่</option>
+              {categoryOptions.map((cat, i) => (
+                <option key={i} value={cat}>
+                  {cat}
+                </option>
+              ))}
+            </select>
+
+            {/* Detail Input */}
             <input
               type="text"
               placeholder="รายละเอียด (detail)"
@@ -127,12 +150,14 @@ const DevData = () => {
               onChange={(e) => handleDevChange(index, "detail", e.target.value)}
               className="w-full border px-3 py-2 rounded"
             />
+
             <input
               type="file"
               accept="image/*"
               onChange={(e) => handleFileChange(index, e.target.files[0])}
               className="w-full"
             />
+
             {dev.image && (
               <img
                 src={dev.image}
@@ -140,6 +165,7 @@ const DevData = () => {
                 className="w-20 h-20 object-cover rounded mt-1"
               />
             )}
+
             <input
               type="text"
               placeholder="หมายเหตุ (note)"
@@ -147,6 +173,7 @@ const DevData = () => {
               onChange={(e) => handleDevChange(index, "note", e.target.value)}
               className="w-full border px-3 py-2 rounded"
             />
+
             {developments.length > 1 && (
               <button
                 onClick={() => removeDevelopmentField(index)}

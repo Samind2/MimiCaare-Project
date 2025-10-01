@@ -20,13 +20,13 @@ const AddDevelopment = () => {
 
     // Meta develop
     const [metaDevelop, setMetaDevelop] = useState([]);
-    const categoryOptions = [
-        "การเคลื่อนไหวพื้นฐาน",
-        "การใช้กล้ามเนื้อมัดเล็กและสติปัญญา",
+    const [categoryOptions, setCategoryOptions] = useState([
+        "ด้านการเคลื่อนไหวพื้นฐาน",
+        "ด้านการใช้กล้ามเนื้อมัดเล็กและสติปัญญา",
         "ด้านการเข้าใจภาษา",
         "ด้านการใช้ภาษา",
         "ด้านการช่วยเหลือตัวเองและสังคม",
-    ];
+    ]);
 
     const ageOptions = [
         { value: 1 }, { value: 2 }, { value: 4 }, { value: 6 }, { value: 8 },
@@ -47,7 +47,8 @@ const AddDevelopment = () => {
             if (res.data && res.data.data) {
                 setMetaDevelop(res.data.data);
                 const categories = [...new Set(res.data.data.map(item => item.category))];
-                categoryOptions(categories);
+                setCategoryOptions(categories);
+                // categoryOptions(categories);
             }
         } catch (err) {
             console.error("โหลด metaDevelop ไม่สำเร็จ", err);
@@ -196,7 +197,7 @@ const AddDevelopment = () => {
         // สร้างtoast เพื่อยืนยันการลบ
         const confirmDelete = () =>
             new Promise((resolve) => {
-                const ToastContent = ({ closeToast }) => ( // ฟังก์ชันที่ใช้แสดงเนื้อหาใน Toast
+                const ToastContent = ({ closeToast }) => ( 
                     <div>
                         <p>คุณต้องการลบข้อมูลช่วงอายุ {idToDelete} ใช่หรือไม่?</p>
                         <div className="mt-2 flex justify-end gap-2">
@@ -438,11 +439,13 @@ const AddDevelopment = () => {
                                             >
                                                 <option value="">เลือกรายละเอียด</option>
                                                 {metaDevelop
-                                                    .filter(m => m.category === dev.category)
+                                                    .filter(m => m.category.trim() === dev.category.trim())
                                                     .map((m, i) => (
                                                         <option key={i} value={m.detail}>{m.detail}</option>
                                                     ))
                                                 }
+
+
                                             </select>
                                         </div>
 

@@ -13,14 +13,15 @@ import AddChild from '../pages/ManageChild/AddChild.jsx';
 import AdminLayout from '../layouts/AdminLayout.jsx';
 import AddDevelopment from '../pages/ManageDevelopment/AddDevelopment.jsx';
 import Dashboard from '../pages/Dashboard/Index.jsx';
-import AdminRoute from '../ProtectedRoutes/AdminRoute.jsx'; 
+import AdminRoute from '../ProtectedRoutes/AdminRoute.jsx';
 import AddVaccine from '../pages/ManageVac/AddVac.jsx';
 import ViewVaccine from '../pages/User/Vaccine/Index.jsx';
 import ViewDevelopment from '../pages/User/Development/Index.jsx';
 import ManageRights from '../pages/ManageUser/ManageRights.jsx';
 import AllUser from '../pages/ManageUser/AllUser.jsx';
-import ResetPassword from '../pages/ManagePassword/ResetPassword.jsx'; 
+import ResetPassword from '../pages/ManagePassword/ResetPassword.jsx';
 import MetaData from '../pages/ManageData/index.jsx'
+import GuestRoute from '../ProtectedRoutes/GuestRoute.jsx';
 
 const router = createBrowserRouter([
     {
@@ -29,15 +30,27 @@ const router = createBrowserRouter([
         children: [
             {
                 path: "/",
-                element: <Home />
-            },
-            {
-                path: "/signup",
-                element: <SignUp />
+                element: (
+                    <ProtectedRoute allowedRoles={["user"]}>
+                        <Home />
+                    </ProtectedRoute>
+                )
             },
             {
                 path: "/signin",
-                element: <Signin />
+                element: (
+                    <GuestRoute>
+                        <Signin />
+                    </GuestRoute>
+                )
+            },
+            {
+                path: "/signup",
+                element: (
+                    <GuestRoute>
+                        <SignUp />
+                    </GuestRoute>
+                )
             },
             {
                 path: "/reset-password",
@@ -46,7 +59,7 @@ const router = createBrowserRouter([
             {
                 path: "/ViewVaccine",
                 element: (
-                    <ProtectedRoute>
+                    <ProtectedRoute allowedRoles={["user"]}>
                         <ViewVaccine />
                     </ProtectedRoute>
                 )
@@ -54,7 +67,7 @@ const router = createBrowserRouter([
             {
                 path: "/ViewDevelopment",
                 element: (
-                    <ProtectedRoute>
+                    <ProtectedRoute allowedRoles={["user"]}>
                         <ViewDevelopment />
                     </ProtectedRoute>
                 )
@@ -62,7 +75,7 @@ const router = createBrowserRouter([
             {
                 path: "/profile-child",
                 element: (
-                    <ProtectedRoute>
+                    <ProtectedRoute allowedRoles={["user"]}>
                         <ProfileChild />
                     </ProtectedRoute>
                 )
@@ -70,15 +83,15 @@ const router = createBrowserRouter([
             {
                 path: "/profile-parent",
                 element: (
-                    <ProtectedRoute>
+                    <ProtectedRoute allowedRoles={["user"]}>
                         <ProfileParent />
                     </ProtectedRoute>
                 )
             },
             {
                 path: "/notification",
-                element:(
-                    <ProtectedRoute>
+                element: (
+                    <ProtectedRoute allowedRoles={["user"]}>
                         <Notification />
                     </ProtectedRoute>
                 )
@@ -86,7 +99,7 @@ const router = createBrowserRouter([
             {
                 path: "/addChild",
                 element: (
-                    <ProtectedRoute>
+                    <ProtectedRoute allowedRoles={["user"]}>
                         <AddChild />
                     </ProtectedRoute>
                 )
@@ -94,14 +107,14 @@ const router = createBrowserRouter([
             {
                 path: "/profile-child-update/:id",
                 element: (
-                    <ProtectedRoute>
+                    <ProtectedRoute allowedRoles={["user"]}>
                         <ProfileChildUpdate />
                     </ProtectedRoute>
                 )
             },
             {
                 path: "/manage-data",
-                element:(
+                element: (
                     <ProtectedRoute>
                         <MetaData />
                     </ProtectedRoute>
@@ -135,7 +148,7 @@ const router = createBrowserRouter([
             },
             {
                 path: "AllUser",
-                element: 
+                element:
                     <AllUser />
             },
 
