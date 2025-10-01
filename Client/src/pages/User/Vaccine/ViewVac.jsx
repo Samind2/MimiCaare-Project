@@ -184,6 +184,16 @@ const ViewVac = () => {
       return;
     }
 
+    if (!formData.receiveDate) {
+      toast.warning("กรุณาเลือกวันที่รับวัคซีน");
+      return;
+    }
+
+    if (!formData.placeName || !formData.phoneNumber) {
+      toast.warning("กรุณากรอกสถานที่และเบอร์โทรให้ครบ");
+      return;
+    }
+
     const payload = {
       childId: selectedChild.id,
       standardVaccineId: formData.standardVaccineId,
@@ -232,6 +242,22 @@ const ViewVac = () => {
         return;
       }
     }
+    
+    const newDate = new Date(customFormData.receiveDate).toISOString().split('T')[0];
+    const newName = customRecords[0].vaccineName.trim();
+
+    const isDuplicate = customVaccines.some(vaccine => {
+      const vaccineDate = vaccine.receiveDate ? vaccine.receiveDate.split('T')[0] : '';
+      const vaccineName = Array.isArray(vaccine.records) && vaccine.records.length > 0 ? vaccine.records[0].vaccineName.trim() : '';
+      return vaccineDate === newDate && vaccineName === newName;
+    });
+
+    if (isDuplicate && isEditMode) {
+      toast.warning("มีการบันทึกวัคซีนนี้ในวันที่เดียวกันแล้ว");
+      return;
+    }
+
+    
 
     const payload = {
       childId: selectedChild.id,
