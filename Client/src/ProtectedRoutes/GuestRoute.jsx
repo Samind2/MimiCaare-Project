@@ -7,7 +7,7 @@ const GuestRoute = ({ children }) => {
 
   if (loading) return <div>Loading...</div>;
 
-  // ถ้า login แล้ว → ไปหน้า Home
+  
   if (user) return <Navigate to="/" replace />;
 
   return children;
