@@ -9,14 +9,15 @@ import VaccineTimeline from "./VaccineTimeline"
 
 
 const ViewVac = () => {
-  //  STATE 
+
   const [vaccines, setVaccines] = useState([]);
   const [children, setChildren] = useState([]);
   const [selectedChild, setSelectedChild] = useState(null);
   const [receivedVaccines, setReceivedVaccines] = useState([]);
   const [customVaccines, setCustomVaccines] = useState([]);
   const [showCustomOnly, setShowCustomOnly] = useState(false);
-  // เพิ่ม state สำหรับควบคุม step
+
+
   const [currentStep, setCurrentStep] = useState(1);
   const [lastPlaceName, setLastPlaceName] = useState("");
   const [lastPhoneNumber, setLastPhoneNumber] = useState("");
@@ -42,12 +43,11 @@ const ViewVac = () => {
   });
   const [selectedVaccines, setSelectedVaccines] = useState([]);
 
-  // ฟังก์ชันไปขั้นถัดไป
+
   const nextStep = () => setCurrentStep((prev) => Math.min(prev + 1, 3));
-  // ฟังก์ชันย้อนกลับ
   const prevStep = () => setCurrentStep((prev) => Math.max(prev - 1, 1));
 
-  // Modal สำหรับวัคซีนที่ผู้ใช้กรอกเอง (custom)
+  // Modal สำหรับวัคซีนที่ผู้ใช้กรอกเอง 
   const [showCustomModal, setShowCustomModal] = useState(false);
   const [customFormData, setCustomFormData] = useState({
     receiveDate: new Date().toISOString().substring(0, 10),
@@ -61,10 +61,19 @@ const ViewVac = () => {
   ];
 
   const filteredOptions = vaccineOptions.filter(option => option.value !== showCustomOnly);
+
   //  ฟังก์ชันเปิด Modal มาตรฐาน 
   const openModal = (item, isEdit = false) => {
+
+    if (!selectedChild) {
+      toast.warning("กรุณาเพิ่มเด็กในระบบก่อน");
+      return;
+    }
+
     if (isEdit) {
       const record = receivedVaccines.find((receivedVaccineRecord) => receivedVaccineRecord.standardVaccineId === item.id);
+
+
 
       if (!record) {
         toast.warning("ไม่พบข้อมูลวัคซีนที่ต้องการแก้ไข");
@@ -98,8 +107,14 @@ const ViewVac = () => {
     setShowModal(true);
   };
 
-  //  ฟังก์ชันเปิด Modal กรอกเอง (custom) 
+  //  ฟังก์ชันเปิด Modal กรอกเอง 
   const openCustomModal = () => {
+
+    if (!selectedChild) {
+      toast.warning("กรุณาเพิ่มเด็กในระบบก่อน");
+      return; 
+    }
+
     setCustomFormData({
       receiveDate: new Date().toISOString().substring(0, 10),
       placeName: lastPlaceName || "",
@@ -110,7 +125,7 @@ const ViewVac = () => {
     setShowCustomModal(true);
   };
 
-  //  โหลดข้อมูลต่าง ๆ 
+  //  โหลดข้อมูล
   useEffect(() => {
     const fetchVaccines = async () => {
       try {
@@ -242,7 +257,7 @@ const ViewVac = () => {
         return;
       }
     }
-    
+
     const newDate = new Date(customFormData.receiveDate).toISOString().split('T')[0];
     const newName = customRecords[0].vaccineName.trim();
 
@@ -257,7 +272,7 @@ const ViewVac = () => {
       return;
     }
 
-    
+
 
     const payload = {
       childId: selectedChild.id,
@@ -308,7 +323,7 @@ const ViewVac = () => {
     });
 
     setCustomRecords(item.records || []);
-    setEditingRecordId(item.id); // ใช้ id สำหรับการแก้ไข
+    setEditingRecordId(item.id);
     setIsEditMode(true);
     setShowCustomModal(true);
 
@@ -394,7 +409,7 @@ const ViewVac = () => {
               <li key={i}>
                 <a
                   className="hover:bg-blue-300 rounded-md p-2 cursor-pointer"
-                  onClick={() => setShowCustomOnly(item.value)} // เลือกวัคซีนตามมาตรฐาน
+                  onClick={() => setShowCustomOnly(item.value)} 
                 >
                   {item.label}
                 </a>
@@ -437,7 +452,6 @@ const ViewVac = () => {
           </ul>
         </div>
 
-        {/* ปุ่มเปิด modal กรอกวัคซีนเอง */}
         {showCustomOnly && (
           <button
             className="bg-pink-500 hover:bg-pink-600 text-white text-sm px-4 py-2 rounded"
@@ -449,15 +463,14 @@ const ViewVac = () => {
         )}
       </div>
 
-      {/* ตารางวัคซีน */}
 
       {showCustomOnly ? (
         <VaccineTimeline
-          vaccines={customVaccines}       // แทนที่ receivedVaccines
-          receivedVaccines={customVaccines} // ให้ Timeline ใช้ข้อมูล custom
-          onSelectVaccine={openEditCustomModal} // ใช้ฟังก์ชันแก้ไข
-          isCustom={true}                 // เพิ่ม prop เพื่อบอกว่าเป็น custom
-          onDeleteVaccine={handleDeleteCustomVaccine} // เพิ่ม prop สำหรับลบ
+          vaccines={customVaccines}       
+          receivedVaccines={customVaccines}
+          onSelectVaccine={openEditCustomModal} 
+          isCustom={true}               
+          onDeleteVaccine={handleDeleteCustomVaccine} 
         />
       ) : (
         <VaccineTimeline
