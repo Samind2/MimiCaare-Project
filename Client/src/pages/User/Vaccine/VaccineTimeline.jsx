@@ -17,7 +17,7 @@ const VaccineTimeline = ({
   if (!vaccines.length) return <p>ไม่มีข้อมูลวัคซีน</p>;
 
   return (
-    <div className="relative border-l-4 border-gray-300 ml-6">
+    <div className="relative border-l-4 border-gray-300 ml-6" data-testid="vaccine-timeline">
       {vaccines.map((vaccineItem, index) => {
         // แปลงอายุวัคซีนจากเดือนเป็นปี
         const ageText = (() => {
@@ -47,12 +47,14 @@ const VaccineTimeline = ({
           : receivedVaccines?.filter((v) => v.standardVaccineId === vaccineItem?.id) || [];
 
         return (
-          <div key={vaccineItem?.id || index} className="mb-10 ml-6 relative">
+          <div key={vaccineItem?.id || index} className="mb-10 ml-6 relative"
+            data-testid={`vaccine-item-${vaccineItem?.id || index}`}>
             {/* จุดสถานะ */}
             <span
               className={`absolute left-0 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center w-8 h-8 rounded-full border-4 ${received ? "border-green-500 bg-green-100" : "border-red-500 bg-red-100"
-                }`}
-            >
+                }`} 
+              data-testid={`status-dot-${vaccineItem?.id || index}`}
+            >   
               <span
                 className={`w-3 h-3 rounded-full ${received ? "bg-green-500" : "bg-red-500"
                   }`}
@@ -63,10 +65,14 @@ const VaccineTimeline = ({
             <div className={`p-5 rounded-2xl shadow-md ${received ? "bg-green-50" : "bg-red-50"}`}>
               {/* Header */}
               <div className="flex justify-between items-center mb-3">
-                <h3 className="font-bold text-lg">{ageText}</h3>
+                <h3 className="font-bold text-lg"
+                data-testid={`age-text-${vaccineItem?.id || index}`}
+                >
+                  {ageText}</h3>
                 <span
                   className={`px-3 py-1 rounded-full text-xs font-semibold text-white ${received ? "bg-green-600" : "bg-red-600"
                     }`}
+                    data-testid={`status-label-${vaccineItem?.id || index}`}
                 >
                   {received ? "รับแล้ว" : "ยังไม่ได้รับ"}
                 </span>
@@ -136,6 +142,7 @@ const VaccineTimeline = ({
                     <button
                       onClick={() => onSelectVaccine(vaccineItem)}
                       className="btn btn-sm btn-warning"
+                      data-testid={`edit-btn-${vaccineItem?.id || index}`}
                     >
                       แก้ไข
                     </button>
@@ -143,6 +150,7 @@ const VaccineTimeline = ({
                       <button
                         onClick={() => onDeleteVaccine(vaccineItem.id)}
                         className="btn btn-sm btn-error"
+                        data-testid={`delete-btn-${vaccineItem?.id || index}`}
                       >
                         ลบ
                       </button>
@@ -153,6 +161,7 @@ const VaccineTimeline = ({
                   <button
                     onClick={() => onSelectVaccine(vaccineItem)}
                     className="btn btn-sm btn-primary"
+                    data-testid={`save-btn-${vaccineItem?.id || index}`}
                   >
                     บันทึก
                   </button>
@@ -161,6 +170,7 @@ const VaccineTimeline = ({
                   <button
                     onClick={() => onSelectVaccine(vaccineItem, true)}
                     className="btn btn-sm btn-warning"
+                    data-testid={`edit-btn-${vaccineItem?.id || index}`}
                   >
                     แก้ไข
                   </button>
