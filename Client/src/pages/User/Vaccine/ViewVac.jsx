@@ -257,6 +257,22 @@ const ViewVac = () => {
         return;
       }
     }
+    
+    const newDate = new Date(customFormData.receiveDate).toISOString().split('T')[0];
+    const newName = customRecords[0].vaccineName.trim();
+
+    const isDuplicate = customVaccines.some(vaccine => {
+      const vaccineDate = vaccine.receiveDate ? vaccine.receiveDate.split('T')[0] : '';
+      const vaccineName = Array.isArray(vaccine.records) && vaccine.records.length > 0 ? vaccine.records[0].vaccineName.trim() : '';
+      return vaccineDate === newDate && vaccineName === newName;
+    });
+
+    if (isDuplicate && isEditMode) {
+      toast.warning("มีการบันทึกวัคซีนนี้ในวันที่เดียวกันแล้ว");
+      return;
+    }
+
+    
 
     const newDate = new Date(customFormData.receiveDate).toISOString().split('T')[0];
     const newName = customRecords[0].vaccineName.trim();
@@ -330,6 +346,7 @@ const ViewVac = () => {
   };
 
   const handleDeleteCustomVaccine = async (id) => {
+
     const confirm = await new Promise((resolve) => {
       toast.info(
         <div>
@@ -463,6 +480,7 @@ const ViewVac = () => {
         )}
       </div>
 
+      {/* ตารางวัคซีน */}
 
       {showCustomOnly ? (
         <VaccineTimeline
@@ -496,8 +514,10 @@ const ViewVac = () => {
 
             {/* Step 1 */}
             {currentStep === 1 && (
+
               <div className="space-y-3">
                 <p><strong>ชื่อเด็ก:</strong> {selectedChild?.firstName} {selectedChild?.lastName}</p>
+
                 <p>
                   <strong>อายุ:</strong>{" "}
                   {Number(formData.ageRange) === 0
@@ -534,14 +554,18 @@ const ViewVac = () => {
                 <input
                   type="text"
                   placeholder="สถานที่รับวัคซีน"
+
                   className={`input input-bordered w-full ${!formData.placeName && isStep3Attempted ? "input-error" : ""}`}
+
                   value={formData.placeName}
                   onChange={(e) => setFormData({ ...formData, placeName: e.target.value })}
                 />
                 <input
                   type="text"
                   placeholder="เบอร์โทร"
+
                   className={`input input-bordered w-full ${!formData.phoneNumber && isStep3Attempted ? "input-error" : ""}`}
+
                   value={formData.phoneNumber}
                   onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
                 />
@@ -566,6 +590,7 @@ const ViewVac = () => {
               </button>
 
               {currentStep < 3 ? (
+
                 <button
                   className="px-5 py-2 bg-green-200 text-green-900 rounded-lg hover:bg-green-300"
                   onClick={nextStep}
@@ -625,7 +650,9 @@ const ViewVac = () => {
                     <input
                       type="text"
                       placeholder="ชื่อวัคซีน"
+
                       className={`input input-bordered w-full mb-2 ${!rec.vaccineName && isCustomStep3Attempted ? "input-error" : ""}`}
+
                       value={rec.vaccineName}
                       onChange={(e) => {
                         const newRecords = [...customRecords];
@@ -661,14 +688,18 @@ const ViewVac = () => {
                 <input
                   type="text"
                   placeholder="สถานที่รับวัคซีน"
+
                   className={`input input-bordered w-full my-2 ${!customFormData.placeName && isCustomStep3Attempted ? "input-error" : ""}`}
+
                   value={customFormData.placeName}
                   onChange={(e) => setCustomFormData({ ...customFormData, placeName: e.target.value })}
                 />
                 <input
                   type="text"
                   placeholder="เบอร์โทร"
+
                   className={`input input-bordered w-full my-2 ${!customFormData.phoneNumber && isCustomStep3Attempted ? "input-error" : ""}`}
+
                   value={customFormData.phoneNumber}
                   onChange={(e) => setCustomFormData({ ...customFormData, phoneNumber: e.target.value })}
                 />
@@ -687,6 +718,7 @@ const ViewVac = () => {
               </button>
 
               {currentCustomStep < 3 ? (
+
                 <button className="btn btn-success" onClick={nextCustomStep}>ถัดไป</button>
               ) : (
                 <button
@@ -701,6 +733,7 @@ const ViewVac = () => {
                     setIsCustomStep3Attempted(false);
                   }}
                 >
+
                   บันทึก
                 </button>
               )}
