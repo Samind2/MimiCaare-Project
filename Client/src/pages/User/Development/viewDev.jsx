@@ -66,7 +66,7 @@ const ViewDev = () => {
     fetchStandardDev();
   }, [selectedAgeRange]);
 
-  // ดึงข้อมูลที่เคยประเมิน (เฉพาะถ้ามีเด็ก)
+  // ดึงข้อมูลประเมิน 
   useEffect(() => {
     const fetchReceivedDev = async () => {
       if (!selectedChild) return;
@@ -172,7 +172,7 @@ const ViewDev = () => {
     <div className="p-6 mx-auto w-full max-w-full">
       <h1 className="text-3xl font-bold mb-6 text-center">ประเมินพัฒนาการ</h1>
 
-      {/* ส่วนเลือกเด็กและอายุ */}
+      {/* เลือกเด็กและอายุ */}
       <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
         <h2 className="text-xl font-semibold">พัฒนาการของเด็กช่วงอายุ {ageRangeToText(selectedAgeRange)}</h2>
 
@@ -205,7 +205,7 @@ const ViewDev = () => {
             </ul>
           </div>
 
-          {/* dropdown อายุ */}
+          {/* เลือกอายุ */}
           <div className="dropdown dropdown-hover">
             <div
               tabIndex={0}
@@ -233,7 +233,7 @@ const ViewDev = () => {
         </div>
       </div>
 
-      {/* ส่วนแสดงพัฒนาการ */}
+      {/* แสดงพัฒนาการ */}
       {standardDevelopments.length > 0 ? (
         !isAssessmentSubmitted ? (
           <>
