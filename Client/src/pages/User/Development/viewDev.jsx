@@ -237,7 +237,6 @@ const ViewDev = () => {
       {standardDevelopments.length > 0 ? (
         !isAssessmentSubmitted ? (
           <>
-            {/* แจ้งเตือนถ้ายังไม่ได้เลือกเด็ก */}
             {!selectedChild && (
               <div className="bg-yellow-100 border border-yellow-400 text-yellow-800 px-4 py-3 rounded-lg mb-4 text-center">
                 กรุณาเพิ่มหรือเลือกเด็กก่อนทำการประเมินพัฒนาการ
