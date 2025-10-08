@@ -28,6 +28,25 @@ func SetStandardDevelopReference(client *mongo.Client) {
 	StandardDevelopCollection = client.Database(dbName).Collection("standardDevelops")
 }
 
+// @name AddReceiveDevelopRequest
+type AddReceiveDevelopRequest struct {
+	ChildID           primitive.ObjectID `json:"childId" binding:"required" example:"64a7f0c2e1b8c8b4f0d6e8a1"`
+	StatusList        []bool             `json:"status" binding:"required" example:"[true, false, true]"`
+	StandardDevelopID primitive.ObjectID `json:"standardDevelopId" binding:"required" example:"64a7f0c2e1b8c8b4f0d6e8a2"`
+	AgeRange          int                `json:"ageRange" binding:"required" example:"24"`
+}
+
+// @Summary เพิ่มข้อมูลการประเมินพัฒนาการของเด็ก
+// @Description ใช้สำหรับเพิ่มข้อมูลการประเมินพัฒนาการของเด็ก (ผู้ใช้ต้องเป็นเจ้าของข้อมูลเด็กคนนี้)
+// @Tags ReceiveDevelop
+// @Accept json
+// @Produce json
+// @Param request body AddReceiveDevelopRequest true "ข้อมูลการประเมินพัฒนาการของเด็ก"
+// @Success 201 {object} map[string]interface{}
+// @Failure 400 {object} map[string]interface{}
+// @Failure 401 {object} map[string]interface{}
+// @Failure 404 {object} map[string]interface{}
+// @Router /receiveDevelop/add [post]
 func AddReceiveDevelop(c *gin.Context) {
 	var inputData struct {
 		ChildID           primitive.ObjectID `json:"childId"`
@@ -93,6 +112,22 @@ func AddReceiveDevelop(c *gin.Context) {
 	})
 }
 
+type UpdateReceiveDevelopRequest struct {
+	Status []bool `json:"status" binding:"required" example:"[true, false, true]"`
+}
+
+// @Summary อัปเดตข้อมูลการประเมินพัฒนาการของเด็กตาม ID
+// @Description ใช้สำหรับอัปเดตข้อมูลการประเมินพัฒนาการของเด็กตาม ID (ผู้ใช้ต้องเป็นเจ้าของข้อมูลเด็กคนนี้)
+// @Tags ReceiveDevelop
+// @Accept json
+// @Produce json
+// @Param id path string true "ObjectID ของข้อมูลการประเมินพัฒนาการ"
+// @Param request body UpdateReceiveDevelopRequest true "ข้อมูลใหม่"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]interface{}
+// @Failure 401 {object} map[string]interface{}
+// @Failure 404 {object} map[string]interface{}
+// @Router /receiveDevelop/update/{id} [put]
 func UpdateReceiveDevelopByID(c *gin.Context) {
 	id := c.Param("id")
 	developId, err := primitive.ObjectIDFromHex(id)
@@ -171,6 +206,16 @@ func UpdateReceiveDevelopByID(c *gin.Context) {
 	})
 }
 
+// @Summary ดึงข้อมูลการประเมินพัฒนาการของเด็กตาม ChildID
+// @Description ใช้สำหรับดึงข้อมูลการประเมินพัฒนาการของเด็กตาม ChildID (ผู้ใช้ต้องเป็นเจ้าของข้อมูลเด็กคนนี้)
+// @Tags ReceiveDevelop
+// @Produce json
+// @Param id path string true "ObjectID ของเด็ก (ChildID)"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]interface{}
+// @Failure 401 {object} map[string]interface{}
+// @Failure 404 {object} map[string]interface{}
+// @Router /receiveDevelop/getById/{id} [get]
 func GetReceiveDevelopByChildID(c *gin.Context) {
 	id := c.Param("id")
 	childID, err := primitive.ObjectIDFromHex(id)

@@ -20,6 +20,22 @@ func SetStandardVaccineCollection(client *mongo.Client) {
 	StandardVaccineCollection = client.Database(dbName).Collection("standardVaccine")
 }
 
+type AddStandardVaccineRequest struct {
+	AgeRange int      `json:"ageRange" binding:"required" example:"24"`
+	Vaccines []string `json:"vaccines" binding:"required" example:"[\"วัคซีนไข้หวัดใหญ่\",\"วัคซีนหัด\"]"`
+}
+
+// @Summary เพิ่มข้อมูลวัคซีนมาตรฐานใหม่
+// @Description ใช้สำหรับเพิ่มข้อมูลวัคซีนมาตรฐานใหม่ (admin เท่านั้น)
+// @Tags StandardVaccine
+// @Accept json
+// @Produce json
+// @Param request body AddStandardVaccineRequest true "ข้อมูลวัคซีนมาตรฐาน"
+// @Success 201 {object} map[string]interface{}
+// @Failure 400 {object} map[string]interface{}
+// @Failure 401 {object} map[string]interface{}
+// @Failure 500 {object} map[string]interface{}
+// @Router /standardVaccine/add [post]
 func AddStandardVaccine(c *gin.Context) {
 	var standardVaccine standardVaccineModel.StandardVaccine
 
@@ -52,6 +68,14 @@ func AddStandardVaccine(c *gin.Context) {
 	})
 }
 
+// @Summary ดึงข้อมูลวัคซีนมาตรฐานทั้งหมด
+// @Description ใช้สำหรับดึงข้อมูลวัคซีนมาตรฐานทั้งหมด (admin เท่านั้น)
+// @Tags StandardVaccine
+// @Produce json
+// @Success 200 {object} map[string]interface{}
+// @Failure 401 {object} map[string]interface{}
+// @Failure 500 {object} map[string]interface{}
+// @Router /standardVaccine/all [get]
 func GetAllStandardVaccines(c *gin.Context) {
 	focus, err := StandardVaccineCollection.Find(context.TODO(), bson.M{})
 	if err != nil {
@@ -73,6 +97,16 @@ func GetAllStandardVaccines(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"vaccines": vaccines})
 }
 
+// @Summary ดึงข้อมูลวัคซีนมาตรฐานตาม ID
+// @Description ใช้สำหรับดึงข้อมูลวัคซีนมาตรฐานตาม ID (admin เท่านั้น)
+// @Tags StandardVaccine
+// @Produce json
+// @Param id path string true "ObjectID ของวัคซีนมาตรฐาน"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]interface{}
+// @Failure 404 {object} map[string]interface{}
+// @Failure 500 {object} map[string]interface{}
+// @Router /standardVaccine/get/{id} [get]
 func GetStandardVaccineByID(c *gin.Context) {
 	idParam := c.Param("id")
 	objectID, err := primitive.ObjectIDFromHex(idParam)
@@ -91,6 +125,23 @@ func GetStandardVaccineByID(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"vaccine": vaccine})
 }
 
+type UpdateStandardVaccineRequest struct {
+	AgeRange int      `json:"ageRange" example:"24"`
+	Vaccines []string `json:"vaccines" example:"[\"วัคซีนไข้หวัดใหญ่\",\"วัคซีนหัด\"]"`
+}
+
+// @Summary อัปเดตข้อมูลวัคซีนมาตรฐานตาม ID
+// @Description ใช้สำหรับอัปเดตข้อมูลวัคซีนมาตรฐานตาม ID (admin เท่านั้น)
+// @Tags StandardVaccine
+// @Accept json
+// @Produce json
+// @Param id path string true "ObjectID ของวัคซีนมาตรฐาน"
+// @Param request body UpdateStandardVaccineRequest true "ข้อมูลใหม่ของวัคซีนมาตรฐาน"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]interface{}
+// @Failure 404 {object} map[string]interface{}
+// @Failure 500 {object} map[string]interface{}
+// @Router /standardVaccine/update/{id} [put]
 func UpdateStandardVaccine(c *gin.Context) {
 	idParam := c.Param("id")
 	objectID, err := primitive.ObjectIDFromHex(idParam)
@@ -131,6 +182,16 @@ func UpdateStandardVaccine(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "อัปเดตข้อมูลวัคซีนสำเร็จ", "data": updatedData})
 }
 
+// @Summary ลบข้อมูลวัคซีนมาตรฐานตาม ID
+// @Description ใช้สำหรับลบข้อมูลวัคซีนมาตรฐานตาม ID (admin เท่านั้น)
+// @Tags StandardVaccine
+// @Produce json
+// @Param id path string true "ObjectID ของวัคซีนมาตรฐาน"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]interface{}
+// @Failure 404 {object} map[string]interface{}
+// @Failure 500 {object} map[string]interface{}
+// @Router /standardVaccine/delete/{id} [delete]
 func DeleteStandardVaccine(c *gin.Context) {
 	idParam := c.Param("id")
 	objectID, err := primitive.ObjectIDFromHex(idParam)

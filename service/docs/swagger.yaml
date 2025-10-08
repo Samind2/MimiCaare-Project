@@ -44,12 +44,205 @@ definitions:
     required:
     - ageRange
     type: object
+  metadataController.AddDevelopRequest:
+    properties:
+      category:
+        example: กล้ามเนื้อมัดใหญ่
+        type: string
+      detail:
+        example: การนั่ง
+        type: string
+      image:
+        example: https://res.cloudinary.com/demo/image/upload/sample.jpg
+        type: string
+      note:
+        example: เด็กจะเริ่มนั่งได้เองเมื่ออายุประมาณ 6 เดือน โดยไม่ต้องพิง
+        type: string
+    required:
+    - category
+    - detail
+    - image
+    - note
+    type: object
+  metadataController.AddVaccineRequest:
+    properties:
+      note:
+        example: สำหรับเด็กอายุ 6 เดือนขึ้นไป
+        type: string
+      vaccineName:
+        example: วัคซีนไข้หวัดใหญ่
+        type: string
+    required:
+    - vaccineName
+    type: object
+  metadataController.GetByCategoryAndDetailRequest:
+    properties:
+      category:
+        example: กล้ามเนื้อมัดใหญ่
+        type: string
+      detail:
+        example: การนั่ง
+        type: string
+    required:
+    - category
+    - detail
+    type: object
+  metadataController.GetByCategoryRequest:
+    properties:
+      category:
+        example: กล้ามเนื้อมัดใหญ่
+        type: string
+    required:
+    - category
+    type: object
+  metadataController.UpdateDevelopRequest:
+    properties:
+      category:
+        example: การเคลื่อนไหว
+        type: string
+      detail:
+        example: การนั่ง
+        type: string
+      image:
+        example: https://res.cloudinary.com/demo/image/upload/sample.jpg
+        type: string
+      note:
+        example: เด็กจะเริ่มนั่งได้เองเมื่ออายุประมาณ 6 เดือน โดยไม่ต้องพิง
+        type: string
+    type: object
+  metadataController.UpdateVaccineRequest:
+    properties:
+      note:
+        example: สำหรับเด็กอายุ 3 เดือนขึ้นไป
+        type: string
+      vaccineName:
+        example: วัคซีนไข้หวัดเล็ก
+        type: string
+    type: object
   metadataModel.MetaAgeRange:
     properties:
       ageRange:
         type: integer
       id:
         type: string
+    type: object
+  metadataModel.MetaDevelop:
+    properties:
+      category:
+        type: string
+      detail:
+        type: string
+      id:
+        type: string
+      image:
+        type: string
+      note:
+        type: string
+    type: object
+  receiveDevelopControllers.AddReceiveDevelopRequest:
+    type: object
+  receiveDevelopControllers.UpdateReceiveDevelopRequest:
+    type: object
+  receiveVaccineController.AddReceiveVaccineCustomRequest:
+    type: object
+  receiveVaccineController.AddReceiveVaccineFromStandardRequest:
+    type: object
+  resendMail.ResendMailRequest:
+    properties:
+      email:
+        example: email@mail.com
+        type: string
+      firstName:
+        example: สมชาย
+        type: string
+    required:
+    - email
+    - firstName
+    type: object
+  standardDevelopController.AddStandardDevelopRequest:
+    properties:
+      ageRange:
+        example: 24
+        type: integer
+      developments:
+        example:
+        - '[{"category":"กล้ามเนื้อ"'
+        - '"detail":"วิ่งได้"'
+        - '"image":"https://example.com/crawl.png"'
+        - '"note":"ควรฝึกทุกวัน"}]'
+        items:
+          type: string
+        type: array
+    required:
+    - ageRange
+    - developments
+    type: object
+  standardDevelopController.UpdateStandardDevelopRequest:
+    properties:
+      ageRange:
+        example: 24
+        type: integer
+      developments:
+        example:
+        - '[{"category":"กล้ามเนื้อ"'
+        - '"detail":"วิ่งได้"'
+        - '"image":"https://example.com/crawl.png"'
+        - '"note":"ควรฝึกทุกวัน"}]'
+        items:
+          type: string
+        type: array
+    required:
+    - developments
+    type: object
+  standardDevelopModel.DevelopmentItem:
+    properties:
+      category:
+        type: string
+      detail:
+        type: string
+      image:
+        type: string
+      note:
+        type: string
+    type: object
+  standardDevelopModel.StandardDevelop:
+    properties:
+      ageRange:
+        type: integer
+      developments:
+        items:
+          $ref: '#/definitions/standardDevelopModel.DevelopmentItem'
+        type: array
+      id:
+        type: string
+    type: object
+  standardVaccineControllers.AddStandardVaccineRequest:
+    properties:
+      ageRange:
+        example: 24
+        type: integer
+      vaccines:
+        example:
+        - '["วัคซีนไข้หวัดใหญ่"'
+        - '"วัคซีนหัด"]'
+        items:
+          type: string
+        type: array
+    required:
+    - ageRange
+    - vaccines
+    type: object
+  standardVaccineControllers.UpdateStandardVaccineRequest:
+    properties:
+      ageRange:
+        example: 24
+        type: integer
+      vaccines:
+        example:
+        - '['
+        items:
+          type: string
+        type: array
     type: object
   userController.assignRoleRequest:
     properties:
@@ -476,6 +669,1090 @@ paths:
       summary: อัปเดตช่วงอายุตาม ID
       tags:
       - MetaAgeRange
+  /metaDevelop/add:
+    post:
+      consumes:
+      - application/json
+      description: ใช้สำหรับเพิ่มข้อมูลพัฒนาการ (admin เท่านั้น)
+      parameters:
+      - description: ข้อมูลช่วงอายุ
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/metadataController.AddDevelopRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "409":
+          description: Conflict
+          schema:
+            additionalProperties: true
+            type: object
+      summary: เพิ่มพัฒนาการใหม่
+      tags:
+      - MetaDevelop
+  /metaDevelop/delete/{id}:
+    delete:
+      description: ลบข้อมูลพัฒนาการตาม ObjectID (admin เท่านั้น)
+      parameters:
+      - description: ObjectID ของพัฒนาการ
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: ลบข้อมูลพัฒนาการตาม ID
+      tags:
+      - MetaDevelop
+  /metaDevelop/get-all:
+    get:
+      description: คืนค่าข้อมูลพัฒนาการทั้งหมด (admin เท่านั้น)
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/metadataModel.MetaDevelop'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+      summary: ดึงข้อมูลพัฒนาการทั้งหมด
+      tags:
+      - MetaDevelop
+  /metaDevelop/get-by-category:
+    post:
+      consumes:
+      - application/json
+      description: คืนค่าข้อมูลพัฒนาการตามหมวดหมู่ (admin เท่านั้น)
+      parameters:
+      - description: หมวดหมู่พัฒนาการ
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/metadataController.GetByCategoryRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/metadataModel.MetaDevelop'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+      summary: ดึงข้อมูลพัฒนาการตามหมวดหมู่
+      tags:
+      - MetaDevelop
+  /metaDevelop/get-by-category-detail:
+    post:
+      consumes:
+      - application/json
+      description: คืนค่าข้อมูลพัฒนาการตามหมวดหมู่และรายละเอียด (admin เท่านั้น)
+      parameters:
+      - description: หมวดหมู่และรายละเอียดพัฒนาการ
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/metadataController.GetByCategoryAndDetailRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/metadataModel.MetaDevelop'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+      summary: ดึงข้อมูลพัฒนาการตามหมวดหมู่และรายละเอียด
+      tags:
+      - MetaDevelop
+  /metaDevelop/get/{id}:
+    get:
+      description: คืนค่าข้อมูลพัฒนาการตาม ObjectID (admin เท่านั้น)
+      parameters:
+      - description: ObjectID ของพัฒนาการ
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/metadataModel.MetaDevelop'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+      summary: ดึงข้อมูลพัฒนาการตาม ID
+      tags:
+      - MetaDevelop
+  /metaDevelop/update/{id}:
+    put:
+      consumes:
+      - application/json
+      description: ใช้สำหรับอัปเดตข้อมูลพัฒนาการตาม ObjectID (admin เท่านั้น)
+      parameters:
+      - description: ObjectID ของพัฒนาการที่ต้องการอัปเดต
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: ข้อมูลพัฒนาการที่ต้องการอัปเดต
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/metadataController.UpdateDevelopRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/metadataModel.MetaDevelop'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: อัปเดตข้อมูลพัฒนาการตาม ID
+      tags:
+      - MetaDevelop
+  /metaVaccine/add:
+    post:
+      consumes:
+      - application/json
+      description: ใช้สำหรับเพิ่มข้อมูลวัคซีน (admin เท่านั้น)
+      parameters:
+      - description: ข้อมูลวัคซีน
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/metadataController.AddVaccineRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "409":
+          description: Conflict
+          schema:
+            additionalProperties: true
+            type: object
+      summary: เพิ่มวัคซีนใหม่
+      tags:
+      - MetaVaccine
+  /metaVaccine/delete/{id}:
+    delete:
+      description: ลบข้อมูลวัคซีน (admin เท่านั้น)
+      parameters:
+      - description: ObjectID ของวัคซีนที่ต้องการลบ
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: ลบวัคซีนตาม ID
+      tags:
+      - MetaVaccine
+  /metaVaccine/get-all:
+    get:
+      description: ใช้สำหรับดึงข้อมูลวัคซีนทั้งหมด (admin เท่านั้น)
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+      summary: ดึงข้อมูลวัคซีนทั้งหมด
+      tags:
+      - MetaVaccine
+  /metaVaccine/get/{id}:
+    get:
+      description: ใช้สำหรับดึงข้อมูลวัคซีนตาม ID (admin เท่านั้น)
+      parameters:
+      - description: ObjectID ของวัคซีน
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+      summary: ดึงข้อมูลวัคซีนตาม ID
+      tags:
+      - MetaVaccine
+  /metaVaccine/update/{id}:
+    put:
+      consumes:
+      - application/json
+      description: ใช้สำหรับอัปเดตข้อมูลวัคซีนตาม ID (admin เท่านั้น)
+      parameters:
+      - description: ObjectID ของวัคซีนที่ต้องการอัปเดต
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: ข้อมูลวัคซีนที่ต้องการอัปเดต
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/metadataController.UpdateVaccineRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "409":
+          description: Conflict
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: อัปเดตข้อมูลวัคซีนตาม ID
+      tags:
+      - MetaVaccine
+  /notification/get:
+    get:
+      description: ดึงการแจ้งเตือนทั้งหมดของผู้ใช้ที่ล็อกอินอยู่ (ผู้ใช้ต้องเป็นเจ้าของการแจ้งเตือนเหล่านี้)
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+      summary: ดึงการแจ้งเตือนทั้งหมดของผู้ใช้ตาม ID
+      tags:
+      - Notification
+  /notification/read-all:
+    put:
+      description: ทำเครื่องหมายการแจ้งเตือนทั้งหมดว่าอ่านแล้ว (สำหรับผู้ใช้ที่ล็อกอินอยู่)
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties: true
+            type: object
+      summary: ทำเครื่องหมายการแจ้งเตือนทั้งหมดว่าอ่านแล้ว
+      tags:
+      - Notification
+  /notification/read/{id}:
+    put:
+      description: ทำเครื่องหมายการแจ้งเตือนว่าอ่านแล้วตาม ID ของการแจ้งเตือน (ผู้ใช้ต้องเป็นเจ้าของการแจ้งเตือนนี้)
+      parameters:
+      - description: ObjectID ของการแจ้งเตือน
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+      summary: ทำเครื่องหมายการแจ้งเตือนว่าอ่านแล้วตาม ID
+      tags:
+      - Notification
+  /receiveDevelop/add:
+    post:
+      consumes:
+      - application/json
+      description: ใช้สำหรับเพิ่มข้อมูลการประเมินพัฒนาการของเด็ก (ผู้ใช้ต้องเป็นเจ้าของข้อมูลเด็กคนนี้)
+      parameters:
+      - description: ข้อมูลการประเมินพัฒนาการของเด็ก
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/receiveDevelopControllers.AddReceiveDevelopRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+      summary: เพิ่มข้อมูลการประเมินพัฒนาการของเด็ก
+      tags:
+      - ReceiveDevelop
+  /receiveDevelop/getById/{id}:
+    get:
+      description: ใช้สำหรับดึงข้อมูลการประเมินพัฒนาการของเด็กตาม ChildID (ผู้ใช้ต้องเป็นเจ้าของข้อมูลเด็กคนนี้)
+      parameters:
+      - description: ObjectID ของเด็ก (ChildID)
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+      summary: ดึงข้อมูลการประเมินพัฒนาการของเด็กตาม ChildID
+      tags:
+      - ReceiveDevelop
+  /receiveDevelop/update/{id}:
+    put:
+      consumes:
+      - application/json
+      description: ใช้สำหรับอัปเดตข้อมูลการประเมินพัฒนาการของเด็กตาม ID (ผู้ใช้ต้องเป็นเจ้าของข้อมูลเด็กคนนี้)
+      parameters:
+      - description: ObjectID ของข้อมูลการประเมินพัฒนาการ
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: ข้อมูลใหม่
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/receiveDevelopControllers.UpdateReceiveDevelopRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+      summary: อัปเดตข้อมูลการประเมินพัฒนาการของเด็กตาม ID
+      tags:
+      - ReceiveDevelop
+  /receiveVaccine/custom:
+    post:
+      consumes:
+      - application/json
+      description: ใช้สำหรับเพิ่มข้อมูลการรับวัคซีนแบบกำหนดเอง (ผู้ใช้ต้องเป็นเจ้าของข้อมูลเด็กคนนี้)
+      parameters:
+      - description: ข้อมูลการรับวัคซีนแบบกำหนดเอง
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/receiveVaccineController.AddReceiveVaccineCustomRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+      summary: เพิ่มข้อมูลการรับวัคซีนแบบกำหนดเอง
+      tags:
+      - ReceiveVaccine
+  /receiveVaccine/from-standard:
+    post:
+      consumes:
+      - application/json
+      description: ใช้สำหรับเพิ่มข้อมูลการรับวัคซีนจากมาตรฐาน (ผู้ใช้ต้องเป็นเจ้าของข้อมูลเด็กคนนี้)
+      parameters:
+      - description: ข้อมูลการรับวัคซีนจากมาตรฐาน
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/receiveVaccineController.AddReceiveVaccineFromStandardRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+      summary: เพิ่มข้อมูลการรับวัคซีนจากมาตรฐาน
+      tags:
+      - ReceiveVaccine
+  /resendMail/send-password:
+    post:
+      consumes:
+      - application/json
+      description: ใช้สำหรับส่งรหัสผ่านใหม่ไปยังอีเมลของผู้ใช้ (กรณีลืมรหัสผ่าน)
+      parameters:
+      - description: ข้อมูลอีเมลและชื่อผู้ใช้
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/resendMail.ResendMailRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: ส่งรหัสผ่านใหม่ไปยังอีเมลของผู้ใช้
+      tags:
+      - ResendMail
+  /standardDevelop/add:
+    post:
+      consumes:
+      - application/json
+      description: ใช้สำหรับเพิ่มข้อมูลพัฒนาการมาตรฐานใหม่ (admin เท่านั้น)
+      parameters:
+      - description: ข้อมูลพัฒนาการมาตรฐาน
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/standardDevelopController.AddStandardDevelopRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: เพิ่มข้อมูลพัฒนาการมาตรฐานใหม่
+      tags:
+      - StandardDevelop
+  /standardDevelop/all:
+    get:
+      description: ใช้สำหรับดึงข้อมูลพัฒนาการมาตรฐานทั้งหมด (admin เท่านั้น)
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+      summary: ดึงข้อมูลพัฒนาการมาตรฐานทั้งหมด
+      tags:
+      - StandardDevelop
+  /standardDevelop/delete/{id}:
+    delete:
+      description: ใช้สำหรับลบข้อมูลพัฒนาการมาตรฐานตาม ID (admin เท่านั้น)
+      parameters:
+      - description: ObjectID ของพัฒนาการมาตรฐาน
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: ลบข้อมูลพัฒนาการมาตรฐานตาม ID
+      tags:
+      - StandardDevelop
+  /standardDevelop/get/{id}:
+    get:
+      description: ใช้สำหรับดึงข้อมูลพัฒนาการมาตรฐานตาม ID (admin เท่านั้น)
+      parameters:
+      - description: ObjectID ของพัฒนาการมาตรฐาน
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/standardDevelopModel.StandardDevelop'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+      summary: ดึงข้อมูลพัฒนาการมาตรฐานตาม ID
+      tags:
+      - StandardDevelop
+  /standardDevelop/update/{id}:
+    put:
+      consumes:
+      - application/json
+      description: ใช้สำหรับอัปเดตข้อมูลพัฒนาการมาตรฐานตาม ID (admin เท่านั้น)
+      parameters:
+      - description: ObjectID ของพัฒนาการมาตรฐาน
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: ข้อมูลใหม่
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/standardDevelopController.UpdateStandardDevelopRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: อัปเดตข้อมูลพัฒนาการมาตรฐานตาม ID
+      tags:
+      - StandardDevelop
+  /standardVaccine/add:
+    post:
+      consumes:
+      - application/json
+      description: ใช้สำหรับเพิ่มข้อมูลวัคซีนมาตรฐานใหม่ (admin เท่านั้น)
+      parameters:
+      - description: ข้อมูลวัคซีนมาตรฐาน
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/standardVaccineControllers.AddStandardVaccineRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: เพิ่มข้อมูลวัคซีนมาตรฐานใหม่
+      tags:
+      - StandardVaccine
+  /standardVaccine/all:
+    get:
+      description: ใช้สำหรับดึงข้อมูลวัคซีนมาตรฐานทั้งหมด (admin เท่านั้น)
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: ดึงข้อมูลวัคซีนมาตรฐานทั้งหมด
+      tags:
+      - StandardVaccine
+  /standardVaccine/delete/{id}:
+    delete:
+      description: ใช้สำหรับลบข้อมูลวัคซีนมาตรฐานตาม ID (admin เท่านั้น)
+      parameters:
+      - description: ObjectID ของวัคซีนมาตรฐาน
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: ลบข้อมูลวัคซีนมาตรฐานตาม ID
+      tags:
+      - StandardVaccine
+  /standardVaccine/get/{id}:
+    get:
+      description: ใช้สำหรับดึงข้อมูลวัคซีนมาตรฐานตาม ID (admin เท่านั้น)
+      parameters:
+      - description: ObjectID ของวัคซีนมาตรฐาน
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: ดึงข้อมูลวัคซีนมาตรฐานตาม ID
+      tags:
+      - StandardVaccine
+  /standardVaccine/update/{id}:
+    put:
+      consumes:
+      - application/json
+      description: ใช้สำหรับอัปเดตข้อมูลวัคซีนมาตรฐานตาม ID (admin เท่านั้น)
+      parameters:
+      - description: ObjectID ของวัคซีนมาตรฐาน
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: ข้อมูลใหม่ของวัคซีนมาตรฐาน
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/standardVaccineControllers.UpdateStandardVaccineRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: อัปเดตข้อมูลวัคซีนมาตรฐานตาม ID
+      tags:
+      - StandardVaccine
   /user/all:
     get:
       description: ดึงข้อมูลผู้ใช้ทั้งหมด (เฉพาะ admin เท่านั้น)
