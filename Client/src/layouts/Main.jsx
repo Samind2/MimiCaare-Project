@@ -7,7 +7,7 @@ import Breadcrumbs from "../components/Breadcrumbs";
 
 const Main = () => {
   const location = useLocation();
-  const hiddenRoutes = ["/Signin", "/Signup"];
+  const hiddenRoutes = ["/Signin", "/Signup", "/reset-password"];
   const shouldHideNavbar = hiddenRoutes.includes(location.pathname);
 
   return (

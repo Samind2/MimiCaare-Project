@@ -6,20 +6,16 @@ import { toast } from 'react-toastify';
 import { FaChevronDown } from "react-icons/fa";
 import { IoMdClose, IoMdCheckmark, IoMdCheckmarkCircleOutline, IoMdCloseCircleOutline } from "react-icons/io";
 
-
-
 const ViewDev = () => {
-  // STATE
-  const [selectedAgeRange, setSelectedAgeRange] = useState(1); // ค่าเริ่มต้นเป็น 1 เดือน
-  const [standardDevelopments, setStandardDevelopments] = useState([]); // ข้อมูลพัฒนาการมาตรฐาน
-  const [childrenList, setChildrenList] = useState([]); // ข้อมูลเด็กทั้งหมด
-  const [selectedChild, setSelectedChild] = useState(null); // เด็กที่เลือก
-  const [developmentStatusMap, setDevelopmentStatusMap] = useState({}); // เก็บสถานะ“ทำได้”หรือ“ทำไม่ได้”ของแต่ละข้อ
-  const [isAssessmentSubmitted, setIsAssessmentSubmitted] = useState(false); // เช็คว่าประเมินแล้วหรือยัง
-  const [currentDevelopmentIndex, setCurrentDevelopmentIndex] = useState(0); // ดึงข้อมูลที่บันทึกข้อปัจจุบันมาแสดง
-  //const [lastAssessmentMap, setLastAssessmentMap] = useState(null); // เก็บสถานะการประเมินครั้งล่าสุดสำหรับปุ่มประเมินใหม่
+  const [selectedAgeRange, setSelectedAgeRange] = useState(1);
+  const [standardDevelopments, setStandardDevelopments] = useState([]);
+  const [childrenList, setChildrenList] = useState([]);
+  const [selectedChild, setSelectedChild] = useState(null);
+  const [developmentStatusMap, setDevelopmentStatusMap] = useState({});
+  const [isAssessmentSubmitted, setIsAssessmentSubmitted] = useState(false);
+  const [currentDevelopmentIndex, setCurrentDevelopmentIndex] = useState(0);
 
-  const ageRanges = [1, 2, 4, 6, 8, 9, 12, 15, 17, 18, 24, 29, 30, 39, 41, 42, 48, 54, 59, 60, 66, 72, 78];
+  const ageRanges = [1, 2, 4, 6, 8, 9, 12, 15, 17, 18, 24, 29, 30, 36, 41, 42, 48, 54, 59, 60, 66, 72, 78];
 
   const ageRangeToText = (age) => {
     switch (age) {
@@ -53,75 +49,78 @@ const ViewDev = () => {
     fetchChildren();
   }, []);
 
-  // โหลดข้อมูลพัฒนาการ
+  // โหลดเฉพาะข้อมูลพัฒนาการมาตรฐาน (ไม่ต้องรอมีเด็ก)
   useEffect(() => {
-    fetchStandardOrReceivedDevelopments();
-  }, [selectedChild, selectedAgeRange]);
+    const fetchStandardDev = async () => {
+      try {
+        const resStandard = await standardDevService.getDevelop();
+        const allStandards = resStandard.data.data || [];
+        const ageStandard = allStandards.find(dev => Number(dev.ageRange) === Number(selectedAgeRange));
+        const standardList = ageStandard ? ageStandard.developments : [];
+        setStandardDevelopments(standardList);
+      } catch (err) {
+        toast.error("เกิดข้อผิดพลาดในการดึงข้อมูลพัฒนาการ");
+        console.error(err);
+      }
+    };
+    fetchStandardDev();
+  }, [selectedAgeRange]);
 
-  const fetchStandardOrReceivedDevelopments = async () => {
-    if (!selectedChild) return;
-
-    try {
-      const resStandard = await standardDevService.getDevelop();
-      const allStandards = resStandard.data.data || [];
-      const ageStandard = allStandards.find(dev => Number(dev.ageRange) === Number(selectedAgeRange));
-      const standardList = ageStandard ? ageStandard.developments : [];
-
-      let receivedDevelopments = [];
+  // ดึงข้อมูลประเมิน 
+  useEffect(() => {
+    const fetchReceivedDev = async () => {
+      if (!selectedChild) return;
       try {
         const resReceived = await receiveDevelopService.getReceiveDevelopByChildId(selectedChild.id);
-        receivedDevelopments = resReceived.data["had receive"] || [];
-      } catch (err) {
-        if (err.response && err.response.status === 404) {
-          setStandardDevelopments(standardList);
+        const receivedDevelopments = resReceived.data["had receive"] || [];
+
+        const receivedForAge = receivedDevelopments
+          .filter(item => Number(item.ageRange) === Number(selectedAgeRange))
+          .sort((a, b) => new Date(b.receiveDate) - new Date(a.receiveDate))[0];
+
+        if (receivedForAge) {
+          const statusMapping = {};
+          receivedForAge.developments.forEach(item => {
+            const key = `${item.category}-${item.detail}`;
+            statusMapping[key] = item.status;
+          });
+
+          const mergedDevelopments = standardDevelopments.map(item => ({
+            ...item,
+            status: statusMapping[`${item.category}-${item.detail}`] ?? null,
+          }));
+
+          const newStatusMap = {};
+          mergedDevelopments.forEach((dev, idx) => {
+            if (dev.status === true) newStatusMap[idx] = 'done';
+            else if (dev.status === false) newStatusMap[idx] = 'not-done';
+          });
+
+          setStandardDevelopments(mergedDevelopments);
+          setDevelopmentStatusMap(newStatusMap);
+          setIsAssessmentSubmitted(true);
+        } else {
           setDevelopmentStatusMap({});
           setIsAssessmentSubmitted(false);
-          return;
-        } else {
-          throw err;
+        }
+      } catch (err) {
+        if (err.response?.status !== 404) {
+          console.error(err);
+          toast.error("เกิดข้อผิดพลาดในการโหลดข้อมูลการประเมิน");
         }
       }
+    };
+    fetchReceivedDev();
+  }, [selectedChild, selectedAgeRange, standardDevelopments.length]);
 
-      const receivedForAge = receivedDevelopments
-        .filter(item => Number(item.ageRange) === Number(selectedAgeRange))
-        .sort((a, b) => new Date(b.receiveDate) - new Date(a.receiveDate))[0];
-
-      if (receivedForAge) {
-        const statusMapping = {};
-        receivedForAge.developments.forEach(item => {
-          const key = `${item.category}-${item.detail}`;
-          statusMapping[key] = item.status;
-        });
-
-        const mergedDevelopments = standardList.map(item => ({
-          ...item,
-          status: statusMapping[`${item.category}-${item.detail}`] ?? null,
-        }));
-
-        const newStatusMap = {};
-        mergedDevelopments.forEach((dev, idx) => {
-          if (dev.status === true) newStatusMap[idx] = 'done';
-          else if (dev.status === false) newStatusMap[idx] = 'not-done';
-        });
-
-        setStandardDevelopments(mergedDevelopments);
-        setDevelopmentStatusMap(newStatusMap);
-        setIsAssessmentSubmitted(true);
-      } else {
-        setStandardDevelopments(standardList);
-        setDevelopmentStatusMap({});
-        setIsAssessmentSubmitted(false);
-      }
-    } catch (err) {
-      toast.error("เกิดข้อผิดพลาดในการดึงข้อมูล");
-      console.error(err);
-    }
-  };
-
-  // ฟังก์ชันประเมินพัฒนาการ
   const handleDevelopmentAnswer = (value) => {
     setDevelopmentStatusMap(prev => ({ ...prev, [currentDevelopmentIndex]: value }));
     const updatedMap = { ...developmentStatusMap, [currentDevelopmentIndex]: value };
+
+    if (!selectedChild) {
+      toast.error("กรุณาเลือกเด็กก่อนทำการประเมิน");
+      return;
+    }
 
     if (currentDevelopmentIndex < standardDevelopments.length - 1) {
       setCurrentDevelopmentIndex(currentDevelopmentIndex + 1);
@@ -131,8 +130,9 @@ const ViewDev = () => {
   };
 
   const submitAssessment = async (finalStatusMap) => {
-    if (!selectedChild || standardDevelopments.length === 0) {
-      toast.error("กรุณาเลือกเด็ก และช่วงอายุให้เรียบร้อย");
+    // ตรวจสอบว่ามีเด็กไหม
+    if (!selectedChild) {
+      toast.error("กรุณาเพิ่มเด็กเข้าสู่ระบบก่อนทำการประเมิน");
       return;
     }
 
@@ -162,8 +162,6 @@ const ViewDev = () => {
       await receiveDevelopService.addReceiveDevelop(payload);
       toast.success("บันทึกข้อมูลสำเร็จ", { autoClose: 1500 });
       setIsAssessmentSubmitted(true);
-      //setLastAssessmentMap(finalStatusMap);
-      await fetchStandardOrReceivedDevelopments();
     } catch (err) {
       toast.error("เกิดข้อผิดพลาดในการบันทึก");
       console.error(err);
@@ -172,13 +170,14 @@ const ViewDev = () => {
 
   return (
     <div className="p-6 mx-auto w-full max-w-full">
-      <h1 className="text-3xl font-bold mb-6 text-center ">ประเมินพัฒนาการ</h1>
+      <h1 className="text-3xl font-bold mb-6 text-center">ประเมินพัฒนาการ</h1>
 
+      {/* เลือกเด็กและอายุ */}
       <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
         <h2 className="text-xl font-semibold">พัฒนาการของเด็กช่วงอายุ {ageRangeToText(selectedAgeRange)}</h2>
 
         <div className="flex gap-4">
-          {/* เลือกเด็ก */}
+          {/* dropdown เด็ก */}
           <div className="dropdown dropdown-hover">
             <div
               tabIndex={0}
@@ -206,7 +205,7 @@ const ViewDev = () => {
             </ul>
           </div>
 
-          {/* เลือกช่วงอายุ */}
+          {/* เลือกอายุ */}
           <div className="dropdown dropdown-hover">
             <div
               tabIndex={0}
@@ -234,73 +233,86 @@ const ViewDev = () => {
         </div>
       </div>
 
-      {/* แสดงผล */}
-      {!selectedChild ? (
-        <div className="text-center text-red-500 font-semibold mt-6">
-          กรุณาเลือกเด็กก่อนเพื่อทำการประเมิน
-        </div>
-      ) : !isAssessmentSubmitted ? (
-        standardDevelopments.length > 0 ? (
-          <div className="bg-white shadow-lg rounded-xl p-6 text-center">
-            <h2 className="text-lg font-semibold mb-4">
-              ข้อ {currentDevelopmentIndex + 1} / {standardDevelopments.length}
-            </h2>
-            <p className="text-gray-600 mb-2">ด้าน: {standardDevelopments[currentDevelopmentIndex].category}</p>
-            <p className="font-medium mb-4">{standardDevelopments[currentDevelopmentIndex].detail}</p>
-            {standardDevelopments[currentDevelopmentIndex].image && (
-              <img
-                src={standardDevelopments[currentDevelopmentIndex].image}
-                alt=""
-                className="mx-auto w-32 h-32 object-cover rounded border mb-4"
-              />
+      {/* แสดงพัฒนาการ */}
+      {standardDevelopments.length > 0 ? (
+        !isAssessmentSubmitted ? (
+          <>
+            {!selectedChild && (
+              <div className="bg-yellow-100 border border-yellow-400 text-yellow-800 px-4 py-3 rounded-lg mb-4 text-center">
+                กรุณาเพิ่มหรือเลือกเด็กก่อนทำการประเมินพัฒนาการ
+              </div>
             )}
-            <p className="text-sm text-gray-500 mb-6">{standardDevelopments[currentDevelopmentIndex].note}</p>
 
-            <div className="flex justify-center gap-6">
-              {/* ปุ่มย้อนกลับ */}
-              {currentDevelopmentIndex > 0 && (
-                <button
-                  onClick={() => setCurrentDevelopmentIndex(currentDevelopmentIndex - 1)}
-                  className="px-5 py-2 bg-yellow-200 text-yellow-900 rounded-lg hover:bg-yellow-300"
-                >
-                  ย้อนกลับ
-                </button>
+            <div className="bg-white shadow-lg rounded-xl p-6 text-center">
+              <h2 className="text-lg font-semibold mb-4">
+                ข้อ {currentDevelopmentIndex + 1} / {standardDevelopments.length}
+              </h2>
+              <p className="text-gray-600 mb-2">
+                ด้าน: {standardDevelopments[currentDevelopmentIndex].category}
+              </p>
+              <p className="font-medium mb-4">
+                {standardDevelopments[currentDevelopmentIndex].detail}
+              </p>
+
+              {standardDevelopments[currentDevelopmentIndex].image && (
+                <img
+                  src={standardDevelopments[currentDevelopmentIndex].image}
+                  alt=""
+                  className="mx-auto w-32 h-32 object-cover rounded border mb-4"
+                />
               )}
+              <p className="text-sm text-gray-500 mb-6">
+                {standardDevelopments[currentDevelopmentIndex].note}
+              </p>
 
-              {/* ปุ่มทำได้ */}
-              <button
-                onClick={() => handleDevelopmentAnswer('done')}
-                className={`px-5 py-2 rounded-lg flex items-center justify-center gap-2
-    ${developmentStatusMap[currentDevelopmentIndex] === 'done'
-                    ? "bg-green-600 text-white"
-                    : "bg-green-200 text-green-900 hover:bg-green-400"}`}
-              >
-                ทำได้
-                {developmentStatusMap[currentDevelopmentIndex] === 'done' && (
-                  <IoMdCheckmarkCircleOutline className="text-white text-xl" />
+              <div className="flex justify-center gap-6">
+                {currentDevelopmentIndex > 0 && (
+                  <button
+                    onClick={() => setCurrentDevelopmentIndex(currentDevelopmentIndex - 1)}
+                    className="px-5 py-2 bg-yellow-200 text-yellow-900 rounded-lg hover:bg-yellow-300"
+                    disabled={!selectedChild}
+                  >
+                    ย้อนกลับ
+                  </button>
                 )}
-              </button>
 
-              {/* ปุ่มทำไม่ได้ */}
-              <button
-                onClick={() => handleDevelopmentAnswer('not-done')}
-                className={`px-5 py-2 rounded-lg flex items-center justify-center gap-2
-    ${developmentStatusMap[currentDevelopmentIndex] === 'not-done'
-                    ? "bg-red-600 text-white"
-                    : "bg-red-200 text-red-900 hover:bg-red-400"}`}
-              >
-                ทำไม่ได้
-                {developmentStatusMap[currentDevelopmentIndex] === 'not-done' && (
-                  <IoMdCloseCircleOutline className="text-white text-xl" />
-                )}
-              </button>
+                <button
+                  onClick={() => handleDevelopmentAnswer("done")}
+                  disabled={!selectedChild}
+                  className={`px-5 py-2 rounded-lg flex items-center justify-center gap-2
+              ${!selectedChild
+                      ? "bg-gray-300 cursor-not-allowed text-gray-500"
+                      : developmentStatusMap[currentDevelopmentIndex] === "done"
+                        ? "bg-green-600 text-white"
+                        : "bg-green-200 text-green-900 hover:bg-green-400"
+                    }`}
+                >
+                  ทำได้
+                  {developmentStatusMap[currentDevelopmentIndex] === "done" && (
+                    <IoMdCheckmarkCircleOutline className="text-white text-xl" />
+                  )}
+                </button>
+
+                <button
+                  onClick={() => handleDevelopmentAnswer("not-done")}
+                  disabled={!selectedChild}
+                  className={`px-5 py-2 rounded-lg flex items-center justify-center gap-2
+              ${!selectedChild
+                      ? "bg-gray-300 cursor-not-allowed text-gray-500"
+                      : developmentStatusMap[currentDevelopmentIndex] === "not-done"
+                        ? "bg-red-600 text-white"
+                        : "bg-red-200 text-red-900 hover:bg-red-400"
+                    }`}
+                >
+                  ทำไม่ได้
+                  {developmentStatusMap[currentDevelopmentIndex] === "not-done" && (
+                    <IoMdCloseCircleOutline className="text-white text-xl" />
+                  )}
+                </button>
+              </div>
             </div>
-          </div>
+          </>
         ) : (
-          <p className="text-center text-gray-500 italic">ไม่มีข้อมูลในช่วงอายุนี้</p>
-        )
-      ) : (
-        <div>
           <div className="overflow-x-auto mb-6">
             <table className="table table-zebra w-full">
               <thead className="bg-gray-200 text-gray-700 text-sm">
@@ -331,7 +343,11 @@ const ViewDev = () => {
                     <td>{item.detail}</td>
                     <td className="text-center">
                       {item.image ? (
-                        <img src={item.image} alt="" className="w-24 h-24 object-cover rounded border" />
+                        <img
+                          src={item.image}
+                          alt=""
+                          className="w-24 h-24 object-cover rounded border"
+                        />
                       ) : (
                         <span className="text-gray-400 italic">ไม่มีรูป</span>
                       )}
@@ -342,22 +358,13 @@ const ViewDev = () => {
               </tbody>
             </table>
           </div>
-
-          {/* ปุ่มประเมินใหม่
-          <div className="text-center">
-            <button
-              onClick={() => {
-                setIsAssessmentSubmitted(false);
-                setCurrentDevelopmentIndex(0);
-                setDevelopmentStatusMap(lastAssessmentMap || {});
-              }}
-              className="px-6 py-2 bg-yellow-300 text-yellow-900 font-semibold rounded-lg hover:bg-yellow-400"
-            >
-              🔄 ประเมินใหม่
-            </button>
-          </div> */}
-        </div>
+        )
+      ) : (
+        <p className="text-center text-gray-500 italic">
+          ไม่มีข้อมูลในช่วงอายุนี้
+        </p>
       )}
+
     </div>
   );
 };

@@ -21,6 +21,23 @@ func SetUserReference(client *mongo.Client) {
 	dbName := os.Getenv("DBNAME") // ดึงค่าชื่อฐานข้อมูลจาก .env
 	UserCollection = client.Database(dbName).Collection("users")
 }
+
+type ResendMailRequest struct {
+	Email     string `json:"email" binding:"required" example:"email@mail.com"`
+	FirstName string `json:"firstName" binding:"required" example:"สมชาย"`
+}
+
+// @Summary ส่งรหัสผ่านใหม่ไปยังอีเมลของผู้ใช้
+// @Description ใช้สำหรับส่งรหัสผ่านใหม่ไปยังอีเมลของผู้ใช้ (กรณีลืมรหัสผ่าน)
+// @Tags ResendMail
+// @Accept json
+// @Produce json
+// @Param request body ResendMailRequest true "ข้อมูลอีเมลและชื่อผู้ใช้"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]interface{}
+// @Failure 404 {object} map[string]interface{}
+// @Failure 500 {object} map[string]interface{}
+// @Router /resendMail/send-password [post]
 func SendPasswordToMail(c *gin.Context) {
 	// สุ่มรหัสผ่านใหม่
 	const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()"

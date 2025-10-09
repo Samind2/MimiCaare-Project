@@ -21,6 +21,24 @@ func SetDevelopCollection(client *mongo.Client) {
 	developCollection = client.Database(dbName).Collection("metaDevelops")
 }
 
+type AddDevelopRequest struct {
+	Category string `json:"category" binding:"required" example:"กล้ามเนื้อมัดใหญ่"`
+	Detail   string `json:"detail" binding:"required" example:"การนั่ง"`
+	Note     string `json:"note" binding:"required" example:"เด็กจะเริ่มนั่งได้เองเมื่ออายุประมาณ 6 เดือน โดยไม่ต้องพิง"`
+	Image    string `json:"image" binding:"required" example:"https://res.cloudinary.com/demo/image/upload/sample.jpg"`
+}
+
+// @Summary เพิ่มพัฒนาการใหม่
+// @Description ใช้สำหรับเพิ่มข้อมูลพัฒนาการ (admin เท่านั้น)
+// @Tags MetaDevelop
+// @Accept json
+// @Produce json
+// @Param request body AddDevelopRequest true "ข้อมูลช่วงอายุ"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]interface{}
+// @Failure 401 {object} map[string]interface{}
+// @Failure 409 {object} map[string]interface{}
+// @Router /metaDevelop/add [post]
 func AddNewDevelop(c *gin.Context) {
 	var newDevelop developModel.MetaDevelop
 
@@ -70,6 +88,13 @@ func AddNewDevelop(c *gin.Context) {
 	})
 }
 
+// @Summary ดึงข้อมูลพัฒนาการทั้งหมด
+// @Description คืนค่าข้อมูลพัฒนาการทั้งหมด (admin เท่านั้น)
+// @Tags MetaDevelop
+// @Produce json
+// @Success 200 {array} developModel.MetaDevelop
+// @Failure 401 {object} map[string]interface{}
+// @Router /metaDevelop/get-all [get]
 func GetAllDevelops(c *gin.Context) {
 	var develops []developModel.MetaDevelop
 	cursor, err := developCollection.Find(context.TODO(), primitive.D{})
@@ -87,6 +112,15 @@ func GetAllDevelops(c *gin.Context) {
 	})
 }
 
+// @Summary ดึงข้อมูลพัฒนาการตาม ID
+// @Description คืนค่าข้อมูลพัฒนาการตาม ObjectID (admin เท่านั้น)
+// @Tags MetaDevelop
+// @Produce json
+// @Param id path string true "ObjectID ของพัฒนาการ"
+// @Success 200 {object} developModel.MetaDevelop
+// @Failure 400 {object} map[string]interface{}
+// @Failure 404 {object} map[string]interface{}
+// @Router /metaDevelop/get/{id} [get]
 func GetDevelopByID(c *gin.Context) {
 	id := c.Param("id")
 	objID, err := primitive.ObjectIDFromHex(id)
@@ -106,6 +140,21 @@ func GetDevelopByID(c *gin.Context) {
 	})
 }
 
+type GetByCategoryRequest struct {
+	Category string `json:"category" binding:"required" example:"กล้ามเนื้อมัดใหญ่"`
+}
+
+// @Summary ดึงข้อมูลพัฒนาการตามหมวดหมู่
+// @Description คืนค่าข้อมูลพัฒนาการตามหมวดหมู่ (admin เท่านั้น)
+// @Tags MetaDevelop
+// @Accept json
+// @Produce json
+// @Param request body GetByCategoryRequest true "หมวดหมู่พัฒนาการ"
+// @Success 200 {array} developModel.MetaDevelop
+// @Failure 400 {object} map[string]interface{}
+// @Failure 401 {object} map[string]interface{}
+// @Failure 404 {object} map[string]interface{}
+// @Router /metaDevelop/get-by-category [post]
 func GetDevelopByCategory(c *gin.Context) {
 	var req struct {
 		Category string `json:"category"`
@@ -131,6 +180,22 @@ func GetDevelopByCategory(c *gin.Context) {
 	})
 }
 
+type GetByCategoryAndDetailRequest struct {
+	Category string `json:"category" binding:"required" example:"กล้ามเนื้อมัดใหญ่"`
+	Detail   string `json:"detail" binding:"required" example:"การนั่ง"`
+}
+
+// @Summary ดึงข้อมูลพัฒนาการตามหมวดหมู่และรายละเอียด
+// @Description คืนค่าข้อมูลพัฒนาการตามหมวดหมู่และรายละเอียด (admin เท่านั้น)
+// @Tags MetaDevelop
+// @Accept json
+// @Produce json
+// @Param request body GetByCategoryAndDetailRequest true "หมวดหมู่และรายละเอียดพัฒนาการ"
+// @Success 200 {array} developModel.MetaDevelop
+// @Failure 400 {object} map[string]interface{}
+// @Failure 401 {object} map[string]interface{}
+// @Failure 404 {object} map[string]interface{}
+// @Router /metaDevelop/get-by-category-detail [post]
 func GetDevelopByCategoryAndDetail(c *gin.Context) {
 	var req struct {
 		Category string `json:"category" `
@@ -156,6 +221,16 @@ func GetDevelopByCategoryAndDetail(c *gin.Context) {
 	})
 }
 
+// @Summary ลบข้อมูลพัฒนาการตาม ID
+// @Description ลบข้อมูลพัฒนาการตาม ObjectID (admin เท่านั้น)
+// @Tags MetaDevelop
+// @Produce json
+// @Param id path string true "ObjectID ของพัฒนาการ"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]interface{}
+// @Failure 404 {object} map[string]interface{}
+// @Failure 500 {object} map[string]interface{}
+// @Router /metaDevelop/delete/{id} [delete]
 func DeleteDevelopByID(c *gin.Context) {
 	id := c.Param("id")
 	objID, err := primitive.ObjectIDFromHex(id)
@@ -181,6 +256,25 @@ func DeleteDevelopByID(c *gin.Context) {
 	})
 }
 
+type UpdateDevelopRequest struct {
+	Category string `json:"category" example:"การเคลื่อนไหว"`
+	Detail   string `json:"detail" example:"การนั่ง"`
+	Note     string `json:"note" example:"เด็กจะเริ่มนั่งได้เองเมื่ออายุประมาณ 6 เดือน โดยไม่ต้องพิง"`
+	Image    string `json:"image" example:"https://res.cloudinary.com/demo/image/upload/sample.jpg"`
+}
+
+// @Summary อัปเดตข้อมูลพัฒนาการตาม ID
+// @Description ใช้สำหรับอัปเดตข้อมูลพัฒนาการตาม ObjectID (admin เท่านั้น)
+// @Tags MetaDevelop
+// @Accept json
+// @Produce json
+// @Param id path string true "ObjectID ของพัฒนาการที่ต้องการอัปเดต"
+// @Param request body UpdateDevelopRequest true "ข้อมูลพัฒนาการที่ต้องการอัปเดต"
+// @Success 200 {object} developModel.MetaDevelop
+// @Failure 400 {object} map[string]interface{}
+// @Failure 404 {object} map[string]interface{}
+// @Failure 500 {object} map[string]interface{}
+// @Router /metaDevelop/update/{id} [put]
 func UpdateDevelopByID(c *gin.Context) {
 	idParam := c.Param("id")
 	developID, err := primitive.ObjectIDFromHex(idParam)

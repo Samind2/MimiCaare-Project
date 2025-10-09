@@ -22,7 +22,22 @@ func SetStandardDevelopCollection(client *mongo.Client) {
 	StandardDevelopCollection = client.Database(dbName).Collection("standardDevelops")
 }
 
-// AddStandardDevelop เพิ่มข้อมูลพัฒนาการมาตรฐานใหม่
+type AddStandardDevelopRequest struct {
+	AgeRange     int      `json:"ageRange" binding:"required" example:"24"`
+	Developments []string `json:"developments" binding:"required" example:"[{\"category\":\"กล้ามเนื้อ\",\"detail\":\"วิ่งได้\",\"image\":\"https://example.com/crawl.png\",\"note\":\"ควรฝึกทุกวัน\"}]"`
+}
+
+// @Summary เพิ่มข้อมูลพัฒนาการมาตรฐานใหม่
+// @Description ใช้สำหรับเพิ่มข้อมูลพัฒนาการมาตรฐานใหม่ (admin เท่านั้น)
+// @Tags StandardDevelop
+// @Accept json
+// @Produce json
+// @Param request body AddStandardDevelopRequest true "ข้อมูลพัฒนาการมาตรฐาน"
+// @Success 201 {object} map[string]interface{}
+// @Failure 400 {object} map[string]interface{}
+// @Failure 401 {object} map[string]interface{}
+// @Failure 500 {object} map[string]interface{}
+// @Router /standardDevelop/add [post]
 func AddStandardDevelop(c *gin.Context) {
 	var developData standardDevelopModel.StandardDevelop
 	// ดึงข้อมูล JSON เดียวรอบเดียว
@@ -84,6 +99,13 @@ func AddStandardDevelop(c *gin.Context) {
 	})
 }
 
+// @Summary ดึงข้อมูลพัฒนาการมาตรฐานทั้งหมด
+// @Description ใช้สำหรับดึงข้อมูลพัฒนาการมาตรฐานทั้งหมด (admin เท่านั้น)
+// @Tags StandardDevelop
+// @Produce json
+// @Success 200 {object} map[string]interface{}
+// @Failure 401 {object} map[string]interface{}
+// @Router /standardDevelop/all [get]
 func GetAllStandardDevelops(c *gin.Context) {
 	focus, err := StandardDevelopCollection.Find(context.TODO(), bson.M{})
 	if err != nil {
@@ -105,6 +127,15 @@ func GetAllStandardDevelops(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"data": results})
 }
 
+// @Summary ดึงข้อมูลพัฒนาการมาตรฐานตาม ID
+// @Description ใช้สำหรับดึงข้อมูลพัฒนาการมาตรฐานตาม ID (admin เท่านั้น)
+// @Tags StandardDevelop
+// @Produce json
+// @Param id path string true "ObjectID ของพัฒนาการมาตรฐาน"
+// @Success 200 {object} standardDevelopModel.StandardDevelop
+// @Failure 400 {object} map[string]interface{}
+// @Failure 404 {object} map[string]interface{}
+// @Router /standardDevelop/get/{id} [get]
 func GetStandardDevelopByID(c *gin.Context) {
 	id := c.Param("id")
 	objectID, err := primitive.ObjectIDFromHex(id)
@@ -122,6 +153,23 @@ func GetStandardDevelopByID(c *gin.Context) {
 	c.JSON(http.StatusOK, result)
 }
 
+type UpdateStandardDevelopRequest struct {
+	AgeRange     int      `json:"ageRange" example:"24"`
+	Developments []string `json:"developments" binding:"required" example:"[{\"category\":\"กล้ามเนื้อ\",\"detail\":\"วิ่งได้\",\"image\":\"https://example.com/crawl.png\",\"note\":\"ควรฝึกทุกวัน\"}]"`
+}
+
+// @Summary อัปเดตข้อมูลพัฒนาการมาตรฐานตาม ID
+// @Description ใช้สำหรับอัปเดตข้อมูลพัฒนาการมาตรฐานตาม ID (admin เท่านั้น)
+// @Tags StandardDevelop
+// @Accept json
+// @Produce json
+// @Param id path string true "ObjectID ของพัฒนาการมาตรฐาน"
+// @Param request body UpdateStandardDevelopRequest true "ข้อมูลใหม่"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]interface{}
+// @Failure 404 {object} map[string]interface{}
+// @Failure 500 {object} map[string]interface{}
+// @Router /standardDevelop/update/{id} [put]
 func UpdateStandardDevelopByID(c *gin.Context) {
 	id := c.Param("id")
 	objectID, err := primitive.ObjectIDFromHex(id)
@@ -241,6 +289,16 @@ func UpdateStandardDevelopByID(c *gin.Context) {
 	})
 }
 
+// @Summary ลบข้อมูลพัฒนาการมาตรฐานตาม ID
+// @Description ใช้สำหรับลบข้อมูลพัฒนาการมาตรฐานตาม ID (admin เท่านั้น)
+// @Tags StandardDevelop
+// @Produce json
+// @Param id path string true "ObjectID ของพัฒนาการมาตรฐาน"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]interface{}
+// @Failure 404 {object} map[string]interface{}
+// @Failure 500 {object} map[string]interface{}
+// @Router /standardDevelop/delete/{id} [delete]
 func DeleteStandardDevelopByID(c *gin.Context) {
 	id := c.Param("id")
 	objectID, err := primitive.ObjectIDFromHex(id)

@@ -17,6 +17,7 @@ const ManageRights = () => {
   };
 
   const handleChangeRole = async (targetId, newRole) => {
+    
     try {
       await userService.updateRole({ targetId, role: newRole });
       toast.success("อัปเดตบทบาทสำเร็จ");

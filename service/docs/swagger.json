@@ -1,0 +1,2896 @@
+{
+    "schemes": [
+        "http"
+    ],
+    "swagger": "2.0",
+    "info": {
+        "description": "Backend API for MimiCare Project (Gin + MongoDB)",
+        "title": "MimiCare API",
+        "contact": {},
+        "version": "1.0"
+    },
+    "host": "localhost:5000",
+    "basePath": "/api/v1",
+    "paths": {
+        "/children/add": {
+            "post": {
+                "description": "ผู้ปกครองเพิ่มข้อมูลเด็กใหม่ (ต้องล็อกอินก่อน)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Children"
+                ],
+                "summary": "เพิ่มข้อมูลเด็กใหม่",
+                "parameters": [
+                    {
+                        "description": "ข้อมูลเด็กใหม่",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/childrenController.AddChildrenRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "เพิ่มข้อมูลเด็กสำเร็จ",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "ข้อมูลไม่ถูกต้อง",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "ไม่ได้รับอนุญาต",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "ระบบขัดข้อง",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/children/delete/{id}": {
+            "delete": {
+                "description": "ลบข้อมูลเด็กตาม ID (ต้องเป็น parent ของเด็กคนนั้น)",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Children"
+                ],
+                "summary": "ลบข้อมูลเด็ก",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Child ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "ลบข้อมูลเด็กสำเร็จ",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "ไอดีเด็กไม่ถูกต้อง",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "ไม่ได้รับอนุญาต",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "ไม่พบข้อมูลเด็ก",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "ระบบขัดข้อง",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/children/get": {
+            "get": {
+                "description": "ดึงข้อมูลเด็กทั้งหมดที่เป็นลูกของผู้ปกครอง (ต้องล็อกอินก่อน)",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Children"
+                ],
+                "summary": "ดึงข้อมูลเด็กทั้งหมดของผู้ใช้",
+                "responses": {
+                    "200": {
+                        "description": "รายการเด็ก",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "403": {
+                        "description": "ไม่ได้รับอนุญาต",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "ไม่พบข้อมูลเด็ก",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "ระบบขัดข้อง",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/children/get/{id}": {
+            "get": {
+                "description": "ดึงข้อมูลเด็กคนเดียว โดยตรวจสอบว่าเป็นลูกของผู้ใช้ (ต้องล็อกอินก่อน)",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Children"
+                ],
+                "summary": "ดึงข้อมูลเด็กตาม ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Child ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "ข้อมูลเด็ก",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "ไอดีเด็กไม่ถูกต้อง",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "ไม่ได้รับอนุญาต",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "ไม่พบข้อมูลเด็ก",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/children/update/{id}": {
+            "put": {
+                "description": "อัปเดตข้อมูลเด็กตาม ID (ต้องเป็น parent ของเด็กคนนั้น)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Children"
+                ],
+                "summary": "อัปเดตข้อมูลเด็ก",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Child ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "ข้อมูลเด็กที่จะอัปเดต",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/childrenController.UpdateChildrenRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "อัปเดตข้อมูลเด็กสำเร็จ",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "ข้อมูลไม่ถูกต้อง",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "ไม่ได้รับอนุญาต",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "ไม่พบข้อมูลเด็ก",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/metaAgeRange/add": {
+            "post": {
+                "description": "ใช้สำหรับเพิ่มข้อมูลช่วงอายุ (admin เท่านั้น)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "MetaAgeRange"
+                ],
+                "summary": "เพิ่มช่วงอายุใหม่",
+                "parameters": [
+                    {
+                        "description": "ข้อมูลช่วงอายุ",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/metadataController.AddAgeRangeRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/metaAgeRange/delete/{id}": {
+            "delete": {
+                "description": "ลบข้อมูลช่วงอายุ (admin เท่านั้น)",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "MetaAgeRange"
+                ],
+                "summary": "ลบช่วงอายุตาม ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ObjectID ของช่วงอายุ",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/metaAgeRange/get-all": {
+            "get": {
+                "description": "คืนค่าข้อมูลช่วงอายุทั้งหมด (admin เท่านั้น)",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "MetaAgeRange"
+                ],
+                "summary": "ดึงข้อมูลช่วงอายุทั้งหมด",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/metadataModel.MetaAgeRange"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/metaAgeRange/get/{id}": {
+            "get": {
+                "description": "คืนค่าข้อมูลช่วงอายุตาม ObjectID (admin เท่านั้น)",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "MetaAgeRange"
+                ],
+                "summary": "ดึงข้อมูลช่วงอายุตาม ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ObjectID ของช่วงอายุ",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/metadataModel.MetaAgeRange"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/metaAgeRange/update/{id}": {
+            "put": {
+                "description": "ใช้สำหรับอัปเดตข้อมูลช่วงอายุ (admin เท่านั้น)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "MetaAgeRange"
+                ],
+                "summary": "อัปเดตช่วงอายุตาม ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ObjectID ของช่วงอายุ",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "ข้อมูลใหม่",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/metadataModel.MetaAgeRange"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/metadataModel.MetaAgeRange"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/metaDevelop/add": {
+            "post": {
+                "description": "ใช้สำหรับเพิ่มข้อมูลพัฒนาการ (admin เท่านั้น)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "MetaDevelop"
+                ],
+                "summary": "เพิ่มพัฒนาการใหม่",
+                "parameters": [
+                    {
+                        "description": "ข้อมูลช่วงอายุ",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/metadataController.AddDevelopRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/metaDevelop/delete/{id}": {
+            "delete": {
+                "description": "ลบข้อมูลพัฒนาการตาม ObjectID (admin เท่านั้น)",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "MetaDevelop"
+                ],
+                "summary": "ลบข้อมูลพัฒนาการตาม ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ObjectID ของพัฒนาการ",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/metaDevelop/get-all": {
+            "get": {
+                "description": "คืนค่าข้อมูลพัฒนาการทั้งหมด (admin เท่านั้น)",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "MetaDevelop"
+                ],
+                "summary": "ดึงข้อมูลพัฒนาการทั้งหมด",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/metadataModel.MetaDevelop"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/metaDevelop/get-by-category": {
+            "post": {
+                "description": "คืนค่าข้อมูลพัฒนาการตามหมวดหมู่ (admin เท่านั้น)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "MetaDevelop"
+                ],
+                "summary": "ดึงข้อมูลพัฒนาการตามหมวดหมู่",
+                "parameters": [
+                    {
+                        "description": "หมวดหมู่พัฒนาการ",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/metadataController.GetByCategoryRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/metadataModel.MetaDevelop"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/metaDevelop/get-by-category-detail": {
+            "post": {
+                "description": "คืนค่าข้อมูลพัฒนาการตามหมวดหมู่และรายละเอียด (admin เท่านั้น)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "MetaDevelop"
+                ],
+                "summary": "ดึงข้อมูลพัฒนาการตามหมวดหมู่และรายละเอียด",
+                "parameters": [
+                    {
+                        "description": "หมวดหมู่และรายละเอียดพัฒนาการ",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/metadataController.GetByCategoryAndDetailRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/metadataModel.MetaDevelop"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/metaDevelop/get/{id}": {
+            "get": {
+                "description": "คืนค่าข้อมูลพัฒนาการตาม ObjectID (admin เท่านั้น)",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "MetaDevelop"
+                ],
+                "summary": "ดึงข้อมูลพัฒนาการตาม ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ObjectID ของพัฒนาการ",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/metadataModel.MetaDevelop"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/metaDevelop/update/{id}": {
+            "put": {
+                "description": "ใช้สำหรับอัปเดตข้อมูลพัฒนาการตาม ObjectID (admin เท่านั้น)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "MetaDevelop"
+                ],
+                "summary": "อัปเดตข้อมูลพัฒนาการตาม ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ObjectID ของพัฒนาการที่ต้องการอัปเดต",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "ข้อมูลพัฒนาการที่ต้องการอัปเดต",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/metadataController.UpdateDevelopRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/metadataModel.MetaDevelop"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/metaVaccine/add": {
+            "post": {
+                "description": "ใช้สำหรับเพิ่มข้อมูลวัคซีน (admin เท่านั้น)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "MetaVaccine"
+                ],
+                "summary": "เพิ่มวัคซีนใหม่",
+                "parameters": [
+                    {
+                        "description": "ข้อมูลวัคซีน",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/metadataController.AddVaccineRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/metaVaccine/delete/{id}": {
+            "delete": {
+                "description": "ลบข้อมูลวัคซีน (admin เท่านั้น)",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "MetaVaccine"
+                ],
+                "summary": "ลบวัคซีนตาม ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ObjectID ของวัคซีนที่ต้องการลบ",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/metaVaccine/get-all": {
+            "get": {
+                "description": "ใช้สำหรับดึงข้อมูลวัคซีนทั้งหมด (admin เท่านั้น)",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "MetaVaccine"
+                ],
+                "summary": "ดึงข้อมูลวัคซีนทั้งหมด",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/metaVaccine/get/{id}": {
+            "get": {
+                "description": "ใช้สำหรับดึงข้อมูลวัคซีนตาม ID (admin เท่านั้น)",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "MetaVaccine"
+                ],
+                "summary": "ดึงข้อมูลวัคซีนตาม ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ObjectID ของวัคซีน",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/metaVaccine/update/{id}": {
+            "put": {
+                "description": "ใช้สำหรับอัปเดตข้อมูลวัคซีนตาม ID (admin เท่านั้น)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "MetaVaccine"
+                ],
+                "summary": "อัปเดตข้อมูลวัคซีนตาม ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ObjectID ของวัคซีนที่ต้องการอัปเดต",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "ข้อมูลวัคซีนที่ต้องการอัปเดต",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/metadataController.UpdateVaccineRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/notification/get": {
+            "get": {
+                "description": "ดึงการแจ้งเตือนทั้งหมดของผู้ใช้ที่ล็อกอินอยู่ (ผู้ใช้ต้องเป็นเจ้าของการแจ้งเตือนเหล่านี้)",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Notification"
+                ],
+                "summary": "ดึงการแจ้งเตือนทั้งหมดของผู้ใช้ตาม ID",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/notification/read-all": {
+            "put": {
+                "description": "ทำเครื่องหมายการแจ้งเตือนทั้งหมดว่าอ่านแล้ว (สำหรับผู้ใช้ที่ล็อกอินอยู่)",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Notification"
+                ],
+                "summary": "ทำเครื่องหมายการแจ้งเตือนทั้งหมดว่าอ่านแล้ว",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/notification/read/{id}": {
+            "put": {
+                "description": "ทำเครื่องหมายการแจ้งเตือนว่าอ่านแล้วตาม ID ของการแจ้งเตือน (ผู้ใช้ต้องเป็นเจ้าของการแจ้งเตือนนี้)",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Notification"
+                ],
+                "summary": "ทำเครื่องหมายการแจ้งเตือนว่าอ่านแล้วตาม ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ObjectID ของการแจ้งเตือน",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/receiveDevelop/add": {
+            "post": {
+                "description": "ใช้สำหรับเพิ่มข้อมูลการประเมินพัฒนาการของเด็ก (ผู้ใช้ต้องเป็นเจ้าของข้อมูลเด็กคนนี้)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ReceiveDevelop"
+                ],
+                "summary": "เพิ่มข้อมูลการประเมินพัฒนาการของเด็ก",
+                "parameters": [
+                    {
+                        "description": "ข้อมูลการประเมินพัฒนาการของเด็ก",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/receiveDevelopControllers.AddReceiveDevelopRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/receiveDevelop/getById/{id}": {
+            "get": {
+                "description": "ใช้สำหรับดึงข้อมูลการประเมินพัฒนาการของเด็กตาม ChildID (ผู้ใช้ต้องเป็นเจ้าของข้อมูลเด็กคนนี้)",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ReceiveDevelop"
+                ],
+                "summary": "ดึงข้อมูลการประเมินพัฒนาการของเด็กตาม ChildID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ObjectID ของเด็ก (ChildID)",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/receiveDevelop/update/{id}": {
+            "put": {
+                "description": "ใช้สำหรับอัปเดตข้อมูลการประเมินพัฒนาการของเด็กตาม ID (ผู้ใช้ต้องเป็นเจ้าของข้อมูลเด็กคนนี้)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ReceiveDevelop"
+                ],
+                "summary": "อัปเดตข้อมูลการประเมินพัฒนาการของเด็กตาม ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ObjectID ของข้อมูลการประเมินพัฒนาการ",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "ข้อมูลใหม่",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/receiveDevelopControllers.UpdateReceiveDevelopRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/receiveVaccine/custom": {
+            "post": {
+                "description": "ใช้สำหรับเพิ่มข้อมูลการรับวัคซีนแบบกำหนดเอง (ผู้ใช้ต้องเป็นเจ้าของข้อมูลเด็กคนนี้)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ReceiveVaccine"
+                ],
+                "summary": "เพิ่มข้อมูลการรับวัคซีนแบบกำหนดเอง",
+                "parameters": [
+                    {
+                        "description": "ข้อมูลการรับวัคซีนแบบกำหนดเอง",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/receiveVaccineController.AddReceiveVaccineCustomRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/receiveVaccine/from-standard": {
+            "post": {
+                "description": "ใช้สำหรับเพิ่มข้อมูลการรับวัคซีนจากมาตรฐาน (ผู้ใช้ต้องเป็นเจ้าของข้อมูลเด็กคนนี้)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ReceiveVaccine"
+                ],
+                "summary": "เพิ่มข้อมูลการรับวัคซีนจากมาตรฐาน",
+                "parameters": [
+                    {
+                        "description": "ข้อมูลการรับวัคซีนจากมาตรฐาน",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/receiveVaccineController.AddReceiveVaccineFromStandardRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/resendMail/send-password": {
+            "post": {
+                "description": "ใช้สำหรับส่งรหัสผ่านใหม่ไปยังอีเมลของผู้ใช้ (กรณีลืมรหัสผ่าน)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ResendMail"
+                ],
+                "summary": "ส่งรหัสผ่านใหม่ไปยังอีเมลของผู้ใช้",
+                "parameters": [
+                    {
+                        "description": "ข้อมูลอีเมลและชื่อผู้ใช้",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/resendMail.ResendMailRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/standardDevelop/add": {
+            "post": {
+                "description": "ใช้สำหรับเพิ่มข้อมูลพัฒนาการมาตรฐานใหม่ (admin เท่านั้น)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "StandardDevelop"
+                ],
+                "summary": "เพิ่มข้อมูลพัฒนาการมาตรฐานใหม่",
+                "parameters": [
+                    {
+                        "description": "ข้อมูลพัฒนาการมาตรฐาน",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/standardDevelopController.AddStandardDevelopRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/standardDevelop/all": {
+            "get": {
+                "description": "ใช้สำหรับดึงข้อมูลพัฒนาการมาตรฐานทั้งหมด (admin เท่านั้น)",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "StandardDevelop"
+                ],
+                "summary": "ดึงข้อมูลพัฒนาการมาตรฐานทั้งหมด",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/standardDevelop/delete/{id}": {
+            "delete": {
+                "description": "ใช้สำหรับลบข้อมูลพัฒนาการมาตรฐานตาม ID (admin เท่านั้น)",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "StandardDevelop"
+                ],
+                "summary": "ลบข้อมูลพัฒนาการมาตรฐานตาม ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ObjectID ของพัฒนาการมาตรฐาน",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/standardDevelop/get/{id}": {
+            "get": {
+                "description": "ใช้สำหรับดึงข้อมูลพัฒนาการมาตรฐานตาม ID (admin เท่านั้น)",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "StandardDevelop"
+                ],
+                "summary": "ดึงข้อมูลพัฒนาการมาตรฐานตาม ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ObjectID ของพัฒนาการมาตรฐาน",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/standardDevelopModel.StandardDevelop"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/standardDevelop/update/{id}": {
+            "put": {
+                "description": "ใช้สำหรับอัปเดตข้อมูลพัฒนาการมาตรฐานตาม ID (admin เท่านั้น)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "StandardDevelop"
+                ],
+                "summary": "อัปเดตข้อมูลพัฒนาการมาตรฐานตาม ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ObjectID ของพัฒนาการมาตรฐาน",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "ข้อมูลใหม่",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/standardDevelopController.UpdateStandardDevelopRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/standardVaccine/add": {
+            "post": {
+                "description": "ใช้สำหรับเพิ่มข้อมูลวัคซีนมาตรฐานใหม่ (admin เท่านั้น)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "StandardVaccine"
+                ],
+                "summary": "เพิ่มข้อมูลวัคซีนมาตรฐานใหม่",
+                "parameters": [
+                    {
+                        "description": "ข้อมูลวัคซีนมาตรฐาน",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/standardVaccineControllers.AddStandardVaccineRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/standardVaccine/all": {
+            "get": {
+                "description": "ใช้สำหรับดึงข้อมูลวัคซีนมาตรฐานทั้งหมด (admin เท่านั้น)",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "StandardVaccine"
+                ],
+                "summary": "ดึงข้อมูลวัคซีนมาตรฐานทั้งหมด",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/standardVaccine/delete/{id}": {
+            "delete": {
+                "description": "ใช้สำหรับลบข้อมูลวัคซีนมาตรฐานตาม ID (admin เท่านั้น)",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "StandardVaccine"
+                ],
+                "summary": "ลบข้อมูลวัคซีนมาตรฐานตาม ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ObjectID ของวัคซีนมาตรฐาน",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/standardVaccine/get/{id}": {
+            "get": {
+                "description": "ใช้สำหรับดึงข้อมูลวัคซีนมาตรฐานตาม ID (admin เท่านั้น)",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "StandardVaccine"
+                ],
+                "summary": "ดึงข้อมูลวัคซีนมาตรฐานตาม ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ObjectID ของวัคซีนมาตรฐาน",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/standardVaccine/update/{id}": {
+            "put": {
+                "description": "ใช้สำหรับอัปเดตข้อมูลวัคซีนมาตรฐานตาม ID (admin เท่านั้น)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "StandardVaccine"
+                ],
+                "summary": "อัปเดตข้อมูลวัคซีนมาตรฐานตาม ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ObjectID ของวัคซีนมาตรฐาน",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "ข้อมูลใหม่ของวัคซีนมาตรฐาน",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/standardVaccineControllers.UpdateStandardVaccineRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/user/all": {
+            "get": {
+                "description": "ดึงข้อมูลผู้ใช้ทั้งหมด (เฉพาะ admin เท่านั้น)",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "ดึงข้อมูลผู้ใช้ทั้งหมด",
+                "responses": {
+                    "200": {
+                        "description": "ดึงข้อมูลผู้ใช้สำเร็จ",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "403": {
+                        "description": "ไม่ได้รับอนุญาต",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/user/assign-role": {
+            "put": {
+                "description": "เปลี่ยน role ของผู้ใช้ (admin เท่านั้น)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "กำหนดสิทธิ์ผู้ใช้",
+                "parameters": [
+                    {
+                        "description": "Target user ID และ Role ใหม่",
+                        "name": "role",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/userController.assignRoleRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "อัปเดต role สำเร็จ",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "ข้อมูลไม่ถูกต้อง",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "403": {
+                        "description": "ไม่ได้รับอนุญาต",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/user/login": {
+            "post": {
+                "description": "ผู้ใช้เข้าสู่ระบบด้วยอีเมลและรหัสผ่าน จากนั้นระบบจะส่ง JWT token กลับมา",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "เข้าสู่ระบบ",
+                "parameters": [
+                    {
+                        "description": "ข้อมูลเข้าสู่ระบบ",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/userController.loginRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "เข้าสู่ระบบสำเร็จ",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "ข้อมูลไม่ถูกต้อง",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "รหัสผ่านไม่ถูกต้อง",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "ไม่พบผู้ใช้งาน",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "ข้อผิดพลาดจากเซิร์ฟเวอร์",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/user/logout": {
+            "post": {
+                "description": "ลบ JWT cookie ออกจากระบบ",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "ออกจากระบบ",
+                "responses": {
+                    "200": {
+                        "description": "ออกจากระบบสำเร็จ",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "ข้อผิดพลาดจากเซิร์ฟเวอร์",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/user/reset-password": {
+            "put": {
+                "description": "รีเซ็ตรหัสผ่านใหม่ โดยตรวจสอบรหัสผ่านเก่า",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "เปลี่ยนรหัสผ่าน",
+                "parameters": [
+                    {
+                        "description": "รหัสผ่านเก่าและรหัสผ่านใหม่",
+                        "name": "passwords",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/userController.resetPasswordRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "รหัสผ่านถูกอัปเดตสำเร็จ",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "ข้อมูลไม่ถูกต้อง",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "รหัสผ่านเก่าไม่ถูกต้อง",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/user/signup": {
+            "post": {
+                "description": "สร้างบัญชีผู้ใช้ใหม่",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "สมัครสมาชิก",
+                "parameters": [
+                    {
+                        "description": "User signup data",
+                        "name": "user",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/userController.registerRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "สมัครสมาชิกสำเร็จ",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "ข้อมูลไม่ถูกต้อง",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "เกิดข้อผิดพลาดจากเซิร์ฟเวอร์",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/user/update": {
+            "put": {
+                "description": "อัปเดตข้อมูลผู้ใช้ (ชื่อ, นามสกุล, อีเมล, รูปภาพ)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "อัปเดตโปรไฟล์",
+                "parameters": [
+                    {
+                        "description": "ข้อมูลที่ต้องการอัปเดต",
+                        "name": "profile",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/userController.updateRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "โปรไฟล์อัปเดตสำเร็จ",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "ข้อมูลไม่ถูกต้อง",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "403": {
+                        "description": "ไม่ได้รับอนุญาต",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "childrenController.AddChildrenRequest": {
+            "type": "object",
+            "properties": {
+                "birthDate": {
+                    "type": "string",
+                    "example": "2020-05-01T00:00:00Z"
+                },
+                "firstName": {
+                    "type": "string",
+                    "example": "สมชาย"
+                },
+                "gender": {
+                    "type": "string",
+                    "example": "male"
+                },
+                "image": {
+                    "type": "string",
+                    "example": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA..."
+                },
+                "lastName": {
+                    "type": "string",
+                    "example": "ใจดี"
+                }
+            }
+        },
+        "childrenController.UpdateChildrenRequest": {
+            "type": "object",
+            "properties": {
+                "birthDate": {
+                    "type": "string",
+                    "example": "2020-05-01T00:00:00Z"
+                },
+                "firstName": {
+                    "type": "string",
+                    "example": "สมหมาย"
+                },
+                "gender": {
+                    "type": "string",
+                    "example": "female"
+                },
+                "image": {
+                    "type": "string",
+                    "example": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA..."
+                },
+                "lastName": {
+                    "type": "string",
+                    "example": "ใจดี"
+                }
+            }
+        },
+        "metadataController.AddAgeRangeRequest": {
+            "type": "object",
+            "required": [
+                "ageRange"
+            ],
+            "properties": {
+                "ageRange": {
+                    "type": "integer",
+                    "example": 24
+                }
+            }
+        },
+        "metadataController.AddDevelopRequest": {
+            "type": "object",
+            "required": [
+                "category",
+                "detail",
+                "image",
+                "note"
+            ],
+            "properties": {
+                "category": {
+                    "type": "string",
+                    "example": "กล้ามเนื้อมัดใหญ่"
+                },
+                "detail": {
+                    "type": "string",
+                    "example": "การนั่ง"
+                },
+                "image": {
+                    "type": "string",
+                    "example": "https://res.cloudinary.com/demo/image/upload/sample.jpg"
+                },
+                "note": {
+                    "type": "string",
+                    "example": "เด็กจะเริ่มนั่งได้เองเมื่ออายุประมาณ 6 เดือน โดยไม่ต้องพิง"
+                }
+            }
+        },
+        "metadataController.AddVaccineRequest": {
+            "type": "object",
+            "required": [
+                "vaccineName"
+            ],
+            "properties": {
+                "note": {
+                    "type": "string",
+                    "example": "สำหรับเด็กอายุ 6 เดือนขึ้นไป"
+                },
+                "vaccineName": {
+                    "type": "string",
+                    "example": "วัคซีนไข้หวัดใหญ่"
+                }
+            }
+        },
+        "metadataController.GetByCategoryAndDetailRequest": {
+            "type": "object",
+            "required": [
+                "category",
+                "detail"
+            ],
+            "properties": {
+                "category": {
+                    "type": "string",
+                    "example": "กล้ามเนื้อมัดใหญ่"
+                },
+                "detail": {
+                    "type": "string",
+                    "example": "การนั่ง"
+                }
+            }
+        },
+        "metadataController.GetByCategoryRequest": {
+            "type": "object",
+            "required": [
+                "category"
+            ],
+            "properties": {
+                "category": {
+                    "type": "string",
+                    "example": "กล้ามเนื้อมัดใหญ่"
+                }
+            }
+        },
+        "metadataController.UpdateDevelopRequest": {
+            "type": "object",
+            "properties": {
+                "category": {
+                    "type": "string",
+                    "example": "การเคลื่อนไหว"
+                },
+                "detail": {
+                    "type": "string",
+                    "example": "การนั่ง"
+                },
+                "image": {
+                    "type": "string",
+                    "example": "https://res.cloudinary.com/demo/image/upload/sample.jpg"
+                },
+                "note": {
+                    "type": "string",
+                    "example": "เด็กจะเริ่มนั่งได้เองเมื่ออายุประมาณ 6 เดือน โดยไม่ต้องพิง"
+                }
+            }
+        },
+        "metadataController.UpdateVaccineRequest": {
+            "type": "object",
+            "properties": {
+                "note": {
+                    "type": "string",
+                    "example": "สำหรับเด็กอายุ 3 เดือนขึ้นไป"
+                },
+                "vaccineName": {
+                    "type": "string",
+                    "example": "วัคซีนไข้หวัดเล็ก"
+                }
+            }
+        },
+        "metadataModel.MetaAgeRange": {
+            "type": "object",
+            "properties": {
+                "ageRange": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "string"
+                }
+            }
+        },
+        "metadataModel.MetaDevelop": {
+            "type": "object",
+            "properties": {
+                "category": {
+                    "type": "string"
+                },
+                "detail": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "image": {
+                    "type": "string"
+                },
+                "note": {
+                    "type": "string"
+                }
+            }
+        },
+        "receiveDevelopControllers.AddReceiveDevelopRequest": {
+            "type": "object"
+        },
+        "receiveDevelopControllers.UpdateReceiveDevelopRequest": {
+            "type": "object"
+        },
+        "receiveVaccineController.AddReceiveVaccineCustomRequest": {
+            "type": "object"
+        },
+        "receiveVaccineController.AddReceiveVaccineFromStandardRequest": {
+            "type": "object"
+        },
+        "resendMail.ResendMailRequest": {
+            "type": "object",
+            "required": [
+                "email",
+                "firstName"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string",
+                    "example": "email@mail.com"
+                },
+                "firstName": {
+                    "type": "string",
+                    "example": "สมชาย"
+                }
+            }
+        },
+        "standardDevelopController.AddStandardDevelopRequest": {
+            "type": "object",
+            "required": [
+                "ageRange",
+                "developments"
+            ],
+            "properties": {
+                "ageRange": {
+                    "type": "integer",
+                    "example": 24
+                },
+                "developments": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "[{\"category\":\"กล้ามเนื้อ\"",
+                        "\"detail\":\"วิ่งได้\"",
+                        "\"image\":\"https://example.com/crawl.png\"",
+                        "\"note\":\"ควรฝึกทุกวัน\"}]"
+                    ]
+                }
+            }
+        },
+        "standardDevelopController.UpdateStandardDevelopRequest": {
+            "type": "object",
+            "required": [
+                "developments"
+            ],
+            "properties": {
+                "ageRange": {
+                    "type": "integer",
+                    "example": 24
+                },
+                "developments": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "[{\"category\":\"กล้ามเนื้อ\"",
+                        "\"detail\":\"วิ่งได้\"",
+                        "\"image\":\"https://example.com/crawl.png\"",
+                        "\"note\":\"ควรฝึกทุกวัน\"}]"
+                    ]
+                }
+            }
+        },
+        "standardDevelopModel.DevelopmentItem": {
+            "type": "object",
+            "properties": {
+                "category": {
+                    "type": "string"
+                },
+                "detail": {
+                    "type": "string"
+                },
+                "image": {
+                    "type": "string"
+                },
+                "note": {
+                    "type": "string"
+                }
+            }
+        },
+        "standardDevelopModel.StandardDevelop": {
+            "type": "object",
+            "properties": {
+                "ageRange": {
+                    "type": "integer"
+                },
+                "developments": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/standardDevelopModel.DevelopmentItem"
+                    }
+                },
+                "id": {
+                    "type": "string"
+                }
+            }
+        },
+        "standardVaccineControllers.AddStandardVaccineRequest": {
+            "type": "object",
+            "required": [
+                "ageRange",
+                "vaccines"
+            ],
+            "properties": {
+                "ageRange": {
+                    "type": "integer",
+                    "example": 24
+                },
+                "vaccines": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "[\"วัคซีนไข้หวัดใหญ่\"",
+                        "\"วัคซีนหัด\"]"
+                    ]
+                }
+            }
+        },
+        "standardVaccineControllers.UpdateStandardVaccineRequest": {
+            "type": "object",
+            "properties": {
+                "ageRange": {
+                    "type": "integer",
+                    "example": 24
+                },
+                "vaccines": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "["
+                    ]
+                }
+            }
+        },
+        "userController.assignRoleRequest": {
+            "type": "object",
+            "properties": {
+                "role": {
+                    "type": "string",
+                    "enum": [
+                        "user",
+                        "admin"
+                    ],
+                    "example": "user"
+                },
+                "targetId": {
+                    "type": "string"
+                }
+            }
+        },
+        "userController.loginRequest": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string",
+                    "example": "example@mail.com"
+                },
+                "password": {
+                    "type": "string",
+                    "example": "strongpassword123"
+                }
+            }
+        },
+        "userController.registerRequest": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string",
+                    "example": "example@mail.com"
+                },
+                "firstName": {
+                    "type": "string",
+                    "example": "John"
+                },
+                "lastName": {
+                    "type": "string",
+                    "example": "Doe"
+                },
+                "password": {
+                    "type": "string",
+                    "example": "strongpassword123"
+                }
+            }
+        },
+        "userController.resetPasswordRequest": {
+            "type": "object",
+            "properties": {
+                "newPassword": {
+                    "type": "string",
+                    "example": "newstrongpassword123"
+                },
+                "oldPassword": {
+                    "type": "string",
+                    "example": "strongpassword123"
+                },
+                "repeatNewPassword": {
+                    "type": "string",
+                    "example": "newstrongpassword123"
+                }
+            }
+        },
+        "userController.updateRequest": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string",
+                    "example": "newemail@mail.com"
+                },
+                "firstName": {
+                    "type": "string",
+                    "example": "John"
+                },
+                "lastName": {
+                    "type": "string",
+                    "example": "Doe"
+                },
+                "picture": {
+                    "type": "string",
+                    "example": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA..."
+                }
+            }
+        }
+    }
+}

@@ -26,6 +26,27 @@ func SetStandardVaccineReference(client *mongo.Client) {
 	dbName := os.Getenv("DBNAME") // ดึงค่าชื่อฐานข้อมูลจาก .env
 	StandardVaccineCollection = client.Database(dbName).Collection("standardVaccine")
 }
+
+type AddReceiveVaccineFromStandardRequest struct {
+	ChildID           primitive.ObjectID ` json:"childId" binding:"required" example:"64a7f0c2e1b8c8b4f0d6e8a1"`
+	StandardVaccineID primitive.ObjectID `json:"standardVaccineId" binding:"required" example:"64a7f0c2e1b8c8b4f0d6e8a2"`
+	AgeRange          int                ` json:"ageRange" binding:"required" example:"24"`
+	ReceiveDate       primitive.DateTime ` json:"receiveDate" binding:"required" example:"2023-07-01T00:00:00Z"`
+	PlaceName         string             ` json:"placeName" binding:"required" example:"โรงพยาบาลสมิติเวช"`
+	PhoneNumber       string             ` json:"phoneNumber" binding:"required" example:"0812345678"`
+}
+
+// @Summary เพิ่มข้อมูลการรับวัคซีนจากมาตรฐาน
+// @Description ใช้สำหรับเพิ่มข้อมูลการรับวัคซีนจากมาตรฐาน (ผู้ใช้ต้องเป็นเจ้าของข้อมูลเด็กคนนี้)
+// @Tags ReceiveVaccine
+// @Accept json
+// @Produce json
+// @Param request body AddReceiveVaccineFromStandardRequest true "ข้อมูลการรับวัคซีนจากมาตรฐาน"
+// @Success 201 {object} map[string]interface{}
+// @Failure 400 {object} map[string]interface{}
+// @Failure 401 {object} map[string]interface{}
+// @Failure 404 {object} map[string]interface{}
+// @Router /receiveVaccine/from-standard [post]
 func AddReceiveVaccineFromStandard(c *gin.Context) {
 	var inputData struct {
 		ChildID           primitive.ObjectID ` json:"childId"`
@@ -78,6 +99,25 @@ func AddReceiveVaccineFromStandard(c *gin.Context) {
 	})
 }
 
+type AddReceiveVaccineCustomRequest struct {
+	ChildID     primitive.ObjectID                       `json:"childId" binding:"required" example:"64a7f0c2e1b8c8b4f0d6e8a1"`
+	AgeRange    int                                      `json:"ageRange" binding:"required" example:"24"`
+	ReceiveDate primitive.DateTime                       `json:"receiveDate" binding:"required" example:"2023-07-01T00:00:00Z"`
+	PlaceName   string                                   `json:"placeName" binding:"required" example:"โรงพยาบาลสมิติเวช"`
+	PhoneNumber string                                   `json:"phoneNumber" binding:"required" example:"0812345678"`
+	Records     []receiveVaccineModel.VaccineReceiveItem `json:"records" binding:"required"`
+}
+
+// @Summary เพิ่มข้อมูลการรับวัคซีนแบบกำหนดเอง
+// @Description ใช้สำหรับเพิ่มข้อมูลการรับวัคซีนแบบกำหนดเอง (ผู้ใช้ต้องเป็นเจ้าของข้อมูลเด็กคนนี้)
+// @Tags ReceiveVaccine
+// @Accept json
+// @Produce json
+// @Param request body AddReceiveVaccineCustomRequest true "ข้อมูลการรับวัคซีนแบบกำหนดเอง"
+// @Success 201 {object} map[string]interface{}
+// @Failure 400 {object} map[string]interface{}
+// @Failure 401 {object} map[string]interface{}
+// @Router /receiveVaccine/custom [post]
 func AddReceiveVaccineCustom(c *gin.Context) {
 	var receiveData receiveVaccineModel.ReceiveVaccine
 	// เช็คข้อมูลก่อนว่ามาป่าว
@@ -86,9 +126,19 @@ func AddReceiveVaccineCustom(c *gin.Context) {
 		return
 	}
 
+	var existingVaccine receiveVaccineModel.ReceiveVaccine
+	err := receiveVaccineCollection.FindOne(context.TODO(), bson.M{
+		"childId": receiveData.ChildID,
+		"records": receiveData.Records,
+	}).Decode(&existingVaccine)
+	if err == nil {
+		c.JSON(http.StatusConflict, gin.H{"message": "มีข้อมูลวัคซีนนี้ในระบบแล้ว"})
+		return
+	}
+
 	receiveData.ID = primitive.NewObjectID() // สร้าง ObjectID ใหม่
 	// บันทึกข้อมูลลง MongoDB
-	_, err := receiveVaccineCollection.InsertOne(context.TODO(), receiveData)
+	_, err = receiveVaccineCollection.InsertOne(context.TODO(), receiveData)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "ไม่สามารถบันทึกข้อมูลได้", "error": err.Error()})
 		return

@@ -18,6 +18,23 @@ func SetVaccineCollection(client *mongo.Client) {
 	dbName := os.Getenv("DBNAME")
 	vaccineCollection = client.Database(dbName).Collection("metaVaccine")
 }
+
+type AddVaccineRequest struct {
+	VaccineName string `json:"vaccineName" binding:"required" example:"วัคซีนไข้หวัดใหญ่"`
+	Note        string `json:"note" example:"สำหรับเด็กอายุ 6 เดือนขึ้นไป"`
+}
+
+// @Summary เพิ่มวัคซีนใหม่
+// @Description ใช้สำหรับเพิ่มข้อมูลวัคซีน (admin เท่านั้น)
+// @Tags MetaVaccine
+// @Accept json
+// @Produce json
+// @Param request body AddVaccineRequest true "ข้อมูลวัคซีน"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]interface{}
+// @Failure 401 {object} map[string]interface{}
+// @Failure 409 {object} map[string]interface{}
+// @Router /metaVaccine/add [post]
 func AddNewVaccine(c *gin.Context) {
 	var newVaccine vaccineModel.MetaVaccine
 	if err := c.ShouldBindJSON(&newVaccine); err != nil {
@@ -44,6 +61,13 @@ func AddNewVaccine(c *gin.Context) {
 	})
 }
 
+// @Summary ดึงข้อมูลวัคซีนทั้งหมด
+// @Description ใช้สำหรับดึงข้อมูลวัคซีนทั้งหมด (admin เท่านั้น)
+// @Tags MetaVaccine
+// @Produce json
+// @Success 200 {object} map[string]interface{}
+// @Failure 401 {object} map[string]interface{}
+// @Router /metaVaccine/get-all [get]
 func GetAllVaccines(c *gin.Context) {
 	var vaccines []vaccineModel.MetaVaccine
 	cursor, err := vaccineCollection.Find(context.TODO(), bson.M{})
@@ -60,6 +84,17 @@ func GetAllVaccines(c *gin.Context) {
 		"data":    vaccines,
 	})
 }
+
+// @Summary ดึงข้อมูลวัคซีนตาม ID
+// @Description ใช้สำหรับดึงข้อมูลวัคซีนตาม ID (admin เท่านั้น)
+// @Tags MetaVaccine
+// @Produce json
+// @Param id path string true "ObjectID ของวัคซีน"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]interface{}
+// @Failure 401 {object} map[string]interface{}
+// @Failure 404 {object} map[string]interface{}
+// @Router /metaVaccine/get/{id} [get]
 func GetVaccineByID(c *gin.Context) {
 	id := c.Param("id")
 	vaccineID, err := primitive.ObjectIDFromHex(id)
@@ -83,6 +118,25 @@ func GetVaccineByID(c *gin.Context) {
 	})
 }
 
+type UpdateVaccineRequest struct {
+	VaccineName string `json:"vaccineName" example:"วัคซีนไข้หวัดเล็ก"`
+	Note        string `json:"note" example:"สำหรับเด็กอายุ 3 เดือนขึ้นไป"`
+}
+
+// @Summary อัปเดตข้อมูลวัคซีนตาม ID
+// @Description ใช้สำหรับอัปเดตข้อมูลวัคซีนตาม ID (admin เท่านั้น)
+// @Tags MetaVaccine
+// @Accept json
+// @Produce json
+// @Param id path string true "ObjectID ของวัคซีนที่ต้องการอัปเดต"
+// @Param request body UpdateVaccineRequest true "ข้อมูลวัคซีนที่ต้องการอัปเดต"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]interface{}
+// @Failure 401 {object} map[string]interface{}
+// @Failure 404 {object} map[string]interface{}
+// @Failure 409 {object} map[string]interface{}
+// @Failure 500 {object} map[string]interface{}
+// @Router /metaVaccine/update/{id} [put]
 func UpdateVaccineByID(c *gin.Context) {
 	id := c.Param("id")
 	vaccineID, err := primitive.ObjectIDFromHex(id)
@@ -149,6 +203,17 @@ func UpdateVaccineByID(c *gin.Context) {
 	})
 }
 
+// @Summary ลบวัคซีนตาม ID
+// @Description ลบข้อมูลวัคซีน (admin เท่านั้น)
+// @Tags MetaVaccine
+// @Produce json
+// @Param id path string true "ObjectID ของวัคซีนที่ต้องการลบ"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]interface{}
+// @Failure 401 {object} map[string]interface{}
+// @Failure 404 {object} map[string]interface{}
+// @Failure 500 {object} map[string]interface{}
+// @Router /metaVaccine/delete/{id} [delete]
 func DeleteVaccineByID(c *gin.Context) {
 	id := c.Param("id")
 	vaccineID, err := primitive.ObjectIDFromHex(id)

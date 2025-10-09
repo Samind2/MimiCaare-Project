@@ -1,121 +1,115 @@
 import React, { useState, useEffect } from 'react';
 import standardDevService from "../../service/standardDev.service";
-import { FaPlus } from 'react-icons/fa';
+import developDataService from "../../service/dataDev.service";
+import { FaPlus, FaPlusCircle, FaPencilAlt } from 'react-icons/fa';
 import { toast } from "react-toastify";
 
 const AddDevelopment = () => {
-    const [isModalOpen, setIsModalOpen] = useState(false); // เก็บสถานะเปิด/ปิด modal
-    const [ageRange, setAgeRange] = useState(''); // เก็บช่วงอายุที่เลือก
-    const [editMode, setEditMode] = useState(false); // เก็บสถานะการแก้ไข
-    const [editId, setEditId] = useState(null); // เก็บ id ที่จะแก้ไข
-    const [currentPage, setCurrentPage] = useState(1); // หน้าปัจจุบัน
-    const itemsPerPage = 3; // จำนวนกลุ่มช่วงอายุต่อหน้า
-    const [developmentList, setDevelopmentList] = useState([ // เก็บข้อมูลพัฒนาการที่กรอก
-        { category: '', detail: '', image: '', note: '' },
-        { category: '', detail: '', image: '', note: '' },
-        { category: '', detail: '', image: '', note: '' },
-        { category: '', detail: '', image: '', note: '' },
-        { category: '', detail: '', image: '', note: '' },]);
-    const [allDevelopments, setAllDevelopments] = useState([]); // เก็บข้อมูลพัฒนาการทั้งหมดจากฐานข้อมูล
+    const emptyDev = { category: '', detail: '', image: '', note: '' };
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [ageRange, setAgeRange] = useState('');
+    const [editMode, setEditMode] = useState(false);
+    const [editId, setEditId] = useState(null);
+    const [currentPage, setCurrentPage] = useState(1); 
+    const [allDevelopments, setAllDevelopments] = useState([]);
     const [isAdding, setIsAdding] = useState(false);
-    // ช่วงอายุที่ใช้
-    const ageOptions = [
-        { value: 1 },
-        { value: 2 },
-        { value: 4 },
-        { value: 6 },
-        { value: 8 },
-        { value: 9 },
-        { value: 12 },
-        { value: 15 },
-        { value: 17 },
-        { value: 18 },
-        { value: 24 },
-        { value: 29 },
-        { value: 30 },
-        { value: 39 },
-        { value: 41 },
-        { value: 42 },
-        { value: 48 },
-        { value: 54 },
-        { value: 59 },
-        { value: 60 },
-        { value: 66 },
-        { value: 72 },
-        { value: 78 },
-    ];
 
-    // แปลงค่าเดือนเป็นข้อความช่วงอายุ
-    const getAgeLabel = (ageValue) => {
-        const found = ageOptions.find(opt => opt.value === ageValue); // ค้นหาช่วงอายุที่ตรงกับค่า val
-        if (found) {
-            return convertMonthsToYearText(found.value);
-        }
-        return ageValue;
-    };
-
-    const convertMonthsToYearText = (months) => {
-        if (months === 1) return "แรกเกิด - 1 เดือน";
-        if (months === 2) return "1 - 2 เดือน";
-        if (months === 4) return "3 - 4 เดือน";
-        if (months === 6) return "5 - 6 เดือน";
-        if (months === 8) return "7 - 8 เดือน";
-        if (months === 9) return "9 เดือน";
-        if (months === 12) return "10 - 12 เดือน";
-
-        // สำหรับเลขเดือนอื่น แปลงเป็นปีและเดือน
-        const years = Math.floor(months / 12);
-        const remainingMonths = months % 12;
-
-        let result = "";
-        if (years > 0) result += `${years} ปี`;
-        if (remainingMonths > 0) result += (years > 0 ? ` ${remainingMonths} เดือน` : `${remainingMonths} เดือน`);
-        return result;
-    };
+    const [developmentList, setDevelopmentList] = useState([{ ...emptyDev }]);
 
 
-    const categoryOptions = [
-        "การเคลื่อนไหวพื้นฐาน ",
-        "การใช้กล้ามเนื้อมัดเล็กและสติปัญญา",
+    // Meta develop
+    const [metaDevelop, setMetaDevelop] = useState([]);
+    const [categoryOptions, setCategoryOptions] = useState([
+        "ด้านการเคลื่อนไหวพื้นฐาน",
+        "ด้านการใช้กล้ามเนื้อมัดเล็กและสติปัญญา",
         "ด้านการเข้าใจภาษา",
         "ด้านการใช้ภาษา",
         "ด้านการช่วยเหลือตัวเองและสังคม",
-    ];
+    ]);
 
-    const detailOptions = [
-        "ท่านอนคว่ำยกศรีษะและหันไปข้างใดข้างหนึ่ง",
-        "มองตามถึงกึ่งกลางลำตัว",
-        "สะดุ้งหรือเคลื่อนไหวร่างกายเมื่อได้ยินเสียงพูดระดับปกติ",
-        "ส่งเสียง อ้อ แอ้ง แอ้ง",
-        "มองจ้องหน้าได้นาน 1 - 2 วินาที",
+    const ageOptions = [
+        { value: 1 }, { value: 2 }, { value: 4 }, { value: 6 }, { value: 8 },
+        { value: 9 }, { value: 12 }, { value: 15 }, { value: 17 }, { value: 18 },
+        { value: 24 }, { value: 29 }, { value: 30 }, { value: 36 }, { value: 41 },
+        { value: 42 }, { value: 48 }, { value: 54 }, { value: 59 }, { value: 60 },
+        { value: 66 }, { value: 72 }, { value: 78 },
     ];
 
     useEffect(() => {
         fetchDevelopments();
+        fetchMetaDevelop();
     }, []);
+
+    const fetchMetaDevelop = async () => {
+        try {
+            const res = await developDataService.getAllDevelop();
+            if (res.data && res.data.data) {
+                setMetaDevelop(res.data.data);
+                const categories = [...new Set(res.data.data.map(item => item.category))];
+                setCategoryOptions(categories);
+                // categoryOptions(categories);
+            }
+        } catch (err) {
+            console.error("โหลด metaDevelop ไม่สำเร็จ", err);
+        }
+    };
 
     const fetchDevelopments = async () => {
         try {
             const res = await standardDevService.getDevelop();
             const data = res.data.data;
-            data.sort((a, b) => a.ageRange - b.ageRange); // เรียงตามช่วงอายุ
+            data.sort((a, b) => a.ageRange - b.ageRange);
             setAllDevelopments(data);
         } catch (err) {
             console.error('เกิดข้อผิดพลาดในการโหลดข้อมูล:', err);
         }
     };
 
-    const handleSubmit = async () => {
-        const validDevelopments = developmentList.filter(
-            (d) => d.category && d.detail
+    const handleCategoryChange = (index, value) => {
+        const updatedList = [...developmentList];
+        updatedList[index].category = value;
+        updatedList[index].detail = '';
+        updatedList[index].image = '';
+        updatedList[index].note = '';
+        setDevelopmentList(updatedList);
+    };
+
+    const handleDetailChange = (index, value) => {
+        const updatedList = [...developmentList];
+        updatedList[index].detail = value;
+
+        // ดึง image และ note จาก metaDevelop
+        const matchedMeta = metaDevelop.find(
+            item => item.category === updatedList[index].category && item.detail === value
         );
+
+        if (matchedMeta) {
+            updatedList[index].image = matchedMeta.image || '';
+            updatedList[index].note = matchedMeta.note || '';
+        } else {
+            updatedList[index].image = '';
+            updatedList[index].note = '';
+        }
+
+        setDevelopmentList(updatedList);
+    };
+
+
+
+    const handleSubmit = async () => {
+        // เช็คจำนวนพัฒนาการ
+        if (developmentList.length < 5) {
+            toast.warning(`กรุณาเพิ่มพัฒนาการอย่างน้อย 5 รายการ`);
+            return;
+        }
+
+        const validDevelopments = developmentList.filter(d => d.category && d.detail);
 
         if (!ageRange) {
             toast.warning('กรุณาเลือกช่วงอายุ');
             return;
         }
 
-        // เช็คว่ามีช่วงอายุซ้ำในฐานข้อมูลหรือไม่
         const isDuplicate = allDevelopments.some(dev =>
             dev.ageRange === ageRange && (editMode ? dev.id !== editId : true)
         );
@@ -136,35 +130,39 @@ const AddDevelopment = () => {
         };
 
         try {
+            setIsAdding(true);
             if (editMode) {
-                // แก้ไขข้อมูล
                 await standardDevService.updateStandardDev(editId, newData);
                 toast.success("แก้ไขข้อมูลสำเร็จ!", { autoClose: 1500 });
             } else {
-                // เพิ่มข้อมูลใหม่
-                setIsAdding(true);
                 await standardDevService.addStandardDev(newData);
                 toast.success("เพิ่มพัฒนาการสำเร็จ!", { autoClose: 1500 });
             }
 
-            // รีเซ็ตฟอร์ม
             setIsModalOpen(false);
             setAgeRange('');
             setEditId(null);
             setEditMode(false);
-            setDevelopmentList([
-                { category: '', detail: '', image: '', note: '', },
-                { category: '', detail: '', image: '', note: '', },
-                { category: '', detail: '', image: '', note: '', },
-                { category: '', detail: '', image: '', note: '', },
-                { category: '', detail: '', image: '', note: '', },
-            ]);
+            setDevelopmentList([{ ...emptyDev }]);
             fetchDevelopments();
         } catch (err) {
             setIsAdding(false);
             toast.error("เกิดข้อผิดพลาดในการบันทึกข้อมูล");
             console.error(err);
+        } finally {
+            setIsAdding(false);
         }
+    };
+
+
+    const handleAddDevelopment = () => {
+        setDevelopmentList([...developmentList, { ...emptyDev }]);
+    };
+
+
+    const handleRemoveDevelopment = (index) => {
+        const updated = developmentList.filter((_, i) => i !== index);
+        setDevelopmentList(updated.length > 0 ? updated : [{ ...emptyDev }]);
     };
 
     // แก้ไขพัฒนาการ
@@ -191,21 +189,22 @@ const AddDevelopment = () => {
         setDevelopmentList(updatedList);
     };
 
-    // เปลี่ยนรูปภาพเมื่อมีการอัปโหลด
+    // เปลี่ยนรูปภาพ
 
-    const handleImageChange = (index, event) => {
-        const file = event.target.files[0];
-        if (!file) return;
+    // const handleImageChange = (index, event) => {
+    //     const file = event.target.files[0];
+    //     if (!file) return;
 
-        const reader = new FileReader();
-        reader.onloadend = () => {
-            const base64Image = reader.result;
-            const updatedList = [...developmentList];
-            updatedList[index].image = base64Image;
-            setDevelopmentList(updatedList);
-        };
-        reader.readAsDataURL(file);
-    };
+    //     const reader = new FileReader();
+    //     reader.onloadend = () => {
+    //         const base64Image = reader.result;
+    //         const updatedList = [...developmentList];
+    //         updatedList[index].image = base64Image;
+    //         setDevelopmentList(updatedList);
+    //     };
+    //     reader.readAsDataURL(file);
+    // };
+
 
     // ลบพัฒนาการ
     const handleDelete = async (idToDelete) => {
@@ -213,15 +212,15 @@ const AddDevelopment = () => {
         // สร้างtoast เพื่อยืนยันการลบ
         const confirmDelete = () =>
             new Promise((resolve) => {
-                const ToastContent = ({ closeToast }) => ( // ฟังก์ชันที่ใช้แสดงเนื้อหาใน Toast
+                const ToastContent = ({ closeToast }) => (
                     <div>
-                        <p>คุณต้องการลบข้อมูลช่วงอายุ {idToDelete} ใช่หรือไม่?</p>
+                        <p>คุณต้องการลบข้อมูลช่วงอายุ {{idToDelete}} ใช่หรือไม่?</p>
                         <div className="mt-2 flex justify-end gap-2">
                             <button
                                 className="btn btn-sm btn-error"
                                 onClick={() => {
                                     closeToast();
-                                    resolve(false); // ยกเลิก
+                                    resolve(false); 
                                 }}
                             >
                                 ยกเลิก
@@ -260,12 +259,18 @@ const AddDevelopment = () => {
         }
     };
 
-    // แบ่งข้อมูลพัฒนาการเป็นกลุ่มตามช่วงอายุ
+    const getAgeLabel = (age) => {
+        return age ? `${age} เดือน` : '-';
+    };
+
+    // Pagination
+    const itemsPerPage = 3;
     const totalPages = Math.ceil(allDevelopments.length / itemsPerPage);
     const paginatedData = allDevelopments.slice(
         (currentPage - 1) * itemsPerPage,
         currentPage * itemsPerPage
     );
+
 
     return (
         <div className="p-6">
@@ -402,145 +407,136 @@ const AddDevelopment = () => {
             </div>
 
 
-
             {/* Modal */}
             {isModalOpen && (
-                <div className="fixed inset-0 flex items-center justify-center bg-black/30 backdrop-blur-md z-50">
-                    <div className="bg-white rounded-xl shadow-xl p-6 w-[90%] max-w-lg transition-all scale-100">
-                        <h2 className="text-xl font-bold text-center text-blue-800 mb-4">
-                            เพิ่มเกณฑ์พัฒนาการ
-                        </h2>
+                <div className="fixed inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm z-[9999] transition">
+                    <div className="bg-white rounded-2xl shadow-2xl p-6 w-[95%] md:w-[700px] max-h-[90vh] overflow-y-auto animate-fadeIn">
 
-                        <div className="space-y-4">
-                            {/* ช่วงอายุ */}
+                        {/* Header */}
+                        <div className="flex justify-between items-center border-b pb-3 mb-4">
+                            <h2 className="text-2xl font-bold text-pink-700 flex items-center gap-2">
+                                {editMode ? <><FaPencilAlt /> แก้ไขเกณฑ์พัฒนาการ</> : <><FaPlusCircle /> เพิ่มเกณฑ์พัฒนาการ</>}
+
+                            </h2>
+                            <button
+                                onClick={() => setIsModalOpen(false)}
+                                className="text-gray-400 hover:text-red-500 transition"
+                            >
+                                < FaPlus className="transform rotate-45 text-2xl" />
+                            </button>
+                        </div>
+
+                        {/* Body */}
+                        <div className="space-y-5">
+                            {/* เลือกช่วงอายุ */}
                             <div>
-                                <label className="block mb-1">ช่วงอายุ</label>
+                                <label className="block mb-1 font-medium text-gray-700">ช่วงอายุ</label>
                                 <select
-                                    id='DEV-01'
-                                    className="w-full border rounded px-3 py-2"
+                                    className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-pink-400 focus:outline-none"
                                     value={ageRange}
                                     onChange={(e) => setAgeRange(Number(e.target.value))}
                                 >
                                     <option value="">เลือกช่วงอายุ</option>
-                                    {ageOptions.map((opt) => (
+                                    {ageOptions.map(opt => (
                                         <option key={opt.value} value={opt.value}>
-                                            {convertMonthsToYearText(opt.value)}
+                                            {opt.value} เดือน
                                         </option>
                                     ))}
                                 </select>
                             </div>
-                            <div className="max-h-[400px] overflow-y-auto space-y-4 pr-1">
-                                {/* พัฒนาการแต่ละด้าน */}
-                                {developmentList.map((dev, index) => {
-                                    const selectedCategories = developmentList
-                                        .filter((_, i) => i !== index)
-                                        .map(d => d.category)
-                                        .filter(c => c);
 
-                                    return (
-                                        <div key={index} className="border rounded p-2 space-y-2 bg-gray-50">
-                                            <div className="flex gap-2">
-                                                <select
-                                                    id='DEV-02'
-                                                    className="w-1/2 border rounded px-3 py-2"
-                                                    value={dev.category}
-                                                    onChange={(e) =>
-                                                        handleDevelopmentChange(index, 'category', e.target.value)
-                                                    }
-                                                >
-                                                    <option value="">เลือกพัฒนาการ</option>
-                                                    {categoryOptions
-                                                        .filter(category => !selectedCategories.includes(category))
-                                                        .map((category, i) => (
-                                                            <option key={i} value={category}>
-                                                                {category}
-                                                            </option>
-                                                        ))}
-                                                </select>
+                            {/* รายการพัฒนาการ */}
+                            <div className="space-y-4">
+                                {developmentList.map((dev, index) => (
+                                    <div
+                                        key={index}
+                                        className="border border-pink-200 rounded-xl p-4 bg-pink-50 relative shadow-sm "
+                                    >
 
-                                                <select
-                                                    id='DEV-03'
-                                                    className="w-1/2 border rounded px-3 py-2"
-                                                    value={dev.detail}
-                                                    onChange={(e) =>
-                                                        handleDevelopmentChange(index, 'detail', e.target.value)
-                                                    }
-                                                >
-                                                    <option value="">เลือกรายละเอียด</option>
-                                                    {detailOptions.map((detail, i) => (
-                                                        <option key={i} value={detail}>
-                                                            {detail}
-                                                        </option>
+                                        {developmentList.length > 1 && index > 0 && (
+                                            <button
+                                                type="button"
+                                                onClick={() => handleRemoveDevelopment(index)}
+                                                className="absolute top-2 right-2 text-red-500 hover:text-red-700 text-lg font-bold"
+                                            >
+                                                <FaPlus className="transform rotate-45" />
+                                            </button>
+                                        )}
+
+
+                                        <div className="flex gap-2">
+                                            <select
+                                                className="w-1/2 border rounded px-3 py-2"
+                                                value={dev.category}
+                                                onChange={(e) => handleCategoryChange(index, e.target.value)}
+                                            >
+                                                <option value="">เลือกพัฒนาการ</option>
+                                                {categoryOptions.map((cat, i) => (
+                                                    <option key={i} value={cat}>{cat}</option>
+                                                ))}
+                                            </select>
+
+                                            <select
+                                                className="w-1/2 border rounded px-3 py-2"
+                                                value={dev.detail}
+                                                onChange={(e) => handleDetailChange(index, e.target.value)}
+                                            >
+                                                <option value="">เลือกรายละเอียด</option>
+                                                {metaDevelop
+                                                    .filter(m => m.category.trim() === dev.category.trim())
+                                                    .map((m, i) => (
+                                                        <option key={i} value={m.detail}>{m.detail}</option>
                                                     ))}
-                                                </select>
-                                            </div>
-
-                                            <div className="flex flex-col">
-                                                <label
-                                                    htmlFor={`image-upload-${index}`}
-                                                    className="mb-1 text-sm font-medium text-pink-600 cursor-pointer select-none flex items-center gap-1"
-                                                >
-                                                    <svg
-                                                        xmlns="http://www.w3.org/2000/svg"
-                                                        className="h-4 w-4"
-                                                        fill="none"
-                                                        viewBox="0 0 24 24"
-                                                        stroke="currentColor"
-                                                        strokeWidth={2}
-                                                    >
-                                                        <path
-                                                            strokeLinecap="round"
-                                                            strokeLinejoin="round"
-                                                            d="M3 15a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4v4H3v-4zM7 10l5-5m0 0l5 5m-5-5v12"
-                                                        />
-                                                    </svg>
-                                                    อัปโหลดรูปภาพ
-                                                </label>
-
-                                                <input
-                                                    type="file"
-                                                    accept="image/*"
-                                                    onChange={(e) => handleImageChange(index, e)}
-                                                    className="file-input file-input-bordered w-full"
-                                                />
-
-                                            </div>
-                                            <div>
-                                                <input
-                                                    type="text"
-                                                    placeholder="ข้อแนะนำ"
-                                                    value={dev.note ?? ''}
-                                                    onChange={(e) => handleDevelopmentChange(index, "note", e.target.value)}
-                                                    className="input input-bordered w-full"
-                                                />
-                                            </div>
-
+                                            </select>
                                         </div>
-                                    );
-                                })}
-                            </div>
-                        </div>
 
-                        {/* ปุ่ม */}
-                        <div className="mt-6 text-center space-x-2">
-                            <button
-                                onClick={handleSubmit}
-                                disabled={isAdding} // ปิดปุ่มถ้ากำลังบันทึก
-                                className={`px-6 py-2 rounded-full font-medium shadow-md transition ${isAdding
+                                        {dev.image && (
+                                            <img src={dev.image} alt="รูปพัฒนาการ"
+                                                className="w-20 h-20 object-cover rounded-md border border-gray-300 shadow-sm" />
+                                        )}
+
+                                        <input
+                                            type="text"
+                                            placeholder="ข้อแนะนำ"
+                                            value={dev.note ?? ''}
+                                            className="input input-bordered w-full"
+                                            onChange={(e) => handleDevelopmentChange(index, 'note', e.target.value)}
+                                        />
+                                    </div>
+                                ))}
+                            </div>
+
+                            {/* ปุ่มเพิ่มช่อง */}
+                            <div className="flex justify-center">
+                                <button
+                                    type="button"
+                                    onClick={handleAddDevelopment}
+                                    className="px-4 py-2 bg-blue-100 text-blue-700 rounded-lg"
+                                >
+                                    < FaPlusCircle className="inline mr-2" />
+                                    เพิ่มพัฒนาการ
+                                </button>
+                            </div>
+
+                            <div className="mt-6 text-center space-x-2">
+                                <button
+                                    onClick={handleSubmit}
+                                    disabled={isAdding}
+                                    className={`px-6 py-2 rounded-full font-medium shadow-md transition ${isAdding
                                         ? "bg-green-300 text-white cursor-not-allowed"
                                         : "bg-green-500 hover:bg-green-600 text-white hover:scale-105"
-                                    }`}
-                            >
-                                {isAdding ? "กำลังเพิ่มข้อมูลพัฒนาการ..." : "บันทึก"}
-                            </button>
-
-                            <button
-                                onClick={() => setIsModalOpen(false)}
-                                disabled={isAdding} // ปิดปุ่มยกเลิกตอนกำลังบันทึก
-                                className="bg-gray-300 hover:bg-gray-400 text-gray-800 px-6 py-2 rounded-full font-medium shadow-md hover:scale-105 transition disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                                ยกเลิก
-                            </button>
+                                        }`}
+                                >
+                                    {isAdding ? "กำลังบันทึก..." : "บันทึก"}
+                                </button>
+                                <button
+                                    onClick={() => setIsModalOpen(false)}
+                                    disabled={isAdding}
+                                    className="bg-gray-300 hover:bg-gray-400 text-gray-800 px-6 py-2 rounded-full font-medium shadow-md hover:scale-105 transition disabled:opacity-50"
+                                >
+                                    ยกเลิก
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>

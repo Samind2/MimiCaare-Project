@@ -7,7 +7,7 @@ import (
 )
 
 func NotificationRoutes(router *gin.RouterGroup) {
-	router.GET("/test-notify", func(c *gin.Context) {
+	router.GET("/test-notify", middleware.VerifyAdmin(), func(c *gin.Context) {
 		go notificationController.RunNotificationJob7Day()
 		go notificationController.RunNotificationJob3Day()
 		go notificationController.RunNotificationJobToDay()

@@ -109,6 +109,7 @@ func fetchStandardDevelopments() []standardDevelopModel.StandardDevelop {
 
 	return standardDevelops
 }
+
 func StartScheduler() {
 	s := gocron.NewScheduler(time.Local)
 
@@ -474,7 +475,15 @@ func RunNotificationJobToDay() {
 	log.Println("✅ การแจ้งเตือนเสร็จสิ้น")
 }
 
-// GetNotifyByUserID ดึงการแจ้งเตือนตาม userId
+// @Summary ดึงการแจ้งเตือนทั้งหมดของผู้ใช้ตาม ID
+// @Description ดึงการแจ้งเตือนทั้งหมดของผู้ใช้ที่ล็อกอินอยู่ (ผู้ใช้ต้องเป็นเจ้าของการแจ้งเตือนเหล่านี้)
+// @Tags Notification
+// @Produce json
+// @Success 200 {object} map[string]interface{}
+// @Failure 401 {object} map[string]interface{}
+// @Failure 403 {object} map[string]interface{}
+// @Failure 404 {object} map[string]interface{}
+// @Router /notification/get [get]
 func GetNotifyByUserID(c *gin.Context) {
 	// ดึง userId จาก cookies
 	jwtCookie, err := c.Cookie("jwt")
@@ -522,6 +531,17 @@ func GetNotifyByUserID(c *gin.Context) {
 	})
 }
 
+// @Summary ทำเครื่องหมายการแจ้งเตือนว่าอ่านแล้วตาม ID
+// @Description ทำเครื่องหมายการแจ้งเตือนว่าอ่านแล้วตาม ID ของการแจ้งเตือน (ผู้ใช้ต้องเป็นเจ้าของการแจ้งเตือนนี้)
+// @Tags Notification
+// @Produce json
+// @Param id path string true "ObjectID ของการแจ้งเตือน"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]interface{}
+// @Failure 401 {object} map[string]interface{}
+// @Failure 403 {object} map[string]interface{}
+// @Failure 404 {object} map[string]interface{}
+// @Router /notification/read/{id} [put]
 func MarkNotificationAsRead(c *gin.Context) {
 	// ดึง userId จาก cookies
 	jwtCookie, err := c.Cookie("jwt")
@@ -578,6 +598,14 @@ func MarkNotificationAsRead(c *gin.Context) {
 	})
 }
 
+// @Summary ทำเครื่องหมายการแจ้งเตือนทั้งหมดว่าอ่านแล้ว
+// @Description ทำเครื่องหมายการแจ้งเตือนทั้งหมดว่าอ่านแล้ว (สำหรับผู้ใช้ที่ล็อกอินอยู่)
+// @Tags Notification
+// @Produce json
+// @Success 200 {object} map[string]interface{}
+// @Failure 401 {object} map[string]interface{}
+// @Failure 403 {object} map[string]interface{}
+// @Router /notification/read-all [put]
 func MarkReadAllNotifications(c *gin.Context) {
 	// ดึง userId จาก cookies
 	jwtCookie, err := c.Cookie("jwt")
