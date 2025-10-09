@@ -31,7 +31,7 @@ const Signin = () => {
 
     try {
       setIsLoggingIn(true);
-      const user = await login(formData);
+      const user = await login(formData); // login จาก context
       toast.success("เข้าสู่ระบบสำเร็จ!", { autoClose: 1500 });
       setTimeout(() => {
         navigate(user.role === "admin" ? "/dashboard" : "/");
@@ -39,9 +39,14 @@ const Signin = () => {
     } catch (error) {
       setIsLoggingIn(false);
       const msg = error.response?.data?.message || "เกิดข้อผิดพลาด";
-      if (msg === "ไม่พบผู้ใช้งาน") setErrors({ email: msg });
-      else if (msg === "รหัสผ่านไม่ถูกต้อง") setErrors({ password: msg });
-      else toast.error(msg);
+
+      if (msg === "ไม่พบผู้ใช้งาน") {
+        setErrors({ email: msg, password: "" });
+      } else if (msg === "รหัสผ่านไม่ถูกต้อง") {
+        setErrors({ email: "", password: msg });
+      } else {
+        toast.error(msg);
+      }
     }
   };
 
@@ -107,6 +112,7 @@ const Signin = () => {
                 </button>
               </div>
               {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password}</p>}
+
             </div>
 
 
