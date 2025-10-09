@@ -36,12 +36,11 @@ const VaccineTimeline = ({
 
         const received = isCustom ? true : hasReceived(vaccineItem?.id);
 
-        // ข้อมูลเข็มวัคซีน
+        // รายการวัคซีน
         const doseRecords = isCustom
           ? vaccineItem.records || []
           : vaccineItem.vaccines || [];
 
-        // ข้อมูลการได้รับจริง
         const receivedDoseRecords = isCustom
           ? doseRecords
           : receivedVaccines?.filter((v) => v.standardVaccineId === vaccineItem?.id) || [];
@@ -78,7 +77,7 @@ const VaccineTimeline = ({
                 </span>
               </div>
 
-              {/* วัคซีนในช่วงอายุนี้ */}
+              {/* วัคซีนในแต่ละช่่วงอายุ */}
               <ul className="space-y-3 text-gray-700">
                 {doseRecords.map((dose, i) => {
                   const vaccineName = dose.vaccineName || dose.name || "ไม่ระบุชื่อวัคซีน";

@@ -4,7 +4,7 @@ import { FaUserFriends, FaSyringe, FaChild } from 'react-icons/fa';
 const Index = () => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-4">
-      {/* การ์ด จัดการผู้ใช้ */}
+      {/* การ์ดจัดการผู้ใช้ */}
       <div className="bg-pink-100 text-pink-900 p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 bg-cover bg-center relative overflow-hidden"
         style={{ backgroundImage: "url('/BG-Card.png')" }}>
         <div className="flex items-center gap-3 mb-4">
@@ -20,7 +20,7 @@ const Index = () => {
         </a>
       </div>
 
-      {/* การ์ด จัดการวัคซีน */}
+      {/* จัดการวัคซีน */}
       <div className="bg-blue-100 text-blue-900 p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 bg-cover bg-center relative overflow-hidden"
         style={{ backgroundImage: "url('/BG-Card.png')" }}>
         <div className="flex items-center gap-3 mb-4">
@@ -36,7 +36,7 @@ const Index = () => {
         </a>
       </div>
 
-      {/* การ์ด จัดการพัฒนาการ */}
+      {/* การ์ดจัดการพัฒนาการ */}
       <div className="bg-green-100 text-green-900 p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 bg-cover bg-center relative overflow-hidden"
         style={{ backgroundImage: "url('/BG-Card.png')" }}>
         <div className="flex items-center gap-3 mb-4">

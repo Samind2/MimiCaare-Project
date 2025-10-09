@@ -269,7 +269,7 @@ const ViewVac = () => {
       return vaccineDate === newDate && vaccineName === newName;
     });
 
-    if (isDuplicate && !isEditMode) { // ✅ แก้เงื่อนไขให้ถูก
+    if (isDuplicate && !isEditMode) { 
       toast.warning("มีการบันทึกวัคซีนนี้ในวันที่เดียวกันแล้ว");
       return;
     }
