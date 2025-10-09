@@ -112,7 +112,7 @@ const ViewVac = () => {
 
     if (!selectedChild) {
       toast.warning("กรุณาเพิ่มเด็กในระบบก่อน");
-      return; 
+      return;
     }
 
     setCustomFormData({
@@ -257,38 +257,22 @@ const ViewVac = () => {
         return;
       }
     }
-    
-    const newDate = new Date(customFormData.receiveDate).toISOString().split('T')[0];
-    const newName = customRecords[0].vaccineName.trim();
-
-    const isDuplicate = customVaccines.some(vaccine => {
-      const vaccineDate = vaccine.receiveDate ? vaccine.receiveDate.split('T')[0] : '';
-      const vaccineName = Array.isArray(vaccine.records) && vaccine.records.length > 0 ? vaccine.records[0].vaccineName.trim() : '';
-      return vaccineDate === newDate && vaccineName === newName;
-    });
-
-    if (isDuplicate && isEditMode) {
-      toast.warning("มีการบันทึกวัคซีนนี้ในวันที่เดียวกันแล้ว");
-      return;
-    }
-
-    
 
     const newDate = new Date(customFormData.receiveDate).toISOString().split('T')[0];
     const newName = customRecords[0].vaccineName.trim();
 
     const isDuplicate = customVaccines.some(vaccine => {
       const vaccineDate = vaccine.receiveDate ? vaccine.receiveDate.split('T')[0] : '';
-      const vaccineName = Array.isArray(vaccine.records) && vaccine.records.length > 0 ? vaccine.records[0].vaccineName.trim() : '';
+      const vaccineName = Array.isArray(vaccine.records) && vaccine.records.length > 0
+        ? vaccine.records[0].vaccineName.trim()
+        : '';
       return vaccineDate === newDate && vaccineName === newName;
     });
 
-    if (isDuplicate && isEditMode) {
+    if (isDuplicate && !isEditMode) { // ✅ แก้เงื่อนไขให้ถูก
       toast.warning("มีการบันทึกวัคซีนนี้ในวันที่เดียวกันแล้ว");
       return;
     }
-
-
 
     const payload = {
       childId: selectedChild.id,
@@ -309,7 +293,6 @@ const ViewVac = () => {
 
       setLastPlaceName(customFormData.placeName);
       setLastPhoneNumber(customFormData.phoneNumber);
-
       setShowCustomModal(false);
       setIsEditMode(false);
       setEditingRecordId(null);
@@ -330,6 +313,7 @@ const ViewVac = () => {
       toast.error("เกิดข้อผิดพลาด กรุณาลองใหม่");
     }
   };
+
 
   const openEditCustomModal = (item) => {
     setCustomFormData({
@@ -426,7 +410,7 @@ const ViewVac = () => {
               <li key={i}>
                 <a
                   className="hover:bg-blue-300 rounded-md p-2 cursor-pointer"
-                  onClick={() => setShowCustomOnly(item.value)} 
+                  onClick={() => setShowCustomOnly(item.value)}
                 >
                   {item.label}
                 </a>
@@ -484,11 +468,11 @@ const ViewVac = () => {
 
       {showCustomOnly ? (
         <VaccineTimeline
-          vaccines={customVaccines}       
+          vaccines={customVaccines}
           receivedVaccines={customVaccines}
-          onSelectVaccine={openEditCustomModal} 
-          isCustom={true}               
-          onDeleteVaccine={handleDeleteCustomVaccine} 
+          onSelectVaccine={openEditCustomModal}
+          isCustom={true}
+          onDeleteVaccine={handleDeleteCustomVaccine}
         />
       ) : (
         <VaccineTimeline
