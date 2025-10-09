@@ -34,22 +34,19 @@ const AuthProvider = ({ children }) => {
 
 
  const login = async (userData) => {
-  setLoading(true);
   try {
     const response = await userService.login(userData);
     const user = response.data; // user มี role ด้วย
 
-    TokenService.setUser(user);  // เก็บ user รวม role
+    TokenService.setUser(user); 
     //console.log("login response:", response.data);
-    setUser(user);               // set state user รวม role
+    setUser(user);               
 
     return user;
   } catch (error) {
     console.error("Login Error:", error);
     throw error;
-  } finally {
-    setLoading(false);
-  }
+  } 
 };
 
 
