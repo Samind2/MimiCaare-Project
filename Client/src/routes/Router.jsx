@@ -20,7 +20,7 @@ import ViewDevelopment from '../pages/User/Development/Index.jsx';
 import ManageRights from '../pages/ManageUser/ManageRights.jsx';
 import AllUser from '../pages/ManageUser/AllUser.jsx';
 import ResetPassword from '../pages/ManagePassword/ResetPassword.jsx';
-import MetaData from '../pages/ManageData/index.jsx'
+// import MetaData from '../pages/ManageData/index.jsx'
 import GuestRoute from '../ProtectedRoutes/GuestRoute.jsx';
 
 const router = createBrowserRouter([
@@ -112,14 +112,14 @@ const router = createBrowserRouter([
                     </ProtectedRoute>
                 )
             },
-            {
-                path: "/manage-data",
-                element: (
-                    <ProtectedRoute>
-                        <MetaData />
-                    </ProtectedRoute>
-                )
-            }
+            // {
+            //     path: "/manage-data",
+            //     element: (
+            //         <ProtectedRoute>
+            //             <MetaData />
+            //         </ProtectedRoute>
+            //     )
+            // }
 
         ],
     },
