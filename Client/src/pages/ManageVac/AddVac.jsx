@@ -102,6 +102,13 @@ const VaccinePage = () => {
         return;
       }
 
+      const emptyVaccines = formRows.some(row => !row.vaccine || row.vaccine.trim() === "");
+      if (emptyVaccines) {
+        toast.error("กรุณาเพิ่มวัคซีนอย่างน้อย 1 รายการ", { autoClose: 2000 });
+        return;
+      }
+
+
       const vaccines = formRows.map(row => ({ vaccineName: row.vaccine, note: "" }));
 
       const payload = { ageRange: ageNum, vaccines };

@@ -7,7 +7,7 @@ import { useNavigate } from 'react-router-dom';
 
 const Notification = () => {
   const { notifications, fetchNotifications, markAsRead } = useContext(NotificationContext);
-  const [selectedChild, setSelectedChild] = useState(""); 
+  const [selectedChild, setSelectedChild] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -47,7 +47,7 @@ const Notification = () => {
 
   // จัดกลุ่มแจ้งเตือนตามชื่อเด็ก
   const notificationsGroupedByChild = notifications.reduce((groupedNotifications, notification) => {
-    if (!notification.childName) return groupedNotifications; 
+    if (!notification.childName) return groupedNotifications;
 
     if (!groupedNotifications[notification.childName]) {
       groupedNotifications[notification.childName] = [];
@@ -86,9 +86,8 @@ const Notification = () => {
               <li
                 key={notification.id}
                 onClick={() => handleNotificationClick(notification)}
-                className={`border shadow rounded p-4 cursor-pointer hover:bg-gray-50 ${
-                  notification.isRead ? "bg-white" : "bg-red-50 border-red-300"
-                }`}
+                className={`border shadow rounded p-4 cursor-pointer hover:bg-gray-50 ${notification.isRead ? "bg-white" : "bg-red-50 border-red-300"
+                  }`}
               >
                 <div className="flex items-center gap-2">
                   <PiBellSimpleRingingFill className="text-yellow-500" />
@@ -100,7 +99,7 @@ const Notification = () => {
                   ชื่อเด็ก: {notification.childName}
                 </p>
 
-                {notification.ageRange && (
+                {notification.ageRange != null && (
                   <p className="text-sm mt-1">ช่วงอายุ: {notification.ageRange} เดือน</p>
                 )}
 
