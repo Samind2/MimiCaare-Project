@@ -11,7 +11,6 @@ import { NotificationProvider } from './context/NotificationContext';
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-
     <AuthProvider>
       <NotificationProvider>
           <RouterProvider router={router} />
@@ -29,6 +28,5 @@ createRoot(document.getElementById('root')).render(
       />
     </NotificationProvider>
   </AuthProvider>
-   
   </StrictMode >,
 )
